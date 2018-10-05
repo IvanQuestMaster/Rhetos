@@ -29,12 +29,12 @@ using System.Linq;
 namespace Rhetos.Dsl.Test
 {
     [TestClass]
-    public class DslModelTest
+    public class DslModelWithReplacableConceptsTest
     {
         static IDslModel NewDslModel(IDslParser parser, IEnumerable<IConceptInfo> conceptPrototypes)
         {
             var dslContainter = new DslContainer(new ConsoleLogProvider(), new MockPluginsContainer<IDslModelIndex>(new DslModelIndexByType()));
-            var dslModel = new DslModel(parser, new ConsoleLogProvider(), dslContainter, new StubMacroIndex(), new IConceptMacro[] { }, conceptPrototypes, new StubMacroOrderRepository(), new StubDslModelFile());
+            var dslModel = new DslModelWithReplacableConcepts(parser, new ConsoleLogProvider(), new StubMacroIndex(), new IConceptMacro[] { }, conceptPrototypes, new StubMacroOrderRepository(), new StubDslModelFile());
             return dslModel;
         }
 
@@ -237,7 +237,7 @@ namespace Rhetos.Dsl.Test
                                                   new SimpleConceptInfo("a", ""),
                                                   new MacroConceptInfo("b")
                                               };
-            List<string> expected = new List<string> {"SIMPLE a", "MACRO b", "SIMPLE b1", "SIMPLE b2"};
+            List<string> expected = new List<string> { "SIMPLE a", "MACRO b", "SIMPLE b1", "SIMPLE b2" };
 
             List<string> actual = DslModelFromConcepts(concepts).Select(c => c.ToString()).ToList();
 
@@ -361,7 +361,7 @@ namespace Rhetos.Dsl.Test
             public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
             {
                 return existingConcepts.OfType<SimpleConceptInfo>().Where(c => !c.Name.StartsWith("dup"))
-                    .Select(c => new SimpleConceptInfo {Name = "dup" + c.Name, Data = ""});
+                    .Select(c => new SimpleConceptInfo { Name = "dup" + c.Name, Data = "" });
             }
             public override string ToString()
             {

@@ -1,0 +1,27 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "BuildRhetos",
+            "type": "process",
+            "command": "C:/Users/home/source/repos/Rhetos/Source/Rhetos/bin/DeployPackages.exe",
+            "args": [
+                "/NoPause"
+              ],
+            "problemMatcher": {
+                "owner": "rhe",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^\\[(.*)\\] (.*)\\. At line (\\d+), column (\\d+), file '(.*)'",
+                    "file": 5,
+                    "line": 3,
+                    "column": 4,
+                    "severity": 1,
+                    "message": 2
+                }
+            }
+        }
+    ]
+}

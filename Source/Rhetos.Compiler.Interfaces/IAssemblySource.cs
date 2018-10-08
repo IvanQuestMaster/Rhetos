@@ -17,6 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Rhetos.Dsl;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,5 +29,12 @@ namespace Rhetos.Compiler
     {
         string GeneratedCode { get; }
         IEnumerable<string> RegisteredReferences { get; }
+        ConceptCsMarker GetMarker(int index);
+    }
+
+    public class ConceptCsMarker
+    {
+        public IConceptInfo Concept;
+        public string PropertyName;
     }
 }

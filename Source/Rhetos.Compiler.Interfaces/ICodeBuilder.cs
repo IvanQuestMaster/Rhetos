@@ -24,6 +24,7 @@ using System.Text;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Reflection;
+using Rhetos.Dsl;
 
 namespace Rhetos.Compiler
 {
@@ -43,5 +44,7 @@ namespace Rhetos.Compiler
         void ReplaceCode(string code, string tag);
 
         bool TagExists(string tag);
+
+        string MarkCode(string code, IConceptInfo concept, string propertyName);
     }
 }

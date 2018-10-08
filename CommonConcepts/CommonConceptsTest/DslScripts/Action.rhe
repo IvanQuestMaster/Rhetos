@@ -8,6 +8,7 @@ Module TestAction
     Action InsertAndThrowException
         '(parameters, repository, userInfo) =>
             { 
+                www
                 repository.TestAction.ToInsert.Insert(new TestAction.ToInsert { ID = parameters.ItmemID.Value, Name = "Test" });
                 throw new ApplicationException("TestAction exception " + parameters.Message);
             }'            

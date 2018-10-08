@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Rhetos.Dsl;
 using Rhetos.Utilities;
 
 namespace Rhetos.Compiler
@@ -29,6 +30,8 @@ namespace Rhetos.Compiler
     {
         private readonly FastReplacer _code;
         private readonly HashSet<string> _references = new HashSet<string>();
+
+        Dictionary<int, ConceptCsMarker> _markers = new Dictionary<int, ConceptCsMarker>();
 
         public CodeBuilder(string tagOpen, string tagClose)
         {
@@ -132,6 +135,20 @@ namespace Rhetos.Compiler
         public IEnumerable<string> RegisteredReferences
         {
             get { return _references; }
+        }
+
+        public string MarkCode(string code, IConceptInfo concept, string propertyName)
+        {
+            var markerCount = _markers.Count + 1;
+            _markers.Add(markerCount, new ConceptCsMarker { Concept = concept, PropertyName = propertyName });
+            return "/*MrkStart" + markerCount + "*/" + code + "/*MrkEnd" + markerCount + "*/";
+        }
+
+        public ConceptCsMarker GetMarker(int index)
+        {
+            ConceptCsMarker marker;
+            _markers.TryGetValue(index, out marker);
+            return marker;
         }
     }
 }

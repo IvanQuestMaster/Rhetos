@@ -36,7 +36,7 @@ namespace Rhetos.Dom.DefaultConcepts
         public static readonly CsTag<ActionInfo> BeforeActionTag = "BeforeAction";
         public static readonly CsTag<ActionInfo> AfterActionTag = "AfterAction";
 
-        protected static string RepositoryFunctionsSnippet(ActionInfo info, ICodeBuilder codeBuilder)
+        protected static string RepositoryFunctionsSnippet(ActionInfo info)
         {
             // Using nonstandard naming of variables to avoid name clashes with injected code.
             return string.Format(
@@ -67,7 +67,7 @@ namespace Rhetos.Dom.DefaultConcepts
         ",
             info.Module.Name,
             info.Name,
-            codeBuilder.MarkCode(info.Script, info, nameof(info.Script)),
+            CsMarker.GenerateMarker(info, x => x.Script),
             DataStructureUtility.ComputationAdditionalParametersTypeTag.Evaluate(info),
             DataStructureUtility.ComputationAdditionalParametersArgumentTag.Evaluate(info),
             BeforeActionTag.Evaluate(info),
@@ -86,7 +86,7 @@ namespace Rhetos.Dom.DefaultConcepts
 
             RepositoryHelper.GenerateRepository(info, codeBuilder);
             codeBuilder.InsertCode("IActionRepository", RepositoryHelper.RepositoryInterfaces, info);
-            codeBuilder.InsertCode(RepositoryFunctionsSnippet(info, codeBuilder), RepositoryHelper.RepositoryMembers, info);
+            codeBuilder.InsertCode(RepositoryFunctionsSnippet(info), RepositoryHelper.RepositoryMembers, info);
             codeBuilder.InsertCode(RegisterRepository(info), ModuleCodeGenerator.CommonAutofacConfigurationMembersTag);
 
             codeBuilder.AddReferencesFromDependency(typeof(ExportAttribute));

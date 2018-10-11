@@ -54,7 +54,7 @@ namespace Rhetos.Dom.DefaultConcepts
             info.Source.Module.Name,
             info.Source.Name,
             info.Parameter,
-            info.Expression);
+            CsMarker.GenerateMarker(info, x => x.Expression));
         }
 
         public void GenerateCode(IConceptInfo conceptInfo, ICodeBuilder codeBuilder)

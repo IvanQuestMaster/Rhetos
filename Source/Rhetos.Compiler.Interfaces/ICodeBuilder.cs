@@ -44,7 +44,5 @@ namespace Rhetos.Compiler
         void ReplaceCode(string code, string tag);
 
         bool TagExists(string tag);
-
-        string MarkCode(string code, IConceptInfo concept, string propertyName);
     }
 }

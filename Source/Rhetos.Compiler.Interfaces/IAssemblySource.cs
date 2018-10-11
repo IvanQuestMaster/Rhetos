@@ -29,7 +29,6 @@ namespace Rhetos.Compiler
     {
         string GeneratedCode { get; }
         IEnumerable<string> RegisteredReferences { get; }
-        ConceptCsMarker GetMarker(int index);
     }
 
     public class ConceptCsMarker

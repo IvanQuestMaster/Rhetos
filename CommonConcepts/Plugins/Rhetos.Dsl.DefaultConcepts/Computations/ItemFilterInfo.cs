@@ -17,6 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Rhetos.Compiler;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -55,7 +56,7 @@ namespace Rhetos.Dsl.DefaultConcepts
             { 
                 Source = conceptInfo.Source, 
                 Parameter = filterParameter.GetKeyProperties(),
-                Expression = "(source, repository, parameter) => source.Where(" + conceptInfo.Expression + ")"
+                Expression = "(source, repository, parameter) => source.Where(" + CsMarker.GenerateMarker(conceptInfo, x => x.Expression) + ")"
             };
 
             newConcepts.Add(composableFilter);

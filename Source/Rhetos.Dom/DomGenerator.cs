@@ -148,10 +148,6 @@ namespace Rhetos.Dom
         {
             public string GeneratedCode { get; set; }
             public IEnumerable<string> RegisteredReferences { get; set; }
-            public ConceptCsMarker GetMarker(int index)
-            {
-                return null;
-            }
         }
     }
 }

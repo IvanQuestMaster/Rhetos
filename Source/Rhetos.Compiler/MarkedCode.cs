@@ -61,9 +61,15 @@ namespace Rhetos.Compiler
             _newLines = GetNewlines(StrippedCode);
         }
 
-        public CodeOffset GetNearestMarker(int row, int column)
+        public CodeOffset GetNearestMarker(int line, int column)
         {
-            var index = _newLines[row - 1].Start + column - 1;
+            if (line < 1 || line > _newLines.Count)
+                throw new ArgumentException("The line number does not fall within the allowed range.");
+
+            if (column < 1 || column > _newLines[line - 1].Length + 1)
+                throw new ArgumentException("The column number does not fall within the allowed range.");   
+
+            var index = _newLines[line - 1].Start + column - 1;
 
             for (int i = _markers.Count - 1; i >= 0; i--)
             {

@@ -23,6 +23,7 @@ using System.Linq;
 using System.Globalization;
 using System.Diagnostics.Contracts;
 using Rhetos.Utilities;
+using System.Reflection;
 
 namespace Rhetos.Dsl
 {
@@ -55,13 +56,26 @@ namespace Rhetos.Dsl
         public virtual ValueOrError<IConceptInfo> Parse(ITokenReader tokenReader, Stack<IConceptInfo> context)
         {
             if (tokenReader.TryRead(Keyword))
-                return ParseMembers(tokenReader, context.Count > 0 ? context.Peek() : null, false);
+            {
+                var conceptWithMetadata = ParseMembers(tokenReader, context.Count > 0 ? context.Peek() : null, false);
+                return conceptWithMetadata.IsError ? ValueOrError<IConceptInfo>.CreateError(conceptWithMetadata.Error) : ValueOrError<IConceptInfo>.CreateValue(conceptWithMetadata.Value.Concept);
+            }
             return ValueOrError<IConceptInfo>.CreateError("");
         }
 
-        private ValueOrError<IConceptInfo> ParseMembers(ITokenReader tokenReader, IConceptInfo lastConcept, bool readingAReference)
+        public virtual ValueOrError<ConceptWithMetadata> ParseConceptWithMetadata(ITokenReader tokenReader, Stack<IConceptInfo> context)
         {
-            IConceptInfo conceptInfo = (IConceptInfo)Activator.CreateInstance(ConceptInfoType);
+            if (tokenReader.TryRead(Keyword))
+                return ParseMembers(tokenReader, context.Count > 0 ? context.Peek() : null, false);
+            return ValueOrError<ConceptWithMetadata>.CreateError("");
+        }
+
+        private ValueOrError<ConceptWithMetadata> ParseMembers(ITokenReader tokenReader, IConceptInfo lastConcept, bool readingAReference)
+        {
+            ConceptWithMetadata conceptWithMetadata = (ConceptWithMetadata)Activator.CreateInstance(typeof(ConceptWithMetadata));
+            conceptWithMetadata.Concept = (IConceptInfo)Activator.CreateInstance(ConceptInfoType);
+            conceptWithMetadata.ConceptMemeberMetadata = new List<ConcpetMemeberMetadata>();
+
             bool firstMember = true;
             bool lastPropertyWasInlineParent = false;
             bool lastConceptUsed = false;
@@ -69,30 +83,34 @@ namespace Rhetos.Dsl
             var listOfMembers = readingAReference ? Members.Where(m => m.IsKey) : Members.Where(m => m.IsParsable);
             foreach (ConceptMember member in listOfMembers)
             {
-                var valueOrError = ReadMemberValue(member, tokenReader, lastConcept, firstMember, ref lastPropertyWasInlineParent, ref lastConceptUsed, readingAReference);
+                ConcpetMemeberMetadata memeberMetadata = null;
+                var valueOrError = ReadMemberValue(member, tokenReader, lastConcept, firstMember, ref lastPropertyWasInlineParent, ref lastConceptUsed, readingAReference, ref memeberMetadata);
+                if(memeberMetadata != null)
+                    conceptWithMetadata.ConceptMemeberMetadata.Add(memeberMetadata);
 
                 if (valueOrError.IsError)
-                    return ValueOrError<IConceptInfo>.CreateError(string.Format(CultureInfo.InvariantCulture,
+                    return ValueOrError<ConceptWithMetadata>.CreateError(string.Format(CultureInfo.InvariantCulture,
                         "Cannot read the value of {0} in {1}. {2}",
                         member.Name, ConceptInfoType.Name, valueOrError.Error));
 
-                member.SetMemberValue(conceptInfo, valueOrError.Value);
+                member.SetMemberValue(conceptWithMetadata.Concept, valueOrError.Value);
                 firstMember = false;
             }
 
             if (!lastConceptUsed && lastConcept != null)
-                return ValueOrError<IConceptInfo>.CreateError(string.Format(
+                return ValueOrError<ConceptWithMetadata>.CreateError(string.Format(
                     "This concept cannot be enclosed within {0}. Trying to read {1}.",
                     lastConcept.GetType().Name, ConceptInfoType.Name));
 
-            return ValueOrError<IConceptInfo>.CreateValue(conceptInfo);
+            return ValueOrError<ConceptWithMetadata>.CreateValue(conceptWithMetadata);
         }
 
         public ValueOrError<object> ReadMemberValue(ConceptMember member, ITokenReader tokenReader, IConceptInfo lastConcept,
-            bool firstMember, ref bool lastPropertyWasInlineParent, ref bool lastConceptUsed, bool readingAReference)
+            bool firstMember, ref bool lastPropertyWasInlineParent, ref bool lastConceptUsed, bool readingAReference, ref ConcpetMemeberMetadata memeberMetadata)
         {
             try
             {
+                memeberMetadata = null;
                 if (lastPropertyWasInlineParent && member.IsKey && !member.IsConceptInfo) // TODO: Removing "IsConceptInfo" from this condition would produce a mismatch. Think of a better solution for parsing the concept key.
                 {
                     if (!tokenReader.TryRead("."))
@@ -103,7 +121,18 @@ namespace Rhetos.Dsl
                 lastPropertyWasInlineParent = false;
 
                 if (member.IsStringType)
-                    return tokenReader.ReadText().ChangeType<object>();
+                {
+                    TokenMetadata tokenMetadata;
+                    var tokenValue = tokenReader.ReadText(out tokenMetadata);
+                    if(!tokenValue.IsError)
+                        memeberMetadata = new ConcpetMemeberMetadata {
+                            Position = tokenMetadata.Position,
+                            Length = tokenMetadata.Length,
+                            DslScript = tokenMetadata.DslScript,
+                            MemberName = member.Name
+                        };
+                    return tokenValue.ChangeType<object>();
+                }
 
                 if (member.ValueType == typeof(IConceptInfo))
                     if (firstMember && lastConcept != null)
@@ -151,13 +180,15 @@ namespace Rhetos.Dsl
                     GenericParser subParser = new GenericParser(member.ValueType, "");
                     lastConceptUsed = true;
                     lastPropertyWasInlineParent = true;
-                    return subParser.ParseMembers(tokenReader, lastConcept, true).ChangeType<object>();
+                    var subMemebers = subParser.ParseMembers(tokenReader, lastConcept, true);
+                    return subMemebers.IsError ? ValueOrError<object>.CreateError(subMemebers.Error) : ValueOrError<object>.CreateValue(subMemebers.Value.Concept);
                 }
 
                 if (member.IsConceptInfo)
                 {
                     GenericParser subParser = new GenericParser(member.ValueType, "");
-                    return subParser.ParseMembers(tokenReader, null, true).ChangeType<object>();
+                    var subMemebers = subParser.ParseMembers(tokenReader, null, true);
+                    return subMemebers.IsError ? ValueOrError<object>.CreateError(subMemebers.Error) : ValueOrError<object>.CreateValue(subMemebers.Value.Concept);
                 }
 
                 return ValueOrError.CreateError(string.Format(

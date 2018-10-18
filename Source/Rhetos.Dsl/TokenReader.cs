@@ -52,6 +52,13 @@ namespace Rhetos.Dsl
 
         public ValueOrError<string> ReadText()
         {
+            TokenMetadata token = null;
+            return ReadText(out token);
+        }
+
+        public ValueOrError<string> ReadText(out TokenMetadata token)
+        {
+            token = null;
             if (PositionInTokenList >= _tokenList.Count || CurrentToken.Type == TokenType.EndOfFile)
                 return ValueOrError.CreateError("Tried to read a token past the end of the DSL script.");
 
@@ -62,6 +69,11 @@ namespace Rhetos.Dsl
                         CurrentToken.Value == "'" ? "\"'\"" : "'" + CurrentToken.Value + "'"));
 
             string result = CurrentToken.Value;
+            token = new TokenMetadata {
+                Position = CurrentToken.PositionInDslScript,
+                DslScript = CurrentToken.DslScript,
+                Length = CurrentToken.Value.Length
+            };
             PositionInTokenList++;
             return result;
         }

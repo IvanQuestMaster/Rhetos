@@ -24,5 +24,7 @@ namespace Rhetos.Dsl
     public interface IDslParser
     {
         IEnumerable<IConceptInfo> ParsedConcepts { get; }
+
+        ConcpetMemeberMetadata GetDslScriptPositionForMember(IConceptInfo conceptInfo, string memeberName);
     }
 }

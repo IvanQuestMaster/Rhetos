@@ -98,6 +98,11 @@ namespace Rhetos.Dsl.Test
             private readonly IEnumerable<IConceptInfo> _rawConcepts;
             public StubDslParser(IEnumerable<IConceptInfo> rawConcepts) { _rawConcepts = rawConcepts; }
             public IEnumerable<IConceptInfo> ParsedConcepts { get { return _rawConcepts; } }
+
+            public ConcpetMemeberMetadata GetDslScriptPositionForMember(IConceptInfo conceptInfo, string memeberName)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         internal class StubMacroIndex : IIndex<Type, IEnumerable<IConceptMacro>>

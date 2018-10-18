@@ -22,12 +22,21 @@ using System;
 
 namespace Rhetos.Dsl
 {
+    public class TokenMetadata
+    {
+        public int Position;
+        public int Length;
+        public DslScript DslScript;
+    }
+
     public interface ITokenReader
     {
         /// <summary>
         /// Returns error if there are no more tokens or the next token is a special token.
         /// </summary>
         ValueOrError<string> ReadText();
+
+        ValueOrError<string> ReadText(out TokenMetadata token);
 
         /// <summary>
         /// Returns false if next token does not equal "value". Ignores case.

@@ -22,6 +22,20 @@ using System.Collections.Generic;
 
 namespace Rhetos.Dsl
 {
+    public class ConcpetMemeberMetadata
+    {
+        public string MemberName;
+        public int Position;
+        public int Length;
+        public DslScript DslScript;
+    }
+
+    public class ConceptWithMetadata
+    {
+        public IConceptInfo Concept;
+        public List<ConcpetMemeberMetadata> ConceptMemeberMetadata;
+    }
+
     public interface IConceptParser
     {
         /// <summary>
@@ -29,5 +43,7 @@ namespace Rhetos.Dsl
         /// If the keyword is recognized, but the syntax is wrong, return error description.
         /// </summary>
         ValueOrError<IConceptInfo> Parse(ITokenReader tokenReader, Stack<IConceptInfo> context);
+
+        ValueOrError<ConceptWithMetadata> ParseConceptWithMetadata(ITokenReader tokenReader, Stack<IConceptInfo> context);
     }
 }

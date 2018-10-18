@@ -36,6 +36,11 @@ namespace Rhetos.Dsl
         protected readonly ILogger _logger;
         protected readonly ILogger _keywordsLogger;
 
+        protected List<IConceptInfo> _conceptsWithMetadata = new List<IConceptInfo>();
+        protected List<List<ConcpetMemeberMetadata>> _conceptMetadata = new List<List<ConcpetMemeberMetadata>>();
+        protected IEnumerable<IConceptInfo> _parsedConcepts;
+        protected bool _isInitialized = false;
+
         public DslParser(Tokenizer tokenizer, IConceptInfo[] conceptInfoPlugins, ILogProvider logProvider)
         {
             _tokenizer = tokenizer;
@@ -47,19 +52,35 @@ namespace Rhetos.Dsl
 
         public IEnumerable<IConceptInfo> ParsedConcepts
         {
-            get
-            {
-                IEnumerable<IConceptParser> parsers = CreateGenericParsers();
-                var parsedConcepts = ExtractConcepts(parsers);
-                var alternativeInitializationGeneratedReferences = InitializeAlternativeInitializationConcepts(parsedConcepts);
-                return new[] { CreateInitializationConcept() }
-                    .Concat(parsedConcepts)
-                    .Concat(alternativeInitializationGeneratedReferences)
-                    .ToList();
-            }
+            get { Initialize();  return _parsedConcepts; }
+        }
+
+        public ConcpetMemeberMetadata GetDslScriptPositionForMember(IConceptInfo conceptInfo, string memeberName)
+        {
+            Initialize();
+            var index =  _conceptsWithMetadata.IndexOf(conceptInfo);
+            if (index > -1)
+                return _conceptMetadata[index].FirstOrDefault(x => x.MemberName == memeberName);
+            return null;
         }
 
         //=================================================================
+
+        private void Initialize()
+        {
+            if (_isInitialized)
+                return;
+
+            IEnumerable<IConceptParser> parsers = CreateGenericParsers();
+            var parsedConcepts = ExtractConcepts(parsers);
+            var alternativeInitializationGeneratedReferences = InitializeAlternativeInitializationConcepts(parsedConcepts);
+            _parsedConcepts = new[] { CreateInitializationConcept() }
+                .Concat(parsedConcepts)
+                .Concat(alternativeInitializationGeneratedReferences)
+                .ToList();
+
+            _isInitialized = true;
+        }
 
         private IConceptInfo CreateInitializationConcept()
         {
@@ -122,7 +143,7 @@ namespace Rhetos.Dsl
             return newConcepts;
         }
 
-        class Interpretation { public IConceptInfo ConceptInfo; public TokenReader NextPosition; }
+        class Interpretation { public IConceptInfo ConceptInfo; public TokenReader NextPosition; public List<ConcpetMemeberMetadata> ConceptMemeberMetadata; }
 
         protected IConceptInfo ParseNextConcept(TokenReader tokenReader, Stack<IConceptInfo> context, IEnumerable<IConceptParser> conceptParsers)
         {
@@ -132,16 +153,20 @@ namespace Rhetos.Dsl
             foreach (var conceptParser in conceptParsers)
             {
                 TokenReader nextPosition = new TokenReader(tokenReader);
-                var conceptInfoOrError = conceptParser.Parse(nextPosition, context);
-
-                if (!conceptInfoOrError.IsError)
+                //var conceptInfoOrError = conceptParser.Parse(nextPosition, context);
+                var conceptInfoWithMetadataOrError = conceptParser.ParseConceptWithMetadata(nextPosition, context);
+               
+                if (!conceptInfoWithMetadataOrError.IsError)
+                {
                     possibleInterpretations.Add(new Interpretation
                     {
-                        ConceptInfo = conceptInfoOrError.Value,
-                        NextPosition = nextPosition
+                        ConceptInfo = conceptInfoWithMetadataOrError.Value.Concept,
+                        NextPosition = nextPosition,
+                        ConceptMemeberMetadata = conceptInfoWithMetadataOrError.Value.ConceptMemeberMetadata
                     });
-                else if (!string.IsNullOrEmpty(conceptInfoOrError.Error)) // Empty error means that this parser is not for this keyword.
-                    errors.Add(string.Format("{0}: {1}\r\n{2}", conceptParser.GetType().Name, conceptInfoOrError.Error, tokenReader.ReportPosition()));
+                }
+                else if (!string.IsNullOrEmpty(conceptInfoWithMetadataOrError.Error)) // Empty error means that this parser is not for this keyword.
+                    errors.Add(string.Format("{0}: {1}\r\n{2}", conceptParser.GetType().Name, conceptInfoWithMetadataOrError.Error, tokenReader.ReportPosition()));
             }
 
             if (possibleInterpretations.Count == 0)
@@ -172,7 +197,13 @@ namespace Rhetos.Dsl
             }
 
             tokenReader.CopyFrom(possibleInterpretations.Single().NextPosition);
-            return possibleInterpretations.Single().ConceptInfo;
+            var interpretation = possibleInterpretations.Single();
+            if (interpretation.ConceptMemeberMetadata != null)
+            {
+                _conceptsWithMetadata.Add(interpretation.ConceptInfo);
+                _conceptMetadata.Add(interpretation.ConceptMemeberMetadata);
+            }
+            return interpretation.ConceptInfo;
         }
 
         protected string ReportErrorContext(IConceptInfo conceptInfo, TokenReader tokenReader)

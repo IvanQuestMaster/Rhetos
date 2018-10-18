@@ -94,6 +94,22 @@ namespace Rhetos.Dsl.Test
                 }
                 return ValueOrError<IConceptInfo>.CreateError("");
             }
+
+            public ValueOrError<ConceptWithMetadata> ParseConceptWithMetadata(ITokenReader tokenReader, Stack<IConceptInfo> context)
+            {
+                if (tokenReader.ReadText().Value == Keyword)
+                {
+                    if (tokenReader.TryRead("-"))
+                        return new ConceptWithMetadata
+                        {
+                            Concept = new SimpleConceptInfo("", ""),
+                            ConceptMemeberMetadata = new List<ConcpetMemeberMetadata>()
+                        };
+                    else
+                        return ValueOrError.CreateError(ErrorMessage);
+                }
+                return ValueOrError<ConceptWithMetadata>.CreateError("");
+            }
         }
 
         [TestMethod]

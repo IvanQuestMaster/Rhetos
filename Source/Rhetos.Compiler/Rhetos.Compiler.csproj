@@ -102,6 +102,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Rhetos.Dsl\Rhetos.Dsl.csproj">
+      <Project>{aa08ecfa-2ad6-4b0c-86b9-c5d8754a2073}</Project>
+      <Name>Rhetos.Dsl</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Rhetos.Utilities\Rhetos.Utilities.csproj">
       <Project>{71E63722-57BC-41DF-9FF5-57ECC67E4BC1}</Project>
       <Name>Rhetos.Utilities</Name>

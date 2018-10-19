@@ -36,8 +36,7 @@ namespace Rhetos.Dsl
         protected readonly ILogger _logger;
         protected readonly ILogger _keywordsLogger;
 
-        protected List<IConceptInfo> _conceptsWithMetadata = new List<IConceptInfo>();
-        protected List<List<ConcpetMemeberMetadata>> _conceptMetadata = new List<List<ConcpetMemeberMetadata>>();
+        protected Dictionary<string, List<ConcpetMemeberMetadata>> _conceptMetadata = new Dictionary<string, List<ConcpetMemeberMetadata>>();
         protected IEnumerable<IConceptInfo> _parsedConcepts;
         protected bool _isInitialized = false;
 
@@ -58,10 +57,7 @@ namespace Rhetos.Dsl
         public ConcpetMemeberMetadata GetDslScriptPositionForMember(IConceptInfo conceptInfo, string memeberName)
         {
             Initialize();
-            var index =  _conceptsWithMetadata.IndexOf(conceptInfo);
-            if (index > -1)
-                return _conceptMetadata[index].FirstOrDefault(x => x.MemberName == memeberName);
-            return null;
+            return _conceptMetadata[conceptInfo.GetKey()].FirstOrDefault(x => x.MemberName == memeberName);
         }
 
         //=================================================================
@@ -73,10 +69,10 @@ namespace Rhetos.Dsl
 
             IEnumerable<IConceptParser> parsers = CreateGenericParsers();
             var parsedConcepts = ExtractConcepts(parsers);
-            var alternativeInitializationGeneratedReferences = InitializeAlternativeInitializationConcepts(parsedConcepts);
+            //var alternativeInitializationGeneratedReferences = InitializeAlternativeInitializationConcepts(parsedConcepts);
             _parsedConcepts = new[] { CreateInitializationConcept() }
                 .Concat(parsedConcepts)
-                .Concat(alternativeInitializationGeneratedReferences)
+                //.Concat(alternativeInitializationGeneratedReferences)
                 .ToList();
 
             _isInitialized = true;
@@ -124,8 +120,14 @@ namespace Rhetos.Dsl
             tokenReader.SkipEndOfFile();
             while (!tokenReader.EndOfInput)
             {
-                IConceptInfo conceptInfo = ParseNextConcept(tokenReader, context, conceptParsers);
+                var conceptWithMetadata = ParseNextConcept(tokenReader, context, conceptParsers);
+                IConceptInfo conceptInfo = conceptWithMetadata.ConceptInfo;
                 newConcepts.Add(conceptInfo);
+
+                var alteernateInterpretation = InitializeAlternativeInitializationConcepts(new List<IConceptInfo> { conceptInfo });
+                newConcepts.AddRange(alteernateInterpretation);
+                if (conceptWithMetadata.MemeberMetadata != null && !_conceptMetadata.ContainsKey(conceptInfo.GetKey()))
+                    _conceptMetadata.Add(conceptInfo.GetKey(), conceptWithMetadata.MemeberMetadata);
 
                 UpdateContextForNextConcept(tokenReader, context, conceptInfo);
 
@@ -144,8 +146,9 @@ namespace Rhetos.Dsl
         }
 
         class Interpretation { public IConceptInfo ConceptInfo; public TokenReader NextPosition; public List<ConcpetMemeberMetadata> ConceptMemeberMetadata; }
+        public class ConceptWithMetadata { public IConceptInfo ConceptInfo; public List<ConcpetMemeberMetadata> MemeberMetadata; }
 
-        protected IConceptInfo ParseNextConcept(TokenReader tokenReader, Stack<IConceptInfo> context, IEnumerable<IConceptParser> conceptParsers)
+        protected ConceptWithMetadata ParseNextConcept(TokenReader tokenReader, Stack<IConceptInfo> context, IEnumerable<IConceptParser> conceptParsers)
         {
             var errors = new List<string>();
             List<Interpretation> possibleInterpretations = new List<Interpretation>();
@@ -198,12 +201,12 @@ namespace Rhetos.Dsl
 
             tokenReader.CopyFrom(possibleInterpretations.Single().NextPosition);
             var interpretation = possibleInterpretations.Single();
-            if (interpretation.ConceptMemeberMetadata != null)
-            {
-                _conceptsWithMetadata.Add(interpretation.ConceptInfo);
-                _conceptMetadata.Add(interpretation.ConceptMemeberMetadata);
-            }
-            return interpretation.ConceptInfo;
+            IConceptInfo conceptInterpretation = interpretation.ConceptInfo;
+
+            return new ConceptWithMetadata {
+                ConceptInfo = interpretation.ConceptInfo,
+                MemeberMetadata = interpretation.ConceptMemeberMetadata
+            };
         }
 
         protected string ReportErrorContext(IConceptInfo conceptInfo, TokenReader tokenReader)

@@ -180,14 +180,14 @@ namespace Rhetos.Dsl.Test
 
             var noContext = new Stack<IConceptInfo>();
             TokenReader tokenReader = TestTokenReader(dsl);
-            IConceptInfo concept = new TestDslParser(dsl).ParseNextConcept(tokenReader, noContext, conceptParsers);
+            IConceptInfo concept = new TestDslParser(dsl).ParseNextConcept(tokenReader, noContext, conceptParsers).ConceptInfo;
             Assert.AreEqual(typeof(SimpleConceptInfo), concept.GetType());
             Assert.AreEqual("simple", (concept as SimpleConceptInfo).Name);
             Assert.AreEqual("simpledata", (concept as SimpleConceptInfo).Data);
 
             Assert.IsTrue(tokenReader.TryRead(";"), "Reading ';' between concepts.");
 
-            concept = new TestDslParser(dsl).ParseNextConcept(tokenReader, noContext, conceptParsers);
+            concept = new TestDslParser(dsl).ParseNextConcept(tokenReader, noContext, conceptParsers).ConceptInfo;
             Assert.AreEqual(typeof(ExtendedConceptInfo), concept.GetType());
             Assert.AreEqual("ext", (concept as ExtendedConceptInfo).Name);
             Assert.AreEqual("extdata", (concept as ExtendedConceptInfo).Data);
@@ -208,7 +208,7 @@ namespace Rhetos.Dsl.Test
 
             var context = new Stack<IConceptInfo>();
             TokenReader tokenReader = TestTokenReader(dsl);
-            IConceptInfo concept = new TestDslParser(dsl).ParseNextConcept(tokenReader, context, conceptParsers);
+            IConceptInfo concept = new TestDslParser(dsl).ParseNextConcept(tokenReader, context, conceptParsers).ConceptInfo;
             Assert.AreEqual(typeof(SimpleConceptInfo), concept.GetType());
             Assert.AreEqual("name", (concept as SimpleConceptInfo).Name);
             Assert.AreEqual("data", (concept as SimpleConceptInfo).Data);
@@ -216,7 +216,7 @@ namespace Rhetos.Dsl.Test
 			Assert.IsTrue(tokenReader.TryRead("{"), "Reading '{' between concepts.");
 
             context.Push(concept);
-            concept = new TestDslParser(dsl).ParseNextConcept(tokenReader, context, conceptParsers);
+            concept = new TestDslParser(dsl).ParseNextConcept(tokenReader, context, conceptParsers).ConceptInfo;
             Assert.AreEqual(typeof(EnclosedRefConceptInfo), concept.GetType());
             Assert.AreEqual("ref", (concept as EnclosedRefConceptInfo).Name);
             Assert.AreEqual("name", (concept as EnclosedRefConceptInfo).Reference.Name);
@@ -238,7 +238,7 @@ namespace Rhetos.Dsl.Test
             TokenReader tokenReader = TestTokenReader(dsl);
             try
             {
-                IConceptInfo concept = new TestDslParser(dsl).ParseNextConcept(tokenReader, noContext, conceptParsers);
+                IConceptInfo concept = new TestDslParser(dsl).ParseNextConcept(tokenReader, noContext, conceptParsers).ConceptInfo;
             }
             catch (Exception e)
             {

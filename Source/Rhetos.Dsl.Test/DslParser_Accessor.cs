@@ -41,7 +41,7 @@ namespace Rhetos.Dsl.Test
             return base.ExtractConcepts(conceptParsers);
         }
 
-        new public IConceptInfo ParseNextConcept(TokenReader tokenReader, Stack<IConceptInfo> context, IEnumerable<IConceptParser> conceptParsers)
+        new public DslParser.ConceptWithMetadata ParseNextConcept(TokenReader tokenReader, Stack<IConceptInfo> context, IEnumerable<IConceptParser> conceptParsers)
         {
             return base.ParseNextConcept(tokenReader, context, conceptParsers);
         }

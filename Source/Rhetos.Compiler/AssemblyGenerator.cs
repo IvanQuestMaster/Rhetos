@@ -147,7 +147,7 @@ namespace Rhetos.Compiler
                             var script = _dslScriptsProvider.DslScripts.First(x => x == metadata.DslScript);
                             var fileText = File.ReadAllText(script.Path);
                             var positionInFile = GetPositionInText(fileText, errorPositionInDslFile);
-                            report.Append($@"[Error] C sharp compiler error: {error.ErrorText}. At line {positionInFile.Item1}, column {positionInFile.Item2}");
+                            report.Append($@"[Error] C sharp compiler error: {error.ErrorText}. At line {positionInFile.Item1}, column {positionInFile.Item2} in file {script.Path}");
                         }
                         else
                         {
@@ -173,7 +173,7 @@ namespace Rhetos.Compiler
             var numberOfLines = 0;
             while (lastNewLineIndex > -1)
             {
-                var recentNewLineIndex = text.IndexOf('\n', lastNewLineIndex);
+                var recentNewLineIndex = text.IndexOf('\n', lastNewLineIndex + 1);
                 if (recentNewLineIndex > position)
                 {
                     return new Tuple<int, int>(numberOfLines + 1, position - lastNewLineIndex);

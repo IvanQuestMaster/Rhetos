@@ -41,6 +41,7 @@ namespace Rhetos.Dsl
         private readonly IEnumerable<Type> _conceptTypes;
         private readonly IMacroOrderRepository _macroOrderRepository;
         private readonly IDslModelFile _dslModelFile;
+        private readonly IConceptsFile _conceptsFile;
 
         public DslModel(
             IDslParser dslParser,
@@ -50,7 +51,8 @@ namespace Rhetos.Dsl
             IEnumerable<IConceptMacro> macroPrototypes,
             IEnumerable<IConceptInfo> conceptPrototypes,
             IMacroOrderRepository macroOrderRepository,
-            IDslModelFile dslModelFile)
+            IDslModelFile dslModelFile,
+            IConceptsFile conceptsFile)
         {
             _dslParser = dslParser;
             _performanceLogger = logProvider.GetLogger("Performance");
@@ -63,6 +65,7 @@ namespace Rhetos.Dsl
             _conceptTypes = conceptPrototypes.Select(conceptInfo => conceptInfo.GetType());
             _macroOrderRepository = macroOrderRepository;
             _dslModelFile = dslModelFile;
+            _conceptsFile = conceptsFile;
         }
 
         #region IDslModel implementation
@@ -111,17 +114,39 @@ namespace Rhetos.Dsl
                     {
                         var sw = Stopwatch.StartNew();
 
+                        var oldParesdConcepts = _conceptsFile.LoadConcepts("ParsedConcepts.json", ConceptsFileSource.FromCache);
                         var parsedConcepts = _dslParser.ParsedConcepts;
-                        _dslContainer.AddNewConceptsAndReplaceReferences(parsedConcepts);
-                        ExpandMacroConcepts();
-                        _dslContainer.ReportErrorForUnresolvedConcepts();
-                        CheckSemantics();
-                        _dslContainer.SortReferencesBeforeUsingConcept();
+                        var parsedConceptsDiff = oldParesdConcepts.Diff(parsedConcepts);
+
+                        if (!parsedConceptsDiff.Added.Any() && !parsedConceptsDiff.Removed.Any() && !parsedConceptsDiff.Changed.Any())
+                        {
+                            _dslContainer.AddNewConceptsAndReplaceReferences(_conceptsFile.LoadConcepts("DslModel.json", ConceptsFileSource.FromCache));
+                            _logger.Info("Unchged dsl scripts. Loading DslModel from cache.");
+                        }
+                        else 
+                        {
+                            if (!parsedConceptsDiff.Changed.Any() && !parsedConceptsDiff.Removed.Any())
+                            {
+                                _dslContainer.AddNewConceptsAndReplaceReferences(_conceptsFile.LoadConcepts("DslModel.json", ConceptsFileSource.FromCache));
+                            }
+                            else
+                            {
+                                _dslContainer.AddNewConceptsAndReplaceReferences(parsedConcepts);
+                            }
+
+                            _dslContainer.AddNewConceptsAndReplaceReferences(parsedConcepts);
+                            ExpandMacroConcepts();
+                            _dslContainer.ReportErrorForUnresolvedConcepts();
+                            CheckSemantics();
+                            _dslContainer.SortReferencesBeforeUsingConcept();
+                        }
+
                         _performanceLogger.Write(sw, "DslModel.Initialize (" + _dslContainer.Concepts.Count() + " concepts).");
 
                         LogDslModel();
                         ReportObsoleteConcepts();
                         _dslModelFile.SaveConcepts(_dslContainer.Concepts);
+                        _conceptsFile.SaveConcepts(_dslParser.ParsedConcepts, "ParsedConcepts.json");
                         _initialized = true;
                     }
         }

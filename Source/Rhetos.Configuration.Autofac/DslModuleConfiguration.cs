@@ -42,6 +42,7 @@ namespace Rhetos.Configuration.Autofac
                 builder.RegisterType<DiskDslScriptLoader>().As<IDslScriptsProvider>().SingleInstance();
                 builder.RegisterType<Tokenizer>().SingleInstance();
                 builder.RegisterType<DslModelFile>().As<IDslModelFile>().SingleInstance();
+                builder.RegisterType<ConceptsFile>().As<IConceptsFile>().SingleInstance();
                 builder.RegisterType<DslParser>().As<IDslParser>();
                 builder.RegisterType<MacroOrderRepository>().As<IMacroOrderRepository>();
                 builder.RegisterType<ConceptMetadata>().SingleInstance();

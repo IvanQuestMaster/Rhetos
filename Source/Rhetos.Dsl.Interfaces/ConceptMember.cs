@@ -37,6 +37,7 @@ namespace Rhetos.Dsl
         public bool IsDerived { get; private set; }
         public bool IsStringType { get; private set; }
         public bool IsParsable { get; private set; }
+        public bool IsCodeSnippet { get; private set; }
 
         private MemberInfo MemberInfo;
 
@@ -55,6 +56,8 @@ namespace Rhetos.Dsl
             this.IsStringType = ValueType == typeof(string);
 
             this.IsParsable = nonParsableMembers == null || !nonParsableMembers.Contains(memberInfo.Name);
+
+            this.IsCodeSnippet = memberInfo.GetCustomAttributes(typeof(CodeSnippetAttribute), false).Any();
         }
 
         private static int InheritanceDepth(MemberInfo memberInfo)

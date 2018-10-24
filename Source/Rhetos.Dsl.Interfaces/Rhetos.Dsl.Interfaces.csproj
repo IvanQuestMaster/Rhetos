@@ -113,6 +113,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeSnippetAttribute.cs" />
     <Compile Include="ConceptInfoHelper.cs" />
     <Compile Include="ConceptKeywordAttribute.cs" />
     <Compile Include="ConceptMember.cs" />

@@ -114,6 +114,17 @@ namespace Rhetos.Dsl.Test
             }
         }
 
+        internal class StubConceptsFile : IConceptsFile
+        {
+            public IEnumerable<IConceptInfo> LoadConcepts(string conceptsFilePath, ConceptsFileSource conceptsFileSource)
+            {
+                return new IConceptInfo[0];
+            }
+
+            public void SaveConcepts(IEnumerable<IConceptInfo> concepts, string conceptsFilePath)
+            {}
+        }
+
         internal class StubMacroOrderRepository : IMacroOrderRepository
         {
             public List<MacroOrder> Load() { return new List<MacroOrder>(); }
@@ -128,7 +139,7 @@ namespace Rhetos.Dsl.Test
         static IDslModel NewDslModel(IDslParser parser, IEnumerable<IConceptInfo> conceptPrototypes)
         {
             var dslContainter = new DslContainer(new ConsoleLogProvider(), new MockPluginsContainer<IDslModelIndex>(new DslModelIndexByType()));
-            var dslModel = new DslModel(parser, new ConsoleLogProvider(), dslContainter, new StubMacroIndex(), new IConceptMacro[] { }, conceptPrototypes, new StubMacroOrderRepository(), new StubDslModelFile());
+            var dslModel = new DslModel(parser, new ConsoleLogProvider(), dslContainter, new StubMacroIndex(), new IConceptMacro[] { }, conceptPrototypes, new StubMacroOrderRepository(), new StubDslModelFile(), new StubConceptsFile());
             return dslModel;
         }
 

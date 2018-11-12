@@ -129,6 +129,7 @@
     <Compile Include="DslModelIndexByType.cs" />
     <Compile Include="IDslModelIndex.cs" />
     <Compile Include="IDslScriptsProvider.cs" />
+    <Compile Include="IDslSubset.cs" />
     <Compile Include="InitializationConcept.cs" />
     <Compile Include="IValidatedConcept.cs" />
     <Compile Include="IValidationConcept.cs" />

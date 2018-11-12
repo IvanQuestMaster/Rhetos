@@ -91,11 +91,11 @@ namespace Rhetos.Dsl
             return _dslContainer.FindByType(conceptType);
         }
 
-        public T GetIndex<T>() where T : IDslModelIndex
+        public IEnumerable<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
         {
             if (!_initialized)
                 Initialize();
-            return _dslContainer.GetIndex<T>();
+            return _dslContainer.QueryIndex<TIndex, TResult>(query);
         }
 
         #endregion

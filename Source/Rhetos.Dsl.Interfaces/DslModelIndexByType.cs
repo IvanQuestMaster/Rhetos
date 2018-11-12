@@ -60,17 +60,17 @@ namespace Rhetos.Dsl
         /// </summary>
         public static IEnumerable<T> FindByType<T>(this IDslModel dslModel) where T : IConceptInfo
         {
-            return dslModel.GetIndex<DslModelIndexByType>().FindByType(typeof(T), includeDerivations: true).Cast<T>();
+            return dslModel.QueryIndex<DslModelIndexByType, T>(x => x.FindByType(typeof(T), includeDerivations: true).Cast<T>());
         }
 
         public static IEnumerable<IConceptInfo> FindByType(this IDslModel dslModel, Type conceptType)
         {
-            return dslModel.GetIndex<DslModelIndexByType>().FindByType(conceptType, includeDerivations: true);
+            return dslModel.QueryIndex<DslModelIndexByType, IConceptInfo>(x => x.FindByType(conceptType, includeDerivations: true));
         }
 
         public static IEnumerable<IConceptInfo> FindByType(this IDslModel dslModel, Type conceptType, bool includeDerivations)
         {
-            return dslModel.GetIndex<DslModelIndexByType>().FindByType(conceptType, includeDerivations);
+            return dslModel.QueryIndex<DslModelIndexByType, IConceptInfo>(x => x.FindByType(conceptType, includeDerivations));
         }
     }
 }

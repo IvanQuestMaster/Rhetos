@@ -617,7 +617,7 @@ namespace Rhetos.DatabaseGenerator.Test
             public IEnumerable<IConceptInfo> Concepts { get { return _conceptInfos; } }
             public IConceptInfo FindByKey(string conceptKey) { throw new NotImplementedException(); }
             public IEnumerable<IConceptInfo> FindByType(Type conceptType) { throw new NotImplementedException(); }
-            public T GetIndex<T>() where T : IDslModelIndex
+            public IEnumerable<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
             {
                 throw new NotImplementedException();
             }

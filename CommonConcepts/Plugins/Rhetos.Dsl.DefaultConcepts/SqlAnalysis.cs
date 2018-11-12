@@ -43,10 +43,8 @@ namespace Rhetos.Dsl.DefaultConcepts
 
             var newConcepts = new List<IConceptInfo>();
 
-            var conceptsBySqlName = existingConcepts.GetIndex<SqlObjectsIndex>().ConceptsBySqlName;
-
             foreach (var sqlObjectInScript in sqlObjectsInScript)
-                foreach (var conceptInfo in conceptsBySqlName.Get(sqlObjectInScript))
+                foreach (var conceptInfo in existingConcepts.GetByName(sqlObjectInScript))
                     if (conceptInfo != dependent)
                     {
                         if (conceptInfo is DataStructureInfo)

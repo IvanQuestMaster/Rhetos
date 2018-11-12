@@ -100,12 +100,12 @@ namespace Rhetos.Dsl
             return result;
         }
 
-        public T GetIndex<T>() where T : IDslModelIndex
+        public IEnumerable<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
         {
             IDslModelIndex index;
-            if (!_dslModelIndexesByType.TryGetValue(typeof(T), out index))
-                throw new FrameworkException("There is no registered IDslModelIndex plugin of type '" + typeof(T).FullName + "'.");
-            return (T)index;
+            if (!_dslModelIndexesByType.TryGetValue(typeof(TIndex), out index))
+                throw new FrameworkException("There is no registered IDslModelIndex plugin of type '" + typeof(TIndex).FullName + "'.");
+            return query((TIndex)index);
         }
 
         #endregion

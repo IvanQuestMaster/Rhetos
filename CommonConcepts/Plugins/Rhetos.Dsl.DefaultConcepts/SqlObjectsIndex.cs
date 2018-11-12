@@ -67,5 +67,18 @@ namespace Rhetos.Dsl.DefaultConcepts
                 ConceptsBySqlName.Add(polymorphicUnionView.Module.Name + "." + polymorphicUnionView.Name, concept);
             }
         }
+
+        public IEnumerable<IConceptInfo> GetByName(string name)
+        {
+            return ConceptsBySqlName.Get(name);
+        }
+    }
+
+    public static class SqlObjectsIndexExtensions
+    {
+        public static IEnumerable<IConceptInfo> GetByName(this IDslModel dslModel, string name)
+        {
+            return dslModel.QueryIndex<SqlObjectsIndex, IConceptInfo>(x => x.GetByName(name));
+        }
     }
 }

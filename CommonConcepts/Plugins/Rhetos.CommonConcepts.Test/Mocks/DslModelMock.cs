@@ -39,12 +39,12 @@ namespace Rhetos.CommonConcepts.Test.Mocks
             return this.Where(c => conceptType.IsAssignableFrom(c.GetType()));
         }
 
-        public T GetIndex<T>() where T : IDslModelIndex
+        public IEnumerable<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
         {
-            IDslModelIndex index = (IDslModelIndex)typeof(T).GetConstructor(new Type[] { }).Invoke(new object[] { });
+            IDslModelIndex index = (IDslModelIndex)typeof(TIndex).GetConstructor(new Type[] { }).Invoke(new object[] { });
             foreach (var concept in Concepts)
                 index.Add(concept);
-            return (T)index;
+            return query((TIndex)index);
         }
     }
 }

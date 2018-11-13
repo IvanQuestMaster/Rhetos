@@ -58,17 +58,17 @@ namespace Rhetos.Dsl
         /// <summary>
         /// Returns all concepts of the given interface or type, including derivations.
         /// </summary>
-        public static IEnumerable<T> FindByType<T>(this IDslModel dslModel) where T : IConceptInfo
+        public static DslSubset<T> FindByType<T>(this IDslModel dslModel) where T : IConceptInfo
         {
             return dslModel.QueryIndex<DslModelIndexByType, T>(x => x.FindByType(typeof(T), includeDerivations: true).Cast<T>());
         }
 
-        public static IEnumerable<IConceptInfo> FindByType(this IDslModel dslModel, Type conceptType)
+        public static DslSubset<IConceptInfo> FindByType(this IDslModel dslModel, Type conceptType)
         {
             return dslModel.QueryIndex<DslModelIndexByType, IConceptInfo>(x => x.FindByType(conceptType, includeDerivations: true));
         }
 
-        public static IEnumerable<IConceptInfo> FindByType(this IDslModel dslModel, Type conceptType, bool includeDerivations)
+        public static DslSubset<IConceptInfo> FindByType(this IDslModel dslModel, Type conceptType, bool includeDerivations)
         {
             return dslModel.QueryIndex<DslModelIndexByType, IConceptInfo>(x => x.FindByType(conceptType, includeDerivations));
         }

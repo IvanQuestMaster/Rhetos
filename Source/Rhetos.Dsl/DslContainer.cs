@@ -88,9 +88,9 @@ namespace Rhetos.Dsl
 
         #region IDslModel filters implementation
 
-        public IEnumerable<IConceptInfo> Concepts
+        public DslSubset<IConceptInfo> Concepts
         {
-            get { return _resolvedConcepts; }
+            get { return new DslSubset<IConceptInfo>(_resolvedConcepts); }
         }
 
         public IConceptInfo FindByKey(string conceptKey)
@@ -100,12 +100,12 @@ namespace Rhetos.Dsl
             return result;
         }
 
-        public IEnumerable<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
+        public DslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
         {
             IDslModelIndex index;
             if (!_dslModelIndexesByType.TryGetValue(typeof(TIndex), out index))
                 throw new FrameworkException("There is no registered IDslModelIndex plugin of type '" + typeof(TIndex).FullName + "'.");
-            return query((TIndex)index);
+            return new DslSubset<TResult>(query((TIndex)index));
         }
 
         #endregion

@@ -149,13 +149,13 @@ namespace Rhetos.Dsl
 
     public static class DslModelIndexByReferenceExtensions
     {
-        public static IEnumerable<T> FindByReference<T>(this IDslModel dslModel, Expression<Func<T, object>> referenceProperty, IConceptInfo referencedConcept) where T : IConceptInfo
+        public static DslSubset<T> FindByReference<T>(this IDslModel dslModel, Expression<Func<T, object>> referenceProperty, IConceptInfo referencedConcept) where T : IConceptInfo
         {
             var propertyName = GetPropertyName<T>(referenceProperty, checkValueType: referencedConcept);
             return dslModel.QueryIndex<DslModelIndexByReference, T>(x => x.FindByReference(typeof(T), true, propertyName, referencedConcept.GetKey()).Cast<T>());
         }
 
-        public static IEnumerable<IConceptInfo> FindByReference(this IDslModel dslModel, Type conceptType, bool includeDerivations, string referenceName, string referencedConceptKey)
+        public static DslSubset<IConceptInfo> FindByReference(this IDslModel dslModel, Type conceptType, bool includeDerivations, string referenceName, string referencedConceptKey)
         {
             return dslModel.QueryIndex<DslModelIndexByReference, IConceptInfo>(x => x.FindByReference(conceptType, includeDerivations, referenceName, referencedConceptKey));
         }

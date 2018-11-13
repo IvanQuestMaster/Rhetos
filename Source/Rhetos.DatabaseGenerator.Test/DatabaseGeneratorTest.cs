@@ -614,10 +614,10 @@ namespace Rhetos.DatabaseGenerator.Test
         {
             private readonly IEnumerable<IConceptInfo> _conceptInfos;
             public MockDslModel(IEnumerable<IConceptInfo> conceptInfos) { _conceptInfos = conceptInfos; }
-            public IEnumerable<IConceptInfo> Concepts { get { return _conceptInfos; } }
+            public DslSubset<IConceptInfo> Concepts { get { return new DslSubset<IConceptInfo>(_conceptInfos); } }
             public IConceptInfo FindByKey(string conceptKey) { throw new NotImplementedException(); }
-            public IEnumerable<IConceptInfo> FindByType(Type conceptType) { throw new NotImplementedException(); }
-            public IEnumerable<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
+            public DslSubset<IConceptInfo> FindByType(Type conceptType) { throw new NotImplementedException(); }
+            public DslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
             {
                 throw new NotImplementedException();
             }

@@ -51,13 +51,13 @@ namespace Rhetos.Dsl
 
         #region IDslModel implementation
 
-        public IEnumerable<IConceptInfo> Concepts
+        public DslSubset<IConceptInfo> Concepts
         {
             get
             {
                 if (!_initialized)
                     Initialize();
-                return _dslContainer.Concepts;
+                return new DslSubset<IConceptInfo>(_dslContainer.Concepts);
             }
         }
 
@@ -68,18 +68,18 @@ namespace Rhetos.Dsl
             return _dslContainer.FindByKey(conceptKey);
         }
 
-        public IEnumerable<IConceptInfo> FindByType(Type conceptType)
+        public DslSubset<IConceptInfo> FindByType(Type conceptType)
         {
             if (!_initialized)
                 Initialize();
-            return _dslContainer.FindByType(conceptType);
+            return new DslSubset<IConceptInfo>(_dslContainer.FindByType(conceptType));
         }
 
-        public IEnumerable<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
+        public DslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
         {
             if (!_initialized)
                 Initialize();
-            return _dslContainer.QueryIndex(query);
+            return new DslSubset<TResult>(_dslContainer.QueryIndex(query));
         }
 
         #endregion

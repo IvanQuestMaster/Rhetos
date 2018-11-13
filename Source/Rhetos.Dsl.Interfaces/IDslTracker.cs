@@ -25,8 +25,8 @@ using System.Diagnostics.Contracts;
 
 namespace Rhetos.Dsl
 {
-    public interface IDslSubset<T> : IEnumerable<T> where T : IConceptInfo
+    public interface IDslTracker 
     {
-        IDslSubset<T> QuerySubset<TResult>(Func<T, IEnumerable<IConceptInfo>> query) where TResult : IConceptInfo;
+        void AddConceptToTracker(IConceptInfo conceptInfo);
     }
 }

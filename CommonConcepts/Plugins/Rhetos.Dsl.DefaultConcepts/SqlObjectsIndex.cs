@@ -76,7 +76,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 
     public static class SqlObjectsIndexExtensions
     {
-        public static IEnumerable<IConceptInfo> GetByName(this IDslModel dslModel, string name)
+        public static DslSubset<IConceptInfo> GetByName(this IDslModel dslModel, string name)
         {
             return dslModel.QueryIndex<SqlObjectsIndex, IConceptInfo>(x => x.GetByName(name));
         }

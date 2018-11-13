@@ -67,6 +67,7 @@
     <Compile Include="DslParser_Accessor.cs" />
     <Compile Include="DslScriptTest.cs" />
     <Compile Include="DslModelTest.cs" />
+    <Compile Include="DslSubsetTest.cs" />
     <Compile Include="GenericParserTest.cs" />
     <Compile Include="Mocks\MockDslScript.cs" />
     <Compile Include="Mocks\MockDslScriptsProvider.cs" />

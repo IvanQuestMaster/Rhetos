@@ -28,7 +28,7 @@ using System.Text;
 
 namespace Rhetos.Dsl
 {
-    public class DslModel : IDslModel
+    public class DslModel : IDslModel, IDslTracker
     {
         private readonly IDslParser _dslParser;
         private readonly ILogger _performanceLogger;
@@ -41,6 +41,9 @@ namespace Rhetos.Dsl
         private readonly IEnumerable<Type> _conceptTypes;
         private readonly IMacroOrderRepository _macroOrderRepository;
         private readonly IDslModelFile _dslModelFile;
+
+        private HashSet<IConceptInfo> _trackedConcepts;
+        private bool _trackChanges;
 
         public DslModel(
             IDslParser dslParser,
@@ -63,6 +66,9 @@ namespace Rhetos.Dsl
             _conceptTypes = conceptPrototypes.Select(conceptInfo => conceptInfo.GetType());
             _macroOrderRepository = macroOrderRepository;
             _dslModelFile = dslModelFile;
+
+            _trackedConcepts = new HashSet<IConceptInfo>();
+            _trackChanges = false;
         }
 
         #region IDslModel implementation
@@ -73,7 +79,7 @@ namespace Rhetos.Dsl
             {
                 if (!_initialized)
                     Initialize();
-                return new DslSubset<IConceptInfo>(_dslContainer.Concepts);
+                return new DslSubset<IConceptInfo>(this, _dslContainer.Concepts);
             }
         }
 
@@ -81,21 +87,34 @@ namespace Rhetos.Dsl
         {
             if (!_initialized)
                 Initialize();
-            return _dslContainer.FindByKey(conceptKey);
+            var conceptByKey = _dslContainer.FindByKey(conceptKey);
+            if (_trackChanges)
+                _trackedConcepts.Add(conceptByKey);
+            return conceptByKey;
         }
 
         public IEnumerable<IConceptInfo> FindByType(Type conceptType)
         {
             if (!_initialized)
                 Initialize();
-            return new DslSubset<IConceptInfo>(_dslContainer.FindByType(conceptType));
+            return new DslSubset<IConceptInfo>(this, _dslContainer.FindByType(conceptType));
         }
 
         public DslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
         {
             if (!_initialized)
                 Initialize();
-            return new DslSubset<TResult>(_dslContainer.QueryIndex<TIndex, TResult>(query));
+            return new DslSubset<TResult>(this, _dslContainer.QueryIndex<TIndex, TResult>(query));
+        }
+
+        #endregion
+
+        #region IDslTracker implementation
+
+        public void AddConceptToTracker(IConceptInfo conceptInfo)
+        {
+            if (_trackChanges)
+                _trackedConcepts.Add(conceptInfo);
         }
 
         #endregion
@@ -179,6 +198,8 @@ namespace Rhetos.Dsl
                     macroStopwatches[macroEvaluator.Name].Start();
                     foreach (var conceptInfo in _dslContainer.FindByType(macroEvaluator.Implements, macroEvaluator.ImplementsDerivations).ToList())
                     {
+                        _trackedConcepts.Clear();
+                        _trackChanges = true;
                         var macroCreatedConcepts = macroEvaluator.Evaluate(conceptInfo, _dslContainer);
                         CsUtility.Materialize(ref macroCreatedConcepts);
 
@@ -201,6 +222,7 @@ namespace Rhetos.Dsl
                             createdTypesInIteration.AddRange(newConceptsReport.NewUniqueConcepts.Select(nuc =>
                                 new CreatedTypesInIteration { Macro = macroEvaluator.Name, Created = nuc.BaseConceptInfoType().Name, Iteration = iteration }));
                         }
+                        _trackChanges = false;
                     }
                     macroStopwatches[macroEvaluator.Name].Stop();
                 };
@@ -277,7 +299,10 @@ namespace Rhetos.Dsl
                     macroEvaluators.Add(new MacroEvaluator
                     {
                         Name = "IConceptMacro " + macro.GetType().FullName + " for " + conceptType.FullName,
-                        Evaluate = (conceptInfo, dslContainer) => macro.CreateNewConcepts(conceptInfo, dslContainer),
+                        Evaluate = (conceptInfo, dslContainer) => {
+                            AddConceptToTracker(conceptInfo);
+                            return macro.CreateNewConcepts(conceptInfo, dslContainer);
+                        },
                         Implements = conceptType,
                         ImplementsDerivations = true
                     });

@@ -46,31 +46,45 @@ namespace Rhetos.Dsl.DefaultConcepts
 
         public void Add(IConceptInfo concept)
         {
-            if (concept is DataStructureInfo)
-            {
-                var dataStructure = (DataStructureInfo)concept;
-                ConceptsBySqlName.Add(dataStructure.Module.Name + "." + dataStructure.Name, concept);
-            }
-            else if (concept is SqlViewInfo)
-            {
-                var sqlView = (SqlViewInfo)concept;
-                ConceptsBySqlName.Add(sqlView.Module.Name + "." + sqlView.Name, concept);
-            }
-            else if (concept is SqlFunctionInfo)
-            {
-                var sqlFunction = (SqlFunctionInfo)concept;
-                ConceptsBySqlName.Add(sqlFunction.Module.Name + "." + sqlFunction.Name, concept);
-            }
-            else if (concept is PolymorphicUnionViewInfo)
-            {
-                var polymorphicUnionView = (PolymorphicUnionViewInfo)concept;
-                ConceptsBySqlName.Add(polymorphicUnionView.Module.Name + "." + polymorphicUnionView.Name, concept);
-            }
+            var sqlObjectName = GetConceptSqlObjectName(concept);
+            if(!string.IsNullOrEmpty(sqlObjectName))
+                ConceptsBySqlName.Add(sqlObjectName, concept);
+        }
+
+        public void Remove(IConceptInfo concept)
+        {
+            throw new NotImplementedException();
         }
 
         public IEnumerable<IConceptInfo> GetByName(string name)
         {
             return ConceptsBySqlName.Get(name);
+        }
+
+        public static string GetConceptSqlObjectName(IConceptInfo concept)
+        {
+            string conceptSqlObjectName = null;
+            if (concept is DataStructureInfo)
+            {
+                var dataStructure = (DataStructureInfo)concept;
+                conceptSqlObjectName = dataStructure.Module.Name + "." + dataStructure.Name;
+            }
+            else if (concept is SqlViewInfo)
+            {
+                var sqlView = (SqlViewInfo)concept;
+                conceptSqlObjectName = sqlView.Module.Name + "." + sqlView.Name;
+            }
+            else if (concept is SqlFunctionInfo)
+            {
+                var sqlFunction = (SqlFunctionInfo)concept;
+                conceptSqlObjectName = sqlFunction.Module.Name + "." + sqlFunction.Name;
+            }
+            else if (concept is PolymorphicUnionViewInfo)
+            {
+                var polymorphicUnionView = (PolymorphicUnionViewInfo)concept;
+                conceptSqlObjectName = polymorphicUnionView.Module.Name + "." + polymorphicUnionView.Name;
+            }
+            return conceptSqlObjectName;
         }
     }
 

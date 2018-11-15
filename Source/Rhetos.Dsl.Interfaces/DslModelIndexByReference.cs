@@ -63,6 +63,26 @@ namespace Rhetos.Dsl
                 index4.Add(concept);
             }
 
+            public void Remove(string referencedConceptKey, Type conceptType, string referenceName, IConceptInfo concept)
+            {
+                Dictionary<Type, Dictionary<string, List<IConceptInfo>>> index2;
+                TryGetValue(referencedConceptKey, out index2);
+
+                Dictionary<string, List<IConceptInfo>> index3 = null;
+                if (index2 != null)
+                    index2.TryGetValue(conceptType, out index3);
+
+                List<IConceptInfo> index4 = null;
+                if (index3 != null)
+                    index3.TryGetValue(referenceName, out index4);
+
+                if (index4 != null)
+                    index4.Remove(concept);
+                if (index2 != null)
+                    Remove(referencedConceptKey);
+
+            }
+
             private static IConceptInfo[] EmptyConceptsArray = new IConceptInfo[] { };
 
             public IEnumerable<IConceptInfo> Get(string referencedConceptKey, IEnumerable<Type> conceptTypes, string referenceName)
@@ -136,6 +156,19 @@ namespace Rhetos.Dsl
                     string referencedConceptKey = ((IConceptInfo)member.GetValue(concept)).GetKey();
                     _conceptsIndex.Add(referencedConceptKey, conceptType, member.Name, concept);
                 }
+        }
+
+        public void Remove(IConceptInfo concept)
+        {
+            Type conceptType = concept.GetType();
+
+            foreach (ConceptMember member in ConceptMembers.Get(concept))
+                if (member.IsConceptInfo)
+                {
+                    string referencedConceptKey = ((IConceptInfo)member.GetValue(concept)).GetKey();
+                    _conceptsIndex.Remove(referencedConceptKey, conceptType, member.Name, concept);
+                }
+            _conceptsIndex.Remove(concept.GetKey());
         }
 
         public IEnumerable<IConceptInfo> FindByReference(Type conceptType, bool includeDerivations, string referenceName, string referencedConceptKey)

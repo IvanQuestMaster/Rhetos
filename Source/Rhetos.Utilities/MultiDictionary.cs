@@ -55,6 +55,15 @@ namespace Rhetos.Utilities
                 Add(key, new List<TValue>());
         }
 
+        public void RemoveValue(TKey key, TValue value)
+        {
+            List<TValue> list;
+            if (TryGetValue(key, out list))
+            {
+                list.Remove(value);
+            }
+        }
+
         private static TValue[] EmptyArray = new TValue[] { };
 
         /// <summary>

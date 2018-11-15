@@ -28,5 +28,7 @@ namespace Rhetos.Dsl
     public interface IDslModelIndex
     {
         void Add(IConceptInfo concept);
+
+        void Remove(IConceptInfo concept);
     }
 }

@@ -35,6 +35,11 @@ namespace Rhetos.Dsl
             _conceptsByType.Add(concept.GetType(), concept);
         }
 
+        public void Remove(IConceptInfo concept)
+        {
+            _conceptsByType.RemoveValue(concept.GetType(), concept);
+        }
+
         public IEnumerable<IConceptInfo> FindByType(Type conceptType, bool includeDerivations)
         {
             if (includeDerivations)

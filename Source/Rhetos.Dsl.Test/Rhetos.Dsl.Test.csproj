@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConceptInfoHelperTest.cs" />
+    <Compile Include="ConceptsDiffTest.cs" />
     <Compile Include="DslContainerTest.cs" />
     <Compile Include="DslModelIndicesTest.cs" />
     <Compile Include="DslParserTest.cs" />

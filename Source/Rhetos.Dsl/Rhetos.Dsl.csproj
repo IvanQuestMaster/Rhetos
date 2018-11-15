@@ -123,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AlternativeInitialization.cs" />
+    <Compile Include="ConceptsDiff.cs" />
     <Compile Include="ConceptMacroUtility.cs" />
     <Compile Include="DiskDslScriptLoader.cs" />
     <Compile Include="DslContainer.cs" />

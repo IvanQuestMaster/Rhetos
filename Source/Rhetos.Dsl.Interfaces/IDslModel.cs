@@ -30,7 +30,7 @@ namespace Rhetos.Dsl
         /// <summary>
         /// The concepts are already sorted by their dependencies.
         /// </summary>
-        DslSubset<IConceptInfo> Concepts { get; }
+        IDslSubset<IConceptInfo> Concepts { get; }
 
         /// <summary>
         /// See ConceptInfoHelper.GetKey function description for expected format of conceptKey.
@@ -38,6 +38,6 @@ namespace Rhetos.Dsl
         /// </summary>
         IConceptInfo FindByKey(string conceptKey);
 
-        DslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo;
+        IDslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo;
     }
 }

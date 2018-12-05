@@ -27,19 +27,19 @@ namespace Rhetos.CommonConcepts.Test.Mocks
 {
     public class DslModelMock : List<IConceptInfo>, IDslModel
     {
-        public DslSubset<IConceptInfo> Concepts { get { return new DslSubset<IConceptInfo>(this); } }
+        public IDslSubset<IConceptInfo> Concepts { get { return new DslSubset<IConceptInfo>(this); } }
 
         public IConceptInfo FindByKey(string conceptKey)
         {
             return this.Where(c => c.GetKey() == conceptKey).SingleOrDefault();
         }
 
-        public DslSubset<IConceptInfo> FindByType(Type conceptType)
+        public IDslSubset<IConceptInfo> FindByType(Type conceptType)
         {
             return new DslSubset<IConceptInfo>(this.Where(c => conceptType.IsAssignableFrom(c.GetType())));
         }
 
-        public DslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
+        public IDslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
         {
             IDslModelIndex index = (IDslModelIndex)typeof(TIndex).GetConstructor(new Type[] { }).Invoke(new object[] { });
             foreach (var concept in Concepts)

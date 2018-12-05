@@ -121,7 +121,6 @@
     <Compile Include="ConceptMetadataKey.cs" />
     <Compile Include="DslModelIndexByReference.cs" />
     <Compile Include="DslScript.cs" />
-    <Compile Include="DslSubset.cs" />
     <Compile Include="DslSyntaxException.cs" />
     <Compile Include="IAlternativeInitializationConcept.cs" />
     <Compile Include="IConceptInfo.cs" />
@@ -130,6 +129,7 @@
     <Compile Include="DslModelIndexByType.cs" />
     <Compile Include="IDslModelIndex.cs" />
     <Compile Include="IDslScriptsProvider.cs" />
+    <Compile Include="IDslSubset.cs" />
     <Compile Include="IDslTracker.cs" />
     <Compile Include="InitializationConcept.cs" />
     <Compile Include="IValidatedConcept.cs" />
@@ -138,6 +138,7 @@
     <Compile Include="IMacroConcept.cs" />
     <Compile Include="ITokenReader.cs" />
     <Compile Include="ConceptKeyAttribute.cs" />
+    <Compile Include="Linq.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\Rhetos\Properties\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>

@@ -88,7 +88,7 @@ namespace Rhetos.Dsl
 
         #region IDslModel filters implementation
 
-        public DslSubset<IConceptInfo> Concepts
+        public IDslSubset<IConceptInfo> Concepts
         {
             get { return new DslSubset<IConceptInfo>(_resolvedConcepts); }
         }
@@ -100,7 +100,7 @@ namespace Rhetos.Dsl
             return result;
         }
 
-        public DslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
+        public IDslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
         {
             IDslModelIndex index;
             if (!_dslModelIndexesByType.TryGetValue(typeof(TIndex), out index))

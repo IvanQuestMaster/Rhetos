@@ -51,7 +51,7 @@ namespace Rhetos.Dsl
 
         #region IDslModel implementation
 
-        public DslSubset<IConceptInfo> Concepts
+        public IDslSubset<IConceptInfo> Concepts
         {
             get
             {
@@ -68,14 +68,14 @@ namespace Rhetos.Dsl
             return _dslContainer.FindByKey(conceptKey);
         }
 
-        public DslSubset<IConceptInfo> FindByType(Type conceptType)
+        public IDslSubset<IConceptInfo> FindByType(Type conceptType)
         {
             if (!_initialized)
                 Initialize();
             return new DslSubset<IConceptInfo>(_dslContainer.FindByType(conceptType));
         }
 
-        public DslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
+        public IDslSubset<TResult> QueryIndex<TIndex, TResult>(Func<TIndex, IEnumerable<TResult>> query) where TIndex : IDslModelIndex where TResult : IConceptInfo
         {
             if (!_initialized)
                 Initialize();

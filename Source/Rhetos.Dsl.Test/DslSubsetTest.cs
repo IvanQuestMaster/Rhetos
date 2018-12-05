@@ -23,6 +23,7 @@ using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Rhetos.Dsl;
 
 namespace Rhetos.Dsl.Test
 {

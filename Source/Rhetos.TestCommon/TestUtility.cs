@@ -185,26 +185,6 @@ namespace Rhetos.TestCommon
         }
 
         /// <summary>
-        /// Unit test will be marked as "Inconclusive" if this function fails.
-        /// </summary>
-        public static void CheckDatabaseAvailability(string expectedLanguage = null)
-        {
-            const string connectionStringLocation = @"Enter the database connection in Rhetos\bin\ConnectionStrings.config, then rebuild this project.";
-            try
-            {
-                Assert.IsNotNull(SqlUtility.ConnectionString);
-            }
-            catch (Exception ex)
-            {
-                Assert.Inconclusive(@"A live database is needed for this unit test to run. " + connectionStringLocation
-                    + Environment.NewLine + ex.GetType().Name + ": " + ex.Message);
-            }
-
-            if (expectedLanguage != null && SqlUtility.DatabaseLanguage != expectedLanguage)
-                Assert.Inconclusive("This test will run only on '" + expectedLanguage + "' database language, not '" + SqlUtility.DatabaseLanguage + "'. " + connectionStringLocation);
-        }
-
-        /// <summary>
         /// Shortens sequences of repeating characters, if longer then 3.
         /// Example: "aaaaaaaaaaXXXbbbb" => "aaa...(10)XXXbbb...(5)"
         /// </summary>

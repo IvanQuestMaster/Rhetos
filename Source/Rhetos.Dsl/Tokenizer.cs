@@ -232,9 +232,10 @@ namespace Rhetos.Dsl
                 if (string.IsNullOrWhiteSpace(fileName))
                     throw new DslSyntaxException("Referenced empty file name (" + basicFilePath + ") in DSL script. " + dslScript.ReportPosition(begin));
 
+                //TODO: Treba viditi sta na praviti sa ovime
                 // Look for SQL dialect-specific files before the generic SQL file:
-                filePaths.Insert(0, Path.Combine(directory, fileName + "." + SqlUtility.DatabaseLanguage + basicFileExtension));
-                filePaths.Insert(1, Path.Combine(directory, fileName + " (" + SqlUtility.DatabaseLanguage + ")" + basicFileExtension));
+                //filePaths.Insert(0, Path.Combine(directory, fileName + "." + SqlUtility.DatabaseLanguage + basicFileExtension));
+                //filePaths.Insert(1, Path.Combine(directory, fileName + " (" + SqlUtility.DatabaseLanguage + ")" + basicFileExtension));
             }
 
             foreach (var filePath in filePaths)

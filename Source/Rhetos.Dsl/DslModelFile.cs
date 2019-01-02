@@ -35,18 +35,15 @@ namespace Rhetos.Dsl
         private readonly ILogger _logger;
         private readonly ILogger _dslModelConceptsLogger;
         private readonly DslContainer _dslContainer;
-        private readonly ISqlExecuter _sqlExecuter;
 
         public DslModelFile(
             ILogProvider logProvider,
-            DslContainer dslContainer,
-            ISqlExecuter sqlExecuter)
+            DslContainer dslContainer)
         {
             _performanceLogger = logProvider.GetLogger("Performance");
             _logger = logProvider.GetLogger(GetType().Name);
             _dslModelConceptsLogger = logProvider.GetLogger("DslModelConcepts");
             _dslContainer = dslContainer;
-            _sqlExecuter = sqlExecuter;
         }
 
         #region IDslModel implementation

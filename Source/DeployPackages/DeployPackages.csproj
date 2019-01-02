@@ -68,18 +68,6 @@
       <Project>{71E63722-57BC-41DF-9FF5-57ECC67E4BC1}</Project>
       <Name>Rhetos.Utilities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\Rhetos.Configuration.Autofac\Rhetos.Configuration.Autofac.csproj">
-      <Project>{759CEA3C-1CD0-449C-977E-102CE308F4DE}</Project>
-      <Name>Rhetos.Configuration.Autofac</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Source\Rhetos.DatabaseGenerator.Interfaces\Rhetos.DatabaseGenerator.Interfaces.csproj">
-      <Project>{CA29D948-78B1-42D9-8E24-D2811E355F5A}</Project>
-      <Name>Rhetos.DatabaseGenerator.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Source\Rhetos.Dom.Interfaces\Rhetos.Dom.Interfaces.csproj">
-      <Project>{91BDF488-0921-4969-8A53-32169338D8DB}</Project>
-      <Name>Rhetos.Dom.Interfaces</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Source\Rhetos.Dsl.Interfaces\Rhetos.Dsl.Interfaces.csproj">
       <Project>{F4ACD412-2782-4191-8708-C7AE99B0CEE9}</Project>
       <Name>Rhetos.Dsl.Interfaces</Name>
@@ -91,10 +79,6 @@
     <ProjectReference Include="..\..\Source\Rhetos.Logging.Interfaces\Rhetos.Logging.Interfaces.csproj">
       <Project>{BB7E5668-1B43-4FCE-A832-444CC57FEE80}</Project>
       <Name>Rhetos.Logging.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Source\Rhetos.Security.Interfaces\Rhetos.Security.Interfaces.csproj">
-      <Project>{8E1D4ACD-B1AA-433F-9E52-FA50D4A1C9DC}</Project>
-      <Name>Rhetos.Security.Interfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\Rhetos.Deployment.Interfaces\Rhetos.Deployment.Interfaces.csproj">
       <Project>{945537dc-4af7-4def-b73c-07f19229efe6}</Project>
@@ -115,14 +99,6 @@
     <ProjectReference Include="..\Rhetos.Logging\Rhetos.Logging.csproj">
       <Project>{8c9f1c24-2d9c-420b-9787-3fcad96c5b3e}</Project>
       <Name>Rhetos.Logging</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Rhetos.Persistence.Interfaces\Rhetos.Persistence.Interfaces.csproj">
-      <Project>{5E3BBD83-91CB-4FBA-81B2-79A81EC94D70}</Project>
-      <Name>Rhetos.Persistence.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Rhetos.Security\Rhetos.Security.csproj">
-      <Project>{f3480d1e-1c20-448d-b2f6-133472ceeb93}</Project>
-      <Name>Rhetos.Security</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

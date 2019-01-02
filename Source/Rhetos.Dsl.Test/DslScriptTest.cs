@@ -23,7 +23,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using Rhetos.Utilities;
-using Rhetos.DatabaseGenerator;
 using Rhetos.TestCommon;
 
 namespace Rhetos.Dsl.Test

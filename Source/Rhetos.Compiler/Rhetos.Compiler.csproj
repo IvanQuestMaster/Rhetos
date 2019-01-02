@@ -105,10 +105,6 @@
       <Project>{71E63722-57BC-41DF-9FF5-57ECC67E4BC1}</Project>
       <Name>Rhetos.Utilities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rhetos.Compiler.Interfaces\Rhetos.Compiler.Interfaces.csproj">
-      <Project>{FCAD7F9A-4C31-4D5A-8699-C291AE09D006}</Project>
-      <Name>Rhetos.Compiler.Interfaces</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Rhetos.Dsl.Interfaces\Rhetos.Dsl.Interfaces.csproj">
       <Project>{F4ACD412-2782-4191-8708-C7AE99B0CEE9}</Project>
       <Name>Rhetos.Dsl.Interfaces</Name>

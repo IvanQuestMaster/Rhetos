@@ -108,14 +108,6 @@
       <Project>{71E63722-57BC-41DF-9FF5-57ECC67E4BC1}</Project>
       <Name>Rhetos.Utilities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\Rhetos.Dom.Interfaces\Rhetos.Dom.Interfaces.csproj">
-      <Project>{91BDF488-0921-4969-8A53-32169338D8DB}</Project>
-      <Name>Rhetos.Dom.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Source\Rhetos.Processing.Interfaces\Rhetos.Processing.Interfaces.csproj">
-      <Project>{4D2FCD7F-D9BB-4E55-B9C6-FDF352F6DCF3}</Project>
-      <Name>Rhetos.Processing.Interfaces</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

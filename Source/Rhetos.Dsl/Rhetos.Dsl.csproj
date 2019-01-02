@@ -124,7 +124,6 @@
   <ItemGroup>
     <Compile Include="AlternativeInitialization.cs" />
     <Compile Include="ConceptMacroUtility.cs" />
-    <Compile Include="DiskDslScriptLoader.cs" />
     <Compile Include="DslContainer.cs" />
     <Compile Include="DslModelFile.cs" />
     <Compile Include="DslParser.cs" />
@@ -144,14 +143,6 @@
     <Compile Include="TokenReader.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Rhetos.Deployment.Interfaces\Rhetos.Deployment.Interfaces.csproj">
-      <Project>{945537dc-4af7-4def-b73c-07f19229efe6}</Project>
-      <Name>Rhetos.Deployment.Interfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Rhetos.Dom.Interfaces\Rhetos.Dom.Interfaces.csproj">
-      <Project>{91bdf488-0921-4969-8a53-32169338d8db}</Project>
-      <Name>Rhetos.Dom.Interfaces</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Rhetos.Extensibility.Interfaces\Rhetos.Extensibility.Interfaces.csproj">
       <Project>{ddc73f5f-bb0e-4944-92cc-4ac937398499}</Project>
       <Name>Rhetos.Extensibility.Interfaces</Name>
@@ -159,10 +150,6 @@
     <ProjectReference Include="..\Rhetos.Utilities\Rhetos.Utilities.csproj">
       <Project>{71E63722-57BC-41DF-9FF5-57ECC67E4BC1}</Project>
       <Name>Rhetos.Utilities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Rhetos.DatabaseGenerator.Interfaces\Rhetos.DatabaseGenerator.Interfaces.csproj">
-      <Project>{CA29D948-78B1-42D9-8E24-D2811E355F5A}</Project>
-      <Name>Rhetos.DatabaseGenerator.Interfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\Rhetos.Dsl.Interfaces\Rhetos.Dsl.Interfaces.csproj">
       <Project>{F4ACD412-2782-4191-8708-C7AE99B0CEE9}</Project>

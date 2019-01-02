@@ -17,7 +17,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Dom;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -101,10 +100,5 @@ namespace Rhetos.Utilities
         public static string PluginsFolder => Path.Combine(RhetosServerRootPath, "bin\\Plugins");
         public static string RhetosServerWebConfigFile => Path.Combine(RhetosServerRootPath, "Web.config");
         public static string ConnectionStringsFile => Path.Combine(RhetosServerRootPath, @"bin\ConnectionStrings.config");
-        public static string GetDomAssemblyFile(DomAssemblies domAssembly) => Path.Combine(GeneratedFolder, $"ServerDom.{domAssembly}.dll");
-        /// <summary>
-        /// List of the generated dll files that make the domain object model (ServerDom.*.dll).
-        /// </summary>
-        public static IEnumerable<string> DomAssemblyFiles => Enum.GetValues(typeof(DomAssemblies)).Cast<DomAssemblies>().Select(domAssembly => GetDomAssemblyFile(domAssembly));
     }
 }

@@ -139,10 +139,6 @@
       <Project>{C0DC3D80-A1FE-46FA-8B97-5B80962687FB}</Project>
       <Name>Rhetos.Compiler</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rhetos.DatabaseGenerator.Interfaces\Rhetos.DatabaseGenerator.Interfaces.csproj">
-      <Project>{CA29D948-78B1-42D9-8E24-D2811E355F5A}</Project>
-      <Name>Rhetos.DatabaseGenerator.Interfaces</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Rhetos.Dsl.Interfaces\Rhetos.Dsl.Interfaces.csproj">
       <Project>{F4ACD412-2782-4191-8708-C7AE99B0CEE9}</Project>
       <Name>Rhetos.Dsl.Interfaces</Name>

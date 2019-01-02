@@ -61,10 +61,6 @@
     <Compile Include="TestUtility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Rhetos.Deployment\Rhetos.Deployment.csproj">
-      <Project>{A7328BFA-A009-4F1E-B9A1-B51B2020F45C}</Project>
-      <Name>Rhetos.Deployment</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Rhetos.Utilities\Rhetos.Utilities.csproj">
       <Project>{71E63722-57BC-41DF-9FF5-57ECC67E4BC1}</Project>
       <Name>Rhetos.Utilities</Name>

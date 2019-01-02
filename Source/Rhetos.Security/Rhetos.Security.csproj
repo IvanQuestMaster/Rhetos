@@ -70,10 +70,6 @@
       <Project>{71E63722-57BC-41DF-9FF5-57ECC67E4BC1}</Project>
       <Name>Rhetos.Utilities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rhetos.Dom.Interfaces\Rhetos.Dom.Interfaces.csproj">
-      <Project>{91bdf488-0921-4969-8a53-32169338d8db}</Project>
-      <Name>Rhetos.Dom.Interfaces</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Rhetos.Dsl.Interfaces\Rhetos.Dsl.Interfaces.csproj">
       <Project>{f4acd412-2782-4191-8708-c7ae99b0cee9}</Project>
       <Name>Rhetos.Dsl.Interfaces</Name>
@@ -97,10 +93,6 @@
     <ProjectReference Include="..\Rhetos.Processing\Rhetos.Processing.csproj">
       <Project>{EB4237C4-3D83-4632-B8C9-AC08C886720A}</Project>
       <Name>Rhetos.Processing</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Rhetos.Security.Interfaces\Rhetos.Security.Interfaces.csproj">
-      <Project>{8E1D4ACD-B1AA-433F-9E52-FA50D4A1C9DC}</Project>
-      <Name>Rhetos.Security.Interfaces</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

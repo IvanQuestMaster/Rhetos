@@ -96,10 +96,6 @@
       <Project>{7EAF15BD-39C9-44AB-8834-EC0AE013A8A2}</Project>
       <Name>Rhetos.Extensibility</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rhetos.DatabaseGenerator.Interfaces\Rhetos.DatabaseGenerator.Interfaces.csproj">
-      <Project>{CA29D948-78B1-42D9-8E24-D2811E355F5A}</Project>
-      <Name>Rhetos.DatabaseGenerator.Interfaces</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Rhetos.Extensibility.Interfaces\Rhetos.Extensibility.Interfaces.csproj">
       <Project>{ddc73f5f-bb0e-4944-92cc-4ac937398499}</Project>
       <Name>Rhetos.Extensibility.Interfaces</Name>

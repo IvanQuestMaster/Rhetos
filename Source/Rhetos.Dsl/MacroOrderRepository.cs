@@ -44,12 +44,14 @@ namespace Rhetos.Dsl
         ILogger _loadOrderLogger;
         ILogger _saveOrderLogger;
         GeneratedFilesCache _generatedFilesCache;
+        IPaths _paths;
 
-        public MacroOrderRepository(ILogProvider logProvider, GeneratedFilesCache generatedFilesCache)
+        public MacroOrderRepository(ILogProvider logProvider, GeneratedFilesCache generatedFilesCache, IPaths paths)
         {
             _generatedFilesCache = generatedFilesCache;
             _loadOrderLogger = logProvider.GetLogger("MacroRepositoryLoad");
             _saveOrderLogger = logProvider.GetLogger("MacroRepositorySave");
+            _paths = paths;
         }
 
         private const string MacroOrderFileName = "MacroOrder.json";
@@ -59,7 +61,7 @@ namespace Rhetos.Dsl
         /// </summary>
         public List<MacroOrder> Load()
         {
-            var cahceFilePath = Path.Combine(Paths.GeneratedFilesCacheFolder, Path.GetFileNameWithoutExtension(MacroOrderFileName), MacroOrderFileName);
+            var cahceFilePath = Path.Combine(_paths.GeneratedFilesCacheFolder, Path.GetFileNameWithoutExtension(MacroOrderFileName), MacroOrderFileName);
             if (File.Exists(cahceFilePath))
             {
                 var serializedConcepts = File.ReadAllText(cahceFilePath);
@@ -82,7 +84,7 @@ namespace Rhetos.Dsl
         public void Save(IEnumerable<MacroOrder> macroOrders)
         {
             string serializedConcepts = JsonConvert.SerializeObject(macroOrders);
-            string path = Path.Combine(Paths.GeneratedFolder, MacroOrderFileName);
+            string path = Path.Combine(_paths.GeneratedFolder, MacroOrderFileName);
             File.WriteAllText(path, serializedConcepts, Encoding.UTF8);
         }
     }

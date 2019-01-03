@@ -35,15 +35,18 @@ namespace Rhetos.Dsl
         private readonly ILogger _logger;
         private readonly ILogger _dslModelConceptsLogger;
         private readonly DslContainer _dslContainer;
+        private readonly IPaths _paths;
 
         public DslModelFile(
             ILogProvider logProvider,
-            DslContainer dslContainer)
+            DslContainer dslContainer,
+            IPaths paths)
         {
             _performanceLogger = logProvider.GetLogger("Performance");
             _logger = logProvider.GetLogger(GetType().Name);
             _dslModelConceptsLogger = logProvider.GetLogger("DslModelConcepts");
             _dslContainer = dslContainer;
+            _paths = paths;
         }
 
         #region IDslModel implementation
@@ -115,7 +118,7 @@ namespace Rhetos.Dsl
 
             CsUtility.Materialize(ref concepts);
             string serializedConcepts = JsonConvert.SerializeObject(concepts, serializerSettings);
-            string path = Path.Combine(Paths.GeneratedFolder, DslModelFileName);
+            string path = Path.Combine(_paths.GeneratedFolder, DslModelFileName);
             File.WriteAllText(path, serializedConcepts, Encoding.UTF8);
 
             _performanceLogger.Write(sw, "DslModelFile.Save.");
@@ -125,7 +128,7 @@ namespace Rhetos.Dsl
         {
             var sw = Stopwatch.StartNew();
 
-            string path = Path.Combine(Paths.GeneratedFolder, DslModelFileName);
+            string path = Path.Combine(_paths.GeneratedFolder, DslModelFileName);
             string serializedConcepts = File.ReadAllText(path, Encoding.UTF8);
 
             var serializerSettings = new JsonSerializerSettings

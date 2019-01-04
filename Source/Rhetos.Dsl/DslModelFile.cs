@@ -18,7 +18,6 @@
 */
 
 using Newtonsoft.Json;
-using Rhetos.Logging;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
@@ -35,12 +34,12 @@ namespace Rhetos.Dsl
         private readonly ILogger _logger;
         private readonly ILogger _dslModelConceptsLogger;
         private readonly DslContainer _dslContainer;
-        private readonly IPaths _paths;
+        private readonly IRhetosConfiguration _paths;
 
         public DslModelFile(
             ILogProvider logProvider,
             DslContainer dslContainer,
-            IPaths paths)
+            IRhetosConfiguration paths)
         {
             _performanceLogger = logProvider.GetLogger("Performance");
             _logger = logProvider.GetLogger(GetType().Name);

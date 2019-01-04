@@ -17,11 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Logging;
 using Rhetos.Utilities;
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
@@ -44,9 +41,9 @@ namespace Rhetos.Dsl
         ILogger _loadOrderLogger;
         ILogger _saveOrderLogger;
         GeneratedFilesCache _generatedFilesCache;
-        IPaths _paths;
+        IRhetosConfiguration _paths;
 
-        public MacroOrderRepository(ILogProvider logProvider, GeneratedFilesCache generatedFilesCache, IPaths paths)
+        public MacroOrderRepository(ILogProvider logProvider, GeneratedFilesCache generatedFilesCache, IRhetosConfiguration paths)
         {
             _generatedFilesCache = generatedFilesCache;
             _loadOrderLogger = logProvider.GetLogger("MacroRepositoryLoad");

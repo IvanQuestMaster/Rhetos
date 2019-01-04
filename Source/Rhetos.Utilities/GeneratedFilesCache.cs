@@ -17,7 +17,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,9 +32,9 @@ namespace Rhetos.Utilities
         private readonly FileSyncer _syncer;
         private readonly ILogger _logger;
         private readonly SHA1 _sha1;
-        private readonly IPaths _paths;
+        private readonly IRhetosConfiguration _paths;
 
-        public GeneratedFilesCache(ILogProvider logProvider, IPaths _paths)
+        public GeneratedFilesCache(ILogProvider logProvider, IRhetosConfiguration _paths)
         {
             _filesUtility = new FilesUtility(logProvider);
             _syncer = new FileSyncer(logProvider);

@@ -20,35 +20,22 @@
 using System;
 using System.Collections.Generic;
 
-namespace Rhetos.Dsl.Test
+namespace Rhetos
 {
-    public class MockPluginsContainer<T> : IPluginsContainer<T>
+    public interface IPluginsContainer<TPlugin>
     {
-        IEnumerable<T> _plugins;
+        /// <summary>
+        /// The plugins are sorted by their dependencies.
+        /// </summary>
+        IEnumerable<TPlugin> GetPlugins();
 
-        public MockPluginsContainer(params T[] plugins)
-        {
-            _plugins = plugins;
-        }
+        Type GetMetadata(TPlugin plugin, string metadataKey);
 
-        public IEnumerable<T> GetPlugins()
-        {
-            return _plugins;
-        }
+        Type GetMetadata(Type pluginType, string metadataKey);
 
-        public Type GetMetadata(T plugin, string metadataKey)
-        {
-            return null;
-        }
-
-        public Type GetMetadata(Type pluginType, string metadataKey)
-        {
-            return null;
-        }
-
-        public IEnumerable<T> GetImplementations(Type implements)
-        {
-            return new T[] { };
-        }
+        /// <summary>
+        /// The implementations are sorted by their dependencies.
+        /// </summary>
+        IEnumerable<TPlugin> GetImplementations(Type implements);
     }
 }

@@ -17,29 +17,38 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Rhetos.Dsl;
 using Rhetos.Utilities;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 
-namespace Rhetos.Dsl.Test
+namespace RhetosBuild
 {
-    class TestDslParser : DslParser
+    public class DiskDslScriptLoader : IDslScriptsProvider
     {
-        public TestDslParser(string dsl, IConceptInfo[] conceptInfoPlugins = null)
-            : base (
-                new Tokenizer(new MockDslScriptsProvider(dsl)),
-                conceptInfoPlugins != null ? conceptInfoPlugins : new IConceptInfo[] { },
-                new ConsoleLogProvider())
-        {
-        }
+        private List<DslScript> _scripts = null;
+        private readonly object _scriptsLock = new object();
 
-        new public IEnumerable<IConceptInfo> ExtractConcepts(IEnumerable<IConceptParser> conceptParsers)
-        {
-            return base.ExtractConcepts(conceptParsers);
-        }
+        const string DslScriptsSubfolder = "DslScripts";
 
-        new public IConceptInfo ParseNextConcept(TokenReader tokenReader, Stack<IConceptInfo> context, IEnumerable<IConceptParser> conceptParsers)
+        public IEnumerable<DslScript> DslScripts
         {
-            return base.ParseNextConcept(tokenReader, context, conceptParsers);
+            get
+            {
+                if (_scripts == null)
+                    lock (_scriptsLock)
+                        if (_scripts == null)
+                        {
+                            _scripts = new List<DslScript>();
+
+                            throw new NotImplementedException();
+                        }
+
+                return _scripts;
+            }
         }
     }
 }

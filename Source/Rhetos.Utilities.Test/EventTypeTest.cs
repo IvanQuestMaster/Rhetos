@@ -22,7 +22,6 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Rhetos.Logging;
 
 namespace Rhetos.Utilities.Test
 {

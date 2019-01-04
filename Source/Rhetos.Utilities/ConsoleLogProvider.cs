@@ -21,7 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Rhetos.Logging;
+using Rhetos;
 
 namespace Rhetos.Utilities
 {

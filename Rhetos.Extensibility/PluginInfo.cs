@@ -19,36 +19,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace Rhetos.Dsl.Test
+namespace Rhetos.Extensibility
 {
-    public class MockPluginsContainer<T> : IPluginsContainer<T>
+    internal class PluginInfo
     {
-        IEnumerable<T> _plugins;
-
-        public MockPluginsContainer(params T[] plugins)
-        {
-            _plugins = plugins;
-        }
-
-        public IEnumerable<T> GetPlugins()
-        {
-            return _plugins;
-        }
-
-        public Type GetMetadata(T plugin, string metadataKey)
-        {
-            return null;
-        }
-
-        public Type GetMetadata(Type pluginType, string metadataKey)
-        {
-            return null;
-        }
-
-        public IEnumerable<T> GetImplementations(Type implements)
-        {
-            return new T[] { };
-        }
+        public Type Type;
+        public Dictionary<string, object> Metadata;
     }
 }

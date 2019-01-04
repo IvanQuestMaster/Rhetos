@@ -17,29 +17,21 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Utilities;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace Rhetos.Dsl.Test
+namespace Rhetos.Extensibility
 {
-    class TestDslParser : DslParser
+    internal static class InitializationLogging
     {
-        public TestDslParser(string dsl, IConceptInfo[] conceptInfoPlugins = null)
-            : base (
-                new Tokenizer(new MockDslScriptsProvider(dsl)),
-                conceptInfoPlugins != null ? conceptInfoPlugins : new IConceptInfo[] { },
-                new ConsoleLogProvider())
-        {
-        }
+        public static ILogger Logger = new NullLogger();
+        public static ILogger PerformanceLogger = new NullLogger();
 
-        new public IEnumerable<IConceptInfo> ExtractConcepts(IEnumerable<IConceptParser> conceptParsers)
+        private class NullLogger : ILogger
         {
-            return base.ExtractConcepts(conceptParsers);
-        }
-
-        new public IConceptInfo ParseNextConcept(TokenReader tokenReader, Stack<IConceptInfo> context, IEnumerable<IConceptParser> conceptParsers)
-        {
-            return base.ParseNextConcept(tokenReader, context, conceptParsers);
+            public void Write(EventType eventType, Func<string> logMessage) { }
         }
     }
 }

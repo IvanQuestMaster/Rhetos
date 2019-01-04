@@ -17,38 +17,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using System;
 using System.Collections.Generic;
 
-namespace Rhetos.Dsl.Test
+namespace Rhetos
 {
-    public class MockPluginsContainer<T> : IPluginsContainer<T>
+    /// <summary>
+    /// Note: Names plugins cannot be used to list all plugins (Autofac limitation). It that feature is needed, the plugin must
+    /// be registered both as a named (keyed) service, and as a simple service, then use PluginsContainer to get all plugins.
+    /// </summary>
+    public interface INamedPlugins<TPlugin>
     {
-        IEnumerable<T> _plugins;
-
-        public MockPluginsContainer(params T[] plugins)
-        {
-            _plugins = plugins;
-        }
-
-        public IEnumerable<T> GetPlugins()
-        {
-            return _plugins;
-        }
-
-        public Type GetMetadata(T plugin, string metadataKey)
-        {
-            return null;
-        }
-
-        public Type GetMetadata(Type pluginType, string metadataKey)
-        {
-            return null;
-        }
-
-        public IEnumerable<T> GetImplementations(Type implements)
-        {
-            return new T[] { };
-        }
+        IEnumerable<TPlugin> GetPlugins(string name);
     }
 }

@@ -17,38 +17,22 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using System;
+
 using System.Collections.Generic;
+using System.Diagnostics;
 
-namespace Rhetos.Dsl.Test
+namespace Rhetos
 {
-    public class MockPluginsContainer<T> : IPluginsContainer<T>
+    public interface IInstalledPackage
     {
-        IEnumerable<T> _plugins;
+        string Id { get; }
 
-        public MockPluginsContainer(params T[] plugins)
-        {
-            _plugins = plugins;
-        }
+        string Version { get; }
 
-        public IEnumerable<T> GetPlugins()
-        {
-            return _plugins;
-        }
+        IEnumerable<IInstalledPackage> Dependencies { get; }
 
-        public Type GetMetadata(T plugin, string metadataKey)
-        {
-            return null;
-        }
+        string Folder { get; }
 
-        public Type GetMetadata(Type pluginType, string metadataKey)
-        {
-            return null;
-        }
-
-        public IEnumerable<T> GetImplementations(Type implements)
-        {
-            return new T[] { };
-        }
+        string Source { get;}
     }
 }

@@ -18,37 +18,19 @@
 */
 
 using System;
-using System.Collections.Generic;
 
-namespace Rhetos.Dsl.Test
+namespace Rhetos.Extensibility
 {
-    public class MockPluginsContainer<T> : IPluginsContainer<T>
+    /// <summary>
+    /// Using a wrapper around 'Type' to allow registration of this instances to the IoC container.
+    /// </summary>
+    public class SuppressPlugin
     {
-        IEnumerable<T> _plugins;
+        public Type PluginType { get; private set; }
 
-        public MockPluginsContainer(params T[] plugins)
+        public SuppressPlugin(Type pluginType)
         {
-            _plugins = plugins;
-        }
-
-        public IEnumerable<T> GetPlugins()
-        {
-            return _plugins;
-        }
-
-        public Type GetMetadata(T plugin, string metadataKey)
-        {
-            return null;
-        }
-
-        public Type GetMetadata(Type pluginType, string metadataKey)
-        {
-            return null;
-        }
-
-        public IEnumerable<T> GetImplementations(Type implements)
-        {
-            return new T[] { };
+            PluginType = pluginType;
         }
     }
 }

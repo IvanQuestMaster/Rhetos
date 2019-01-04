@@ -18,7 +18,6 @@
 */
 
 using Rhetos;
-using Rhetos.Logging;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;

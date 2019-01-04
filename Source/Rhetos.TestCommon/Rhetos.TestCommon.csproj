@@ -59,13 +59,13 @@
     <Compile Include="TestUtility.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj">
+      <Project>{b0441c39-ccd6-479a-b163-ea7b77b86086}</Project>
+      <Name>Rhetos.Intrefaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Rhetos.Utilities\Rhetos.Utilities.csproj">
       <Project>{71E63722-57BC-41DF-9FF5-57ECC67E4BC1}</Project>
       <Name>Rhetos.Utilities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Rhetos.Logging.Interfaces\Rhetos.Logging.Interfaces.csproj">
-      <Project>{BB7E5668-1B43-4FCE-A832-444CC57FEE80}</Project>
-      <Name>Rhetos.Logging.Interfaces</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

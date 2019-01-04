@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using Rhetos;
-using Rhetos.Utilities;
 using System;
 
 namespace RhetosBuild

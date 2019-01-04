@@ -30,12 +30,12 @@ namespace Rhetos.Dsl
             builder.RegisterType<MacroOrderRepository>().As<IMacroOrderRepository>();
             builder.RegisterType<ConceptMetadata>().SingleInstance();
             builder.RegisterType<InitializationConcept>().As<IConceptInfo>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
-            builder.FindAndRegisterPlugins<IConceptInfo>();
-            builder.FindAndRegisterPlugins<IConceptMacro>(typeof(IConceptMacro<>));
+            builder.RegisterPlugins<IConceptInfo>();
+            builder.RegisterPlugins<IConceptMacro>(typeof(IConceptMacro<>));
 
             builder.RegisterType<DslModel>().As<IDslModel>().SingleInstance();
             builder.RegisterType<DslContainer>();
-            builder.FindAndRegisterPlugins<IDslModelIndex>();
+            builder.RegisterPlugins<IDslModelIndex>();
             builder.RegisterType<DslModelIndexByType>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
             builder.RegisterType<DslModelIndexByReference>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
         }

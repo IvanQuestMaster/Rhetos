@@ -19,6 +19,7 @@
 
 using Autofac;
 using Autofac.Core;
+using Autofac.Builder;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +42,7 @@ namespace Rhetos.Extensibility
         }
 
         /// <summary>Find and registers Autofac modules that are implemented as plugins.</summary>
-        public static void FindAndRegisterModules(ContainerBuilder builder, string pluginsFolder)
+        public static void FindAndRegisterModules(Autofac.ContainerBuilder builder, string pluginsFolder)
         {
             var modules = MefPluginScanner.FindPlugins(builder, typeof(Module), pluginsFolder);
 
@@ -66,7 +67,7 @@ namespace Rhetos.Extensibility
         /// Scans for plugins that implement the given export type (it is usually the plugin's interface), and registers them.
         /// The function should be called from a plugin module initialization (from Autofac.Module implementation).
         /// </summary>
-        public static void FindAndRegisterPlugins<TPluginInterface>(ContainerBuilder builder, string pluginsFolder)
+        public static void FindAndRegisterPlugins<TPluginInterface>(Autofac.ContainerBuilder builder, string pluginsFolder)
         {
             var matchingPlugins = MefPluginScanner.FindPlugins(builder, typeof(TPluginInterface), pluginsFolder);
             RegisterPlugins(builder, matchingPlugins, typeof(TPluginInterface));
@@ -81,7 +82,7 @@ namespace Rhetos.Extensibility
         /// The concept type that the plugin handles will be automatically extracted from the generic argument of the genericImplementationBase.
         /// This is an alternative to using MefProvider.Implements in the plugin's ExportMetadata attribute.
         /// </param>
-        public static void FindAndRegisterPlugins<TPluginInterface>(ContainerBuilder builder, Type genericImplementationBase, string pluginsFolder)
+        public static void FindAndRegisterPlugins<TPluginInterface>(Autofac.ContainerBuilder builder, Type genericImplementationBase, string pluginsFolder)
         {
             var matchingPlugins = MefPluginScanner.FindPlugins(builder, typeof(TPluginInterface), pluginsFolder);
 
@@ -99,7 +100,7 @@ namespace Rhetos.Extensibility
         /// use [ExportMetadata(MefProvider.DependsOn, typeof(the other Autofac.Module derivation))] attribute
         /// on the module that registers the components that override registrations from the other module.
         /// </summary>
-        public static void CheckOverride<TInterface, TImplementation>(ContainerBuilder builder, params Type[] expectedPreviousPlugins)
+        public static void CheckOverride<TInterface, TImplementation>(Autofac.ContainerBuilder builder, params Type[] expectedPreviousPlugins)
         {
             builder.RegisterCallback(componentRegistry =>
             {
@@ -128,7 +129,7 @@ namespace Rhetos.Extensibility
             });
         }
 
-        private static void RegisterPlugins(ContainerBuilder builder, IEnumerable<PluginInfo> matchingPlugins, Type exportType)
+        private static void RegisterPlugins(Autofac.ContainerBuilder builder, IEnumerable<PluginInfo> matchingPlugins, Type exportType)
         {
             if (matchingPlugins.Count() == 0)
                 return;
@@ -171,7 +172,7 @@ namespace Rhetos.Extensibility
         /// <summary>
         /// Suppresses the plugin when reading the plugins from IPluginsContainer and INamedPlugins.
         /// </summary>
-        public static void SuppressPlugin<TPluginInterface, TPlugin>(ContainerBuilder builder)
+        public static void SuppressPlugin<TPluginInterface, TPlugin>(Autofac.ContainerBuilder builder)
             where TPlugin : TPluginInterface
         {
             builder.RegisterInstance(new SuppressPlugin(typeof(TPlugin))).Keyed<SuppressPlugin>(typeof(TPluginInterface));

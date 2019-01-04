@@ -42,7 +42,7 @@ namespace Rhetos.Extensibility
         /// <summary>
         /// Returns plugins that are registered for the given interface, sorted by dependencies (MefPovider.DependsOn).
         /// </summary>
-        internal static IEnumerable<PluginInfo> FindPlugins(ContainerBuilder builder, Type pluginInterface, string pluginFolder)
+        internal static IEnumerable<PluginInfo> FindPlugins(Autofac.ContainerBuilder builder, Type pluginInterface, string pluginFolder)
         {
             try
             {

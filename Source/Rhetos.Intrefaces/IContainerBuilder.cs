@@ -25,8 +25,8 @@ namespace Rhetos
     {
         IRegistrationBuilder RegisterType<T>();
 
-        IRegistrationBuilder FindAndRegisterPlugins<T>();
+        void RegisterPlugins<T>();
 
-        IRegistrationBuilder FindAndRegisterPlugins<T>(Type type);
+        void RegisterPlugins<T>(Type type);
     }
 }

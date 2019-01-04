@@ -18,9 +18,7 @@
 */
 
 using System;
-using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
+using Rhetos;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rhetos.Utilities.Test

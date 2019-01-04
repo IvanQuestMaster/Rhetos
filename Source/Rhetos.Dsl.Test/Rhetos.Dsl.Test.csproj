@@ -78,10 +78,6 @@
     <Compile Include="ConceptMetadataTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj">
-      <Project>{b0441c39-ccd6-479a-b163-ea7b77b86086}</Project>
-      <Name>Rhetos.Intrefaces</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Source\Rhetos.Utilities\Rhetos.Utilities.csproj">
       <Project>{71E63722-57BC-41DF-9FF5-57ECC67E4BC1}</Project>
       <Name>Rhetos.Utilities</Name>
@@ -93,6 +89,10 @@
     <ProjectReference Include="..\..\Source\Rhetos.Dsl\Rhetos.Dsl.csproj">
       <Project>{AA08ECFA-2AD6-4B0C-86B9-C5D8754A2073}</Project>
       <Name>Rhetos.Dsl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj">
+      <Project>{b0441c39-ccd6-479a-b163-ea7b77b86086}</Project>
+      <Name>Rhetos.Intrefaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\Rhetos.TestCommon\Rhetos.TestCommon.csproj">
       <Project>{43BA178B-7642-473C-A43A-DBF58294635A}</Project>

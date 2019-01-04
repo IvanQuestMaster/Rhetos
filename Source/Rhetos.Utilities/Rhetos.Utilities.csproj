@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj" />
+    <ProjectReference Include="..\..\Source\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj" />
   </ItemGroup>
 
 </Project>

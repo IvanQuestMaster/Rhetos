@@ -19,13 +19,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.TestCommon", "Source
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{E693EAA4-7798-41E5-BC17-AC162C89C004}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RhetosBuild", "RhetosBuild\RhetosBuild.csproj", "{1072EFEA-8282-47AB-A5B8-9D97A08B5BDD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RhetosBuild", "Source\RhetosBuild\RhetosBuild.csproj", "{1072EFEA-8282-47AB-A5B8-9D97A08B5BDD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Extensibility", "Rhetos.Extensibility\Rhetos.Extensibility.csproj", "{62ACB4C5-0AE6-4A05-9118-73446ECEE432}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Extensibility", "Source\Rhetos.Extensibility\Rhetos.Extensibility.csproj", "{62ACB4C5-0AE6-4A05-9118-73446ECEE432}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Intrefaces", "Rhetos.Intrefaces\Rhetos.Intrefaces.csproj", "{B0441C39-CCD6-479A-B163-EA7B77B86086}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Intrefaces", "Source\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj", "{B0441C39-CCD6-479A-B163-EA7B77B86086}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.Implementations", "Rhetos.Implementations\Rhetos.Implementations.csproj", "{136283DC-C7B2-4B42-8592-60071982441A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.Implementations", "Source\Rhetos.Implementations\Rhetos.Implementations.csproj", "{136283DC-C7B2-4B42-8592-60071982441A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

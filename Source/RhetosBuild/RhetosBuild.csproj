@@ -1,15 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="4.5.11" />
+    <PackageReference Include="Autofac" Version="4.8.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj" />
+    <ProjectReference Include="..\Rhetos.Extensibility\Rhetos.Extensibility.csproj" />
   </ItemGroup>
 
 </Project>

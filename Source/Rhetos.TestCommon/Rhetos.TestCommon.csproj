@@ -59,7 +59,7 @@
     <Compile Include="TestUtility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj">
+    <ProjectReference Include="..\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj">
       <Project>{b0441c39-ccd6-479a-b163-ea7b77b86086}</Project>
       <Name>Rhetos.Intrefaces</Name>
     </ProjectReference>

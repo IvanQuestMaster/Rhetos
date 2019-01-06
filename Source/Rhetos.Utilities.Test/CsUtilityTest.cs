@@ -33,53 +33,6 @@ namespace Rhetos.Utilities.Test
     public class CsUtilityTest
     {
         [TestMethod]
-        public void QuotedString()
-        {
-            string stringConstant = "\r\nabc \" \\ \\\" 123 \\\"\" \\\\\"\"\r\n\t\t \rx\nx ";
-
-            string code = string.Format(
-                @"using System;
-                namespace GeneratedModuleQuotedString
-                {{
-                    public class C
-                    {{
-                        public static string F1()
-                        {{
-                            return {0};
-                        }}
-                        public static string F2()
-                        {{
-                            return {1};
-                        }}
-                    }}
-                }}",
-                CsUtility.QuotedString(stringConstant),
-                CsUtility.QuotedString(null));
-
-            Console.WriteLine(code);
-            CSharpCodeProvider provider = new CSharpCodeProvider();
-            CompilerResults results = provider.CompileAssemblyFromSource(new CompilerParameters(new string[] { }, "GeneratedQuotedStringAssembly"), code);
-            foreach (CompilerError error in results.Errors)
-                Console.WriteLine(error);
-            Assert.AreEqual(0, results.Errors.Count, "Compiler errors");
-
-            Console.WriteLine("CompiledAssembly: " + results.CompiledAssembly.Location);
-            Type generatedClass = results.CompiledAssembly.GetType("GeneratedModuleQuotedString.C");
-
-            {
-                MethodInfo generatedMethod = generatedClass.GetMethod("F1");
-                string generatedCodeResult = (string)generatedMethod.Invoke(null, new object[] { });
-                Assert.AreEqual(stringConstant, generatedCodeResult);
-            }
-
-            {
-                MethodInfo generatedMethod = generatedClass.GetMethod("F2");
-                string generatedCodeResult = (string)generatedMethod.Invoke(null, new object[] { });
-                Assert.IsNull(generatedCodeResult);
-            }
-        }
-
-        [TestMethod]
         public void ValidateNameTest()
         {
             string[] validNames = new[] {

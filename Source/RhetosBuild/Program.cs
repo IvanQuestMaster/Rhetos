@@ -70,32 +70,5 @@ namespace RhetosBuild
 
             containerBuilder.RegisterGeneric(typeof(Index<,>)).As(typeof(IIndex<,>));
         }
-
-        static List<string> GetAssemblyList(string projectFolderPath)
-        {
-            var assemblyList = new List<string>();
-            var projectFile = Directory.GetFiles(projectFolderPath, "*.csproj").Single();
-
-            XNamespace msbuild = "http://schemas.microsoft.com/developer/msbuild/2003";
-            using (var fs = File.OpenRead(projectFile))
-            {
-                XDocument projDefinition = XDocument.Load(fs);
-                var a = projDefinition
-                    .Element("Project");
-                var a1 = a.Elements("ItemGroup");
-                IEnumerable<string> references = projDefinition
-                    .Element("Project")
-                    .Elements("ItemGroup")
-                    .Elements("Reference")
-                    .Select(refElem => refElem.Value);
-                foreach (string reference in references)
-                {
-                    var fullPath = Path.GetFullPath(Path.Combine(projectFolderPath, reference));
-                    assemblyList.Add(fullPath);
-                }
-            }
-
-            return assemblyList;
-        }
     }
 }

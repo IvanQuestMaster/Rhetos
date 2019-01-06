@@ -1,0 +1,88 @@
+﻿Module Common
+{
+	Entity ExclusiveLock
+	{
+		ShortString ResourceType { Required; }
+		Guid ResourceID { Required; }
+		ShortString UserName { Required; }
+		ShortString Workstation { Required; }
+		DateTime LockStart { Required; }
+        DateTime LockFinish { Required; }
+		
+		Unique Common.ExclusiveLock.ResourceID Common.ExclusiveLock.ResourceType;
+	}
+
+    Action SetLock '(parameters, repository, userInfo) =>
+        {
+            var now = SqlUtility.GetDatabaseTime(_executionContext.SqlExecuter);
+
+            var oldLock = repository.Common.ExclusiveLock.Query()
+                .Where(itemLock =>
+                    itemLock.ResourceType == parameters.ResourceType
+                    && itemLock.ResourceID == parameters.ResourceID)
+                .FirstOrDefault();
+            
+            if (oldLock == null)
+                repository.Common.ExclusiveLock.Insert(new[] { new Common.ExclusiveLock
+                    {
+                        UserName = userInfo.UserName,
+                        Workstation = userInfo.Workstation,
+                        ResourceType = parameters.ResourceType,
+                        ResourceID = parameters.ResourceID,
+                        LockStart = now,
+                        LockFinish = now.AddMinutes(15)
+                    }});
+            else if (oldLock.UserName == userInfo.UserName
+                && oldLock.Workstation == userInfo.Workstation
+                || oldLock.LockFinish < now)
+                repository.Common.ExclusiveLock.Update(new[] { new Common.ExclusiveLock
+                    {
+                        ID = oldLock.ID,
+                        UserName = userInfo.UserName,
+                        Workstation = userInfo.Workstation,
+                        ResourceType = parameters.ResourceType,
+                        ResourceID = parameters.ResourceID,
+                        LockStart = now,
+                        LockFinish = now.AddMinutes(15)
+                    }});
+             else
+             {
+                string lockInfo = _localizer["Locked record {0}, ID {1}.", oldLock.ResourceType, oldLock.ResourceID];
+
+                string errorInfo;
+                if (oldLock.UserName.Equals(userInfo.UserName, StringComparison.InvariantCultureIgnoreCase))
+                    errorInfo = _localizer["It is not allowed to enter the record at client workstation ''{0}'' because the data entry is in progress at workstation ''{1}''.",
+                        userInfo.Workstation, oldLock.Workstation];
+                else
+                    errorInfo = _localizer["It is not allowed to enter the record because the data entry is in progress by user ''{0}''.",
+                        oldLock.UserName];
+                
+                string localizedMessage = errorInfo + "\r\n" + lockInfo;
+                throw new Rhetos.UserException(localizedMessage);
+             }
+        }'
+    {
+		ShortString ResourceType;
+		Guid ResourceID;
+
+        RepositoryUses '_localizer' 'Rhetos.Utilities.ILocalizer, Rhetos.Utilities';
+    }
+    
+    Action ReleaseLock '(parameters, repository, userInfo) =>
+        {
+            var myLock = repository.Common.ExclusiveLock.Query()
+                .Where(itemLock =>
+                    itemLock.ResourceType == parameters.ResourceType
+                    && itemLock.ResourceID == parameters.ResourceID
+                    && itemLock.UserName == userInfo.UserName
+                    && itemLock.Workstation == userInfo.Workstation)
+                .FirstOrDefault();
+
+            if (myLock != null)
+                repository.Common.ExclusiveLock.Delete(new[] { myLock });
+        }'
+    {
+		ShortString ResourceType;
+		Guid ResourceID;
+    }
+}

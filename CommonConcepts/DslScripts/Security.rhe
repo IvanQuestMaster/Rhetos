@@ -1,0 +1,133 @@
+﻿Module Common
+{
+	//=====================================================
+	// CLAIMS:
+	
+    // List of all available predefined resources and rights in the system.
+	Entity Claim
+	{
+		ShortString ClaimResource { Required; }
+		ShortString ClaimRight { Required; }
+		Unique Common.Claim.ClaimResource Common.Claim.ClaimRight;
+		Logging { AllProperties; }
+        
+        Deactivatable; // Inactive claims are remains of deleted entities and other objects. They are kept as a backup, and simply hidden in admin GUI to reduce clutter.
+		Implements 'Rhetos.Dom.DefaultConcepts.ICommonClaim, Rhetos.Dom.DefaultConcepts.Interfaces' { RegisteredImplementation; }
+	}
+    
+    // For each claim, MyClaim determines whether the claim applies to the current user, i.e., whether user has the permission.
+	QueryableExtension MyClaim Common.Claim '(query, repository) =>
+		{ throw new Rhetos.UserException("Reading Common.MyClaim without filter is not permitted. Use filter by Common.Claim or Common.Claim[]."); }'
+	{
+		Bool Applies;
+		
+		FilterBy 'Common.Claim' '(repository, parameter, executionContext) =>
+			{
+				var claim = repository.Common.Claim.Query().Where(item => item.ClaimResource == parameter.ClaimResource && item.ClaimRight == parameter.ClaimRight).SingleOrDefault();
+				if (claim == null)
+					throw new Rhetos.UserException("Claim {0}-{1} does not exist.",
+						new[] { parameter.ClaimResource, parameter.ClaimRight }, null, null);
+				
+				return repository.Common.MyClaim.Filter(new[] { claim });
+			}'
+		{
+			UseExecutionContext;
+		}
+		
+		FilterBy 'IEnumerable<Common.Claim>' '(repository, claims, executionContext) =>
+			{
+                var securityClaims = claims.Select(c => new Rhetos.Security.Claim(c.ClaimResource, c.ClaimRight)).ToList();
+                var authorizations = executionContext.AuthorizationManager.GetAuthorizations(securityClaims);
+			
+                return claims.Zip(authorizations, (claim, authorized) => new Common.MyClaim {
+                        ID = claim.ID,
+                        Applies = authorized
+                    }).ToArray();
+             }'
+		{
+			UseExecutionContext;
+		}
+	}
+	
+	//=====================================================
+	// PRINCIPALS:
+	
+	// Principal is a user, a client application or any other actor that can be authenticated.
+	Entity Principal
+	{
+		ShortString Name { Required; Unique; }
+		
+		Implements 'Rhetos.Dom.DefaultConcepts.IPrincipal, Rhetos.Dom.DefaultConcepts.Interfaces' { RegisteredImplementation; }
+		Logging { AllProperties; }
+	}
+	
+	//=====================================================
+	// ROLES:
+
+    Entity PrincipalHasRole
+    {
+        Reference Principal { Required; Detail; }
+        Reference Role { Required; }
+        
+        Implements 'Rhetos.Dom.DefaultConcepts.IPrincipalHasRole, Rhetos.Dom.DefaultConcepts.Interfaces' { RegisteredImplementation; }
+        UniqueMultiple 'Principal Role' { Clustered; }
+        Logging { AllProperties; }
+		
+		// Reading PrincipalHasRole using this filter allows an extension point for authorization plugins.
+		Query 'Rhetos.Dom.DefaultConcepts.IPrincipal'
+			'parameter => Query().Where(item => item.Principal.ID == parameter.ID)';
+    }
+	
+    // Role is a set of permissions.
+    Entity Role
+    {
+        ShortString Name { Required; Unique; }
+        
+        Implements 'Rhetos.Dom.DefaultConcepts.IRole, Rhetos.Dom.DefaultConcepts.Interfaces' { RegisteredImplementation; }
+        Logging { AllProperties; }
+    }
+    
+	// The relation can be viewed in two ways:
+    // 1. The "UsersFrom" role inherits all permissions from the "PermissionsFrom" role.
+	// 2. The "PermissionsFrom" role includes all users from the "UsersFrom" role.
+    Entity RoleInheritsRole
+    {
+		Reference UsersFrom Common.Role { Required; Detail; }
+        Reference PermissionsFrom Common.Role { Required; }
+        
+        Implements 'Rhetos.Dom.DefaultConcepts.IRoleInheritsRole, Rhetos.Dom.DefaultConcepts.Interfaces' { RegisteredImplementation; }
+        UniqueMultiple 'UsersFrom PermissionsFrom' { Clustered; }
+        Logging { AllProperties; }
+    }
+	
+	//=====================================================
+	// PERMISSIONS:
+
+	Entity PrincipalPermission
+	{
+		Reference Principal Common.Principal { Required; Detail; }
+		Reference Claim Common.Claim { Required; Detail; }
+		Bool IsAuthorized { Required; } // If IsAuthorized is false then the autorization is explicitly denied.
+		
+		Implements 'Rhetos.Dom.DefaultConcepts.IPrincipalPermission, Rhetos.Dom.DefaultConcepts.Interfaces' { RegisteredImplementation; }
+		UniqueMultiple 'Principal Claim' { Clustered; }
+		Logging { AllProperties; }
+	}
+	
+	Entity RolePermission
+    {
+        Reference Role { Required; Detail; }
+        Reference Claim { Required; Detail; }
+        Bool IsAuthorized { Required; } // If IsAuthorized is false then the autorization is explicitly denied.
+        
+        Implements 'Rhetos.Dom.DefaultConcepts.IRolePermission, Rhetos.Dom.DefaultConcepts.Interfaces' { RegisteredImplementation; }
+        UniqueMultiple 'Role Claim' { Clustered; }
+        Logging { AllProperties; }
+    }
+    
+	//=====================================================
+	// ROW PERMISSIONS PARAMETERS:
+	
+	Parameter RowPermissionsReadItems;
+	Parameter RowPermissionsWriteItems;
+}

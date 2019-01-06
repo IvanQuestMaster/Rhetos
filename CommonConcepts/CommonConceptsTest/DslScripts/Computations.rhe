@@ -1,0 +1,655 @@
+Module TestAllProperties
+{
+	Entity Parent
+	{
+	}
+	
+	Entity Base
+	{
+	}
+	
+	Browse UsesImplicitlyCreatedProperties TestAllProperties.Base
+	{
+		ShortString ComputedName { From 'Extension_TestAllPropertiesCopyAllFeatures.Name'; }
+	}
+	
+	Entity Source
+	{
+		Extends TestAllProperties.Base;
+		ShortString Name { SqlIndex; }
+		DateTime Start;
+		Reference TheParent TestAllProperties.Parent { Detail; } // Instead of full Detail concept, only CascadeDelete base concept should be copied to TestAllPropertiesCopyAllFeatures.
+		Unique TestAllProperties.Source.Name TestAllProperties.Source.Start; // Instead of full Unique concept, only SqlIndex base concept should be copied to TestAllPropertiesCopyAllFeatures.
+		Unique TestAllProperties.Source.Name TestAllProperties.Source.Start TestAllProperties.Source.TheParent;
+	}
+
+	Persisted TestAllPropertiesCopyAllFeatures TestAllProperties.Source
+	{
+		AllProperties;
+	}
+}
+
+
+Module Test6
+{
+	SqlQueryable Comp
+		"SELECT ID=CONVERT(UNIQUEIDENTIFIER, 'DEC7CD4A-11EC-40E3-8463-5D2EF411449B'), Name='a', Num=1
+		UNION ALL SELECT CONVERT(UNIQUEIDENTIFIER, 'C7BC64CB-B62C-459E-9C3A-D029BED616B6'), 'b', 2
+		UNION ALL SELECT CONVERT(UNIQUEIDENTIFIER, '42446896-BA6A-4B3C-869C-1674FFA2A481'), 'c', 3"
+	{
+		ShortString Name;
+		Integer Num;
+	}
+
+	Persisted Pers Test6.Comp
+	{
+		AllProperties;
+	}
+}
+
+
+Module Test9
+{
+    AutodetectSqlDependencies;
+
+	Entity Document
+	{
+		ShortString Name;
+	}
+	
+	SqlQueryable ComputeDocumentCreationInfo
+		"SELECT d.ID, Rank = (SELECT COUNT(*) FROM Test9.Document), Datum = GETDATE() FROM Test9.Document d"
+	{
+		Extends Test9.Document;
+		Integer Rank;
+		DateTime Datum;
+	}
+	
+	Persisted DocumentCreationInfo Test9.ComputeDocumentCreationInfo
+	{
+		AllProperties;
+		ComputeForNewBaseItems;
+	}
+	
+	Entity Part
+	{
+		Reference Head Test9.Document { CascadeDelete; }
+		ShortString Name;
+	}
+
+	SqlQueryable ComputeDocumentSimpleAggregate
+		"SELECT
+			ID = d.ID,
+			NumParts = COUNT(s.ID)
+		FROM
+			Test9.Document d
+			LEFT JOIN Test9.Part s ON s.HeadID = d.ID
+		GROUP BY
+			d.ID"
+	{
+		Extends Test9.Document;
+		Integer NumParts;
+		
+		ChangesOnLinkedItems Test9.Part.Head;
+	}
+
+	Persisted DocumentSimpleAggregate Test9.ComputeDocumentSimpleAggregate
+	{
+		AllProperties;
+		KeepSynchronized;
+	}
+    
+	SqlQueryable ComputeDocumentAggregates
+		"SELECT
+			ID = d.ID,
+			NameNumParts = d.Name + ':' + CONVERT(NVARCHAR(100), COUNT(s.ID))
+		FROM
+			Test9.Document d
+			LEFT JOIN Test9.Part s ON s.HeadID = d.ID
+		GROUP BY
+			d.ID, d.Name"
+	{
+		Extends Test9.Document;
+		ShortString NameNumParts;
+		
+		//ChangesOnChangedItems Test9.Document 'Guid[]' 'changedItems => changedItems.Select(document => document.ID).ToArray()';
+		ChangesOnBaseItem;
+		//ChangesOnChangedItems Test9.Part 'Guid[]' 'changedItems => changedItems.Where(part => part.HeadID.HasValue).Select(part => part.HeadID.Value).Distinct().ToArray()';
+		ChangesOnLinkedItems Test9.Part.Head;
+	}
+
+	Persisted DocumentAggregates Test9.ComputeDocumentAggregates
+	{
+		AllProperties;
+		KeepSynchronized '(documentAggregates, repository) =>
+        {
+            var ids = documentAggregates.Select(d => d.ID).ToList();
+            var lockedDocuments = new HashSet<Guid>(repository.Test9.Document.Filter(ids).Where(d => !d.Name.Contains("locked")).Select(d => d.ID));
+            return documentAggregates.Where(da => lockedDocuments.Contains(da.ID)).ToList();
+        }';
+	}
+}
+
+Module TestChangesOnReferenced
+{
+    AutodetectSqlDependencies;
+
+    Entity Tested
+    {
+        ShortString Name;
+        Reference Parent;
+        Reference Poly;
+    }
+
+    Entity Parent
+    {
+        ShortString Name;
+    }
+
+    Polymorphic Poly
+    {
+        ShortString Name;
+    }
+
+    Entity ImplementationSimple
+    {
+        ShortString Name;
+        Is TestChangesOnReferenced.Poly;
+    }
+
+    Entity ImplementationComplex
+    {
+        ShortString Name2;
+        Is TestChangesOnReferenced.Poly 'AlternativeName'
+        {
+            Implements TestChangesOnReferenced.Poly.Name 'Name2';
+        }
+    }
+
+    Persisted TestedInfo TestChangesOnReferenced.ComputeTestedInfo
+    {
+        AllProperties;
+        KeepSynchronized;
+    }
+
+    SqlQueryable ComputeTestedInfo
+        "SELECT
+            t.ID,
+            Info = t.Name + '-' + pa.Name + '-' + po.Name
+        FROM
+            TestChangesOnReferenced.Tested t
+            LEFT JOIN TestChangesOnReferenced.Parent pa ON pa.ID = t.ParentID
+            LEFT JOIN TestChangesOnReferenced.Poly po ON po.ID = t.PolyID"
+    {
+        Extends TestChangesOnReferenced.Tested;
+        ShortString Info;
+
+        ChangesOnReferenced 'Base';
+        ChangesOnReferenced 'Base.Parent';
+        ChangesOnReferenced 'Base.Poly';
+    }
+}
+
+Module Test10
+{
+	SqlQueryable Source "SELECT ID = CONVERT(UNIQUEIDENTIFIER, 'F26D84E7-5072-42BF-84DF-3CB4D5946647'), i = 1, s = 'a'
+		UNION ALL SELECT '0690E99C-CC54-4ADF-B177-C4BDB54B3954', 2, 'b'"
+	{
+		Integer i;
+		ShortString s;
+	}
+	
+	Entity Simple
+	{
+		Integer i;
+	}
+}
+
+Module Test11
+{
+	Entity Source
+	{
+		ShortString Name;
+	}
+	
+	QueryableExtension QE Test11.Source
+		'(IQueryable<Common.Queryable.Test11_Source> source, Common.DomRepository repository) =>
+			source.Select(item => new Common.Queryable.Test11_QE
+				{
+                    ID = item.ID,
+					Base = item,
+					Info = item.Name + "x"
+				})'
+	{
+		ShortString Info;
+	}
+	
+	QueryableExtension QEContext Test11.Source
+		'(IQueryable<Common.Queryable.Test11_Source> source, Common.DomRepository repository, Common.ExecutionContext executionContext) =>
+			source.Select(item => new Common.Queryable.Test11_QEContext
+				{
+                    ID = item.ID,
+					Base = item,
+					UserInfo = item.Name + " " + executionContext.UserInfo.UserName
+				})'
+	{
+		UseExecutionContext;
+		ShortString UserInfo;
+	}
+	
+	Browse QEBrowse Test11.QE
+	{
+		ShortString Info { From 'Info'; }
+		ShortString Name { From 'Base.Name'; }
+	}
+}
+
+Module TestFilter
+{
+    Entity CombinedFilters
+    {
+        ShortString Name;
+        Reference Simple;
+    }
+    
+    Entity Simple
+    {
+        ShortString Name;
+    }
+    
+	ComposableFilterBy CombinedFilters.'TestFilter.ComposableFilterByContains' '(source, repos, filter) => source.Where(s => s.Name.Contains(filter.Pattern))';
+	    
+	Entity Source
+	{
+		ShortString Name;
+	}
+	
+	Parameter FilterByPrefix { ShortString Prefix; }
+	FilterBy Source.'TestFilter.FilterByPrefix' '(repos, parameter) => repos.TestFilter.Source.Query().Where(s => s.Name.StartsWith(parameter.Prefix)).ToArray()';
+	
+	Parameter ComposableFilterByPrefix { ShortString Prefix; }
+	Parameter ComposableFilterByContains { ShortString Pattern; }
+	ComposableFilterBy Source.'TestFilter.ComposableFilterByPrefix' '(source, repos, filter) => source.Where(s => s.Name.StartsWith(filter.Prefix))';
+	ComposableFilterBy Source.'TestFilter.ComposableFilterByContains' '(source, repos, filter) => source.Where(s => s.Name.Contains(filter.Pattern))';
+	
+	ItemFilter Source.ItemStartsWithB 'item => item.Name.StartsWith("b")';
+	ItemFilter Source.ItemContains2 'item => item.Name.Contains("2")';
+	
+	ItemFilter Source.'TestFilter2.ItemStartsWithC' 'item => item.Name.StartsWith("c")';
+
+    // FilterByBase test:
+    Entity SourceExtension { Extends TestFilter.Source; ShortString Name2; }
+    FilterByBase SourceExtension.'TestFilter.FilterByPrefix';
+    
+    // FilterByReferenced test:
+    Entity SourceDetail { Reference Parent TestFilter.Source { Detail; } ShortString Name2; }
+    FilterByReferenced SourceDetail.'TestFilter.FilterByPrefix' TestFilter.SourceDetail.Parent '';
+	
+	ItemFilter Source.Composable 'item => item.Name.Contains("1")';
+	ItemFilterReferenced SourceDetail.Composable TestFilter.SourceDetail.Parent;
+    
+    // FilterByLinkedItems test:
+    Parameter FilterDetail { ShortString Prefix; }
+	FilterBy SourceDetail.'TestFilter.FilterDetail' '(repos, parameter) => repos.TestFilter.SourceDetail.Query().Where(s => s.Name2.StartsWith(parameter.Prefix)).ToArray()';
+    FilterByLinkedItems Source.'TestFilter.FilterDetail' TestFilter.SourceDetail.Parent;
+    
+    Browse ComposableFilterBrowse TestFilter.CombinedFilters
+    {
+        Take Name;
+		Take DebugInfoSimpleName 'Simple.Name';
+        Take Simple;
+        ItemFilter SimpleNameA 'item => item.Simple.Name.Contains("a")';
+        ItemFilter NameN 'item => item.Name.Contains("n")';
+        FilterBy ComposableFilterBrowseLoader '(repository, parameter) => repository.TestFilter.ComposableFilterBrowse.Query().Where(item => item.Name.Contains(parameter.Pattern)).ToArray()';
+    }
+    Parameter ComposableFilterBrowseLoader { ShortString Pattern; }
+    
+
+    SqlQueryable FixedData
+		"SELECT ID=CONVERT(UNIQUEIDENTIFIER, 'DEC7CD4A-11EC-40E3-8463-5D2EF411449B'), Name='a', Num=1
+		UNION ALL SELECT CONVERT(UNIQUEIDENTIFIER, 'C7BC64CB-B62C-459E-9C3A-D029BED616B6'), 'b', 2"
+	{
+		ShortString Name;
+		Integer Num;
+        
+        ComposableFilterBy ComposableFilterWithContext '(items, repository, parameter, context) =>
+            new Common.Queryable.TestFilter_FixedData[] { new Common.Queryable.TestFilter_FixedData { Name = context.UserInfo.UserName } }.AsQueryable()'
+        {
+            UseExecutionContext;
+        }
+	}
+    
+    Parameter ComposableFilterWithContext;
+	
+	Entity ExternalFilter
+	{
+		ShortString Name;
+		ComposableFilterBy 'System.DateTime' '(source, repository, parameter) =>
+			{
+				if (parameter == null)
+					return source.Where(item => item.Name.StartsWith("dnull"));
+				else if (parameter == default(System.DateTime))
+					return source.Where(item => item.Name.StartsWith("ddef"));
+				else
+					return source.Where(item => item.Name.StartsWith("date"));
+			}';
+		ComposableFilterBy 'System.String' '(source, repository, parameter) =>
+			{
+				if (parameter == null)
+					return source.Where(item => item.Name.StartsWith("snull"));
+				else
+					return source.Where(item => item.Name.StartsWith("str"));
+			}';
+	}
+	
+	Entity AutoFilter1
+	{
+		ShortString Name;
+		ItemFilter AList 'item => item.Name.StartsWith("a")'
+		{
+			ApplyOnClientRead;
+		}
+	}
+	
+	Entity AutoFilter2
+	{
+		ShortString Name;
+	}
+	
+	Browse AutoFilter2Browse TestFilter.AutoFilter2
+	{
+		Take Name2 'Name';
+		ComposableFilterBy 'System.String' '(source, repository, parameter) => source.Where(item => item.Name2.StartsWith("b")).Select(item =>
+			new Common.Queryable.TestFilter_AutoFilter2Browse { ID = item.ID, Base = item.Base, Name2 = item.Name2 + "x"})';
+		ApplyFilterOnClientRead 'System.String';
+	}
+
+    Entity AutoFilter3
+	{
+		ShortString Name;
+
+        ItemFilter WithA 'item => item.Name.StartsWith("a")';
+		ApplyFilterOnClientRead 'TestFilter.WithA' 'command => command.Top == 10';
+	}
+}
+
+Module TestFilter2;
+
+Module TestGenericFilter
+{
+	Entity Simple
+	{
+		Integer Code;
+		ShortString Name;
+		DateTime Start;
+	}
+    
+    Entity Child
+	{
+		ShortString Name;
+		Reference Parent TestGenericFilter.Simple { Detail; }
+	}
+}
+
+Module TestSqlQueryable
+{
+	Entity Document
+	{
+		ShortString Name;
+	}
+	
+	SqlQueryable DocumentInfo
+		"SELECT d.ID, NameLen = LEN(d.Name) FROM TestSqlQueryable.Document d"
+	{
+		Extends TestSqlQueryable.Document;
+		Integer NameLen;
+	}
+}
+
+Module TestComputed
+{
+    Computed Simple 'repository => new[]
+        {
+            new TestComputed.Simple { Name = "a" },
+            new TestComputed.Simple { Name = "b" }
+        }'
+    {
+        ShortString Name;
+        
+        FilterBy SpecialLoad '(repos, parameter) => new[]
+        {
+            new TestComputed.Simple { Name = parameter.SpecialName }
+        }';
+    }
+    
+    Parameter SpecialLoad
+    {
+        ShortString SpecialName;
+    }
+
+    Computed ComputedWithContext 'repository => new[]
+        {
+            new ComputedWithContext { Name = _executionContext.UserInfo.UserName }
+        }'
+    {
+        ShortString Name;
+    }
+}
+
+Module TestReport
+{
+    Entity Document
+    {
+        ShortString Name;
+        Integer Code;
+    }
+    
+    // Report (only data) with multiple sources:
+    
+    Entity Part1 { Reference Parent TestReport.Document { Detail; } ShortString Name; }
+    Entity Part2 { Reference Parent TestReport.Document { Detail; } ShortString Name; }
+    
+    ReportData MultipleSourcesReport
+    {
+        ShortString Part1Prefix;
+        DataSources 'Document, Part2, TestReport.Part1';
+    }
+
+    FilterBy Part1.'TestReport.MultipleSourcesReport' '(repository, parameter) =>
+        repository.TestReport.Part1.Query()
+            .Where(s1 => s1.Name.StartsWith(parameter.Part1Prefix))
+            .OrderByDescending(s1 => s1.Name).ToArray()';
+    FilterByLinkedItems Document.'TestReport.MultipleSourcesReport' TestReport.Part1.Parent;
+    FilterByReferenced Part2.'TestReport.MultipleSourcesReport' TestReport.Part2.Parent 'subItems => subItems.OrderBy(item => item.Name.Length).ToArray()';
+    
+    // Report with custom file generator:
+    
+    ReportFile CustomFileReport '(object[][] reportData, string convertFormat, Common.ExecutionContext executionContext) =>
+        {
+            var documents = reportData[0].Cast<TestReport.Document>();
+            var parts = reportData[1].Cast<TestReport.Part1>();
+            string textFileData =
+                string.Join(", ", documents.Select(item => item.Name))
+                + "|" + string.Join(", ", parts.Select(item => item.Name));
+                
+            byte[] fileData = new UTF8Encoding().GetBytes(textFileData);
+            return new Rhetos.Dom.DefaultConcepts.ReportFile { Name = "CustomFileReport.txt", Content = fileData };
+        }'
+    {
+        ShortString Prefix;
+        DataSources 'Document, Part1';
+    }
+    
+    FilterBy Part1.'TestReport.CustomFileReport' '(repository, parameter) => repository.TestReport.Part1.Query()
+        .Where(s => s.Name.StartsWith(parameter.Prefix))
+        .OrderBy(s => s.Name).ToArray()';
+    FilterByLinkedItems Document.'TestReport.CustomFileReport' TestReport.Part1.Parent;
+}
+
+Module TestSqlFilter
+{
+    AutodetectSqlDependencies;
+    
+    Entity Simple
+    {
+        Integer Code;
+        DateTime Start;
+    }
+    
+    SqlFunction GetSome '@start DATETIME' "RETURNS TABLE
+        AS RETURN
+            SELECT ID = CONVERT(UNIQUEIDENTIFIER, '11111111-1111-1111-1111-111111111111'), Code = 1, Start = @start
+            UNION ALL 
+            SELECT CONVERT(UNIQUEIDENTIFIER, '22222222-2222-2222-2222-222222222222'), 2, DATEADD(day, 1, @start)";
+    
+    Entity Ref
+    {
+        ShortString Name;
+        Reference Other TestSqlFilter.Simple;
+        DateTime Finish;
+    }
+    
+    SqlFunction GetRef '@start DATETIME' "RETURNS TABLE
+        AS RETURN
+            SELECT ID = s.ID, Name = 'name_' + CONVERT(NVARCHAR(256), s.Code), OtherID = s.ID, Finish = DATEADD(day, s.Code, @start)
+            FROM TestSqlFilter.Simple s";
+}
+
+Module TestComputedFrom
+{
+    Computed Source 'repository => new[]
+        {
+            new Source { ID = new Guid("16BB8451-BC22-4B4E-888E-9B5DD2355A61"), Name = "aa", Code = 11 },
+            new Source { ID = new Guid("15CFF81D-8FA4-4E33-981A-BBCDB1EE63F1"), Name = "bb", Code = 22 }
+        }'
+    {
+        ShortString Name;
+        Integer Code;
+		FilterBy 'IEnumerable<Guid>' '(repository, parameter) => this.Load().Where(item => parameter.Contains(item.ID)).ToArray()';
+    }
+    
+    Entity PersistAll
+    {
+        ComputedFrom TestComputedFrom.Source { AllProperties; }
+    }
+    
+    Entity PersistPartial
+    {
+        ShortString Name { ComputedFrom TestComputedFrom.Source.Name; }
+    }
+
+    Entity PersistCustom
+    {
+        Integer Code { ComputedFrom TestComputedFrom.Source.Code; }
+        ShortString NamePersist { ComputedFrom TestComputedFrom.Source.Name; }
+    }
+    
+    Computed Source2 'repository => new[]
+        {
+            new Source2 { ID = new Guid("16BB8451-BC22-4B4E-888E-9B5DD2355A61"), Name = "cc" },
+            new Source2 { ID = new Guid("15CFF81D-8FA4-4E33-981A-BBCDB1EE63F1"), Name = "dd" }
+        }'
+    {
+        ShortString Name;
+    }
+    
+    Entity PersistComplex
+    {
+        ComputedFrom TestComputedFrom.Source { AllProperties; }
+        ShortString Name2 { ComputedFrom TestComputedFrom.Source2.Name; }
+    }
+
+    Entity PersistOverlap
+    {
+        ComputedFrom TestComputedFrom.Source { AllProperties; }
+        ComputedFrom TestComputedFrom.Source2 { AllProperties; }
+    }
+    
+    // KeepSynchronized:
+    
+    Entity Base1 { ShortString Name1; ShortString Info; }
+    Entity Base2 { ShortString Name2; }
+    
+    QueryableExtension Comp1a TestComputedFrom.Base1 '(items, repos) => items.Select(item => new Common.Queryable.TestComputedFrom_Comp1a { ID = item.ID, Base = item, Name1a = item.Name1 + "a" })' { ShortString Name1a; ChangesOnBaseItem; }
+    QueryableExtension Comp1b TestComputedFrom.Base1 '(items, repos) => items.Select(item => new Common.Queryable.TestComputedFrom_Comp1b { ID = item.ID, Base = item, Name1b = item.Name1 + "b" })' { ShortString Name1b; ChangesOnBaseItem; }
+    QueryableExtension Comp2a TestComputedFrom.Base2 '(items, repos) => items.Select(item => new Common.Queryable.TestComputedFrom_Comp2a { ID = item.ID, Base = item, Name2a = item.Name2 + "a" })' { ShortString Name2a; ChangesOnBaseItem; }
+    
+    Entity MultiSync
+    {
+        ComputedFrom TestComputedFrom.Comp1a { AllProperties; KeepSynchronized; } // The AllProperties concept includes "Base".
+        
+        ShortString Name1bx { ComputedFrom TestComputedFrom.Comp1b.Name1b; }
+        ComputedFrom TestComputedFrom.Comp1b { KeepSynchronized; }
+        
+        ShortString Name2a { ComputedFrom TestComputedFrom.Comp2a.Name2a; }
+        ComputedFrom TestComputedFrom.Comp2a { KeepSynchronized; } // TODO: This should not be allowed.
+        
+        DateTime Start { CreationTime; }
+        DateTime LastModifiedName1bx { ModificationTimeOf TestComputedFrom.MultiSync.Name1bx; }
+    }
+	
+	Entity ComputedWithAutoCode
+	{
+		ShortString Comp;
+		ShortString Code { AutoCode; }
+		
+		ComputedFrom TestComputedFrom.ComputedWithAutoCodeSource { AllProperties; ComputeForNewItems; }
+	}
+	
+	SqlQueryable ComputedWithAutoCodeSource "SELECT ID, Comp = 'abc' FROM ComputedWithAutoCode"
+	{
+		ShortString Comp;
+	}
+
+    Entity KeepSyncRepositoryMembers
+    {
+        ComputedFrom TestComputedFrom.Source
+        {
+            AllProperties;
+            // Update only those items that match current user's name.
+            KeepSynchronized '(items, repository) => items.Where(item => item.Name == _executionContext.UserInfo.UserName)';
+        }
+    }
+    
+    //==========================================================
+    
+    Entity SyncByKeySource
+    {
+        Integer Name1;
+        ShortString Name2;
+        ShortString Data;
+        
+        ChangesOnChangedItems TestComputedFrom.SyncByKeySource 'FilterAll' 'changedItems => new FilterAll()';
+    }
+    
+    Persisted SyncByKeyTarget TestComputedFrom.SyncByKeySource
+    {
+        AllProperties;
+        KeepSynchronized;
+        KeyProperties 'Name1 Name2';
+        
+        ShortString Control;
+    }
+    
+    Entity SyncByKeyTarget2
+    {
+        Integer Name1x { ComputedFrom TestComputedFrom.SyncByKeySource.Name1 { KeyProperty; } }
+        ShortString Name2x { ComputedFrom TestComputedFrom.SyncByKeySource.Name2 { KeyProperty; } }
+        ShortString Datax { ComputedFrom TestComputedFrom.SyncByKeySource.Data; }
+        ComputedFrom TestComputedFrom.SyncByKeySource { KeepSynchronized; }
+        
+        ShortString Control;
+    }
+    
+    Entity SyncByKeyTarget3
+    {
+        ComputedFrom TestComputedFrom.SyncByKeySource
+        {
+            AllProperties;
+            KeepSynchronized;
+            KeyProperties 'Name1 Name2';
+        }
+        
+        ShortString Control;
+    }
+}

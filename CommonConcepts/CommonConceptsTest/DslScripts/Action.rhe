@@ -1,0 +1,90 @@
+Module TestAction
+{
+    Entity ToInsert
+    {
+        LongString Name;
+    }
+
+    Action InsertAndThrowException
+        '(parameters, repository, userInfo) =>
+            { 
+                repository.TestAction.ToInsert.Insert(new TestAction.ToInsert { ID = parameters.ItmemID.Value, Name = "Test" });
+                throw new ApplicationException("TestAction exception " + parameters.Message);
+            }'            
+    {
+        ShortString Message;
+        Guid ItmemID;
+    }
+
+    Action UEC
+        '(parameters, repository, userInfo, executionContext) =>
+            { throw new ApplicationException("User " + executionContext.UserInfo.UserName); }'
+    {
+        UseExecutionContext;
+    }
+    
+    SqlQueryable ComputeNameContainsA
+    "
+        SELECT
+            ID,
+            ContainsA = CASE WHEN Name LIKE '%A%' THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+        FROM
+            TestAction.Simple
+    "
+    {
+        AutodetectSqlDependencies;
+        Extends TestAction.Simple;
+        ChangesOnChangedItems TestAction.Simple 'Guid[]' 'changedItems => changedItems.Select(item => item.ID).ToArray()';
+        Bool ContainsA;
+    }
+    
+    Persisted NameContainsA TestAction.ComputeNameContainsA
+    {
+        AllProperties;
+        KeepSynchronized;
+    }
+    
+    Entity Simple
+    {
+        ShortString Name;
+        
+        ItemFilter NameHasLessThanThreeChars 'item => item.Name.Length < 3';
+        InvalidData NameHasLessThanThreeChars '[Test] Name has to be longer than 2 chars.';
+        
+    }
+    
+    Action RemoveAFromAllSimpleEntities
+        '(parameters, repository, userInfo, executionContext) =>
+            { 
+                var simpleEntities = repository.TestAction.Simple.Query().Where(item => item.Name.Length > 0).ToList();
+                foreach(var entity in simpleEntities)
+                {
+                    if (entity.Extension_NameContainsA.ContainsA.Value)
+                        entity.Name = entity.Name.Replace("A", "");
+                }
+                
+                repository.TestAction.Simple.Update(simpleEntities);
+            }'
+    {
+        UseExecutionContext;
+    }
+    
+    Action TestBefore '(parameter, repository, userInfo) => {  throw new Rhetos.UserException("[Test] " + parameter.S); }'
+    {
+        ShortString S;
+        
+        BeforeAction AddXUserName
+            'actionParameter.S += " X";
+            actionParameter.S += " " + _executionContext.UserInfo.UserName;';
+    }
+
+    Action RollbackOnError '(parameter, repository, userInfo) =>
+        {
+            repository.Common.Principal.Insert(new Common.Principal { Name = parameter.NewUsername });
+            if (parameter.NewUsername.EndsWith("x"))
+                throw new Rhetos.UserException("[Test] The username should not end with x.");
+        }'
+    {
+        ShortString NewUsername;
+    }
+}

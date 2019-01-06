@@ -40,12 +40,10 @@ namespace Rhetos.Dsl
     {
         ILogger _loadOrderLogger;
         ILogger _saveOrderLogger;
-        GeneratedFilesCache _generatedFilesCache;
-        IRhetosConfiguration _paths;
+        IPaths _paths;
 
-        public MacroOrderRepository(ILogProvider logProvider, GeneratedFilesCache generatedFilesCache, IRhetosConfiguration paths)
+        public MacroOrderRepository(ILogProvider logProvider, IPaths paths)
         {
-            _generatedFilesCache = generatedFilesCache;
             _loadOrderLogger = logProvider.GetLogger("MacroRepositoryLoad");
             _saveOrderLogger = logProvider.GetLogger("MacroRepositorySave");
             _paths = paths;

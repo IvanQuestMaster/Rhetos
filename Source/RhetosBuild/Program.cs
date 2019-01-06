@@ -8,6 +8,7 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using Rhetos.Extensibility;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace RhetosBuild
 {
@@ -36,6 +37,7 @@ namespace RhetosBuild
                 instance.Load(containerBuilderImplementation);
             }
 
+            containerBuilderImplementation.RegisterPlugins<IGenerator>();
             var container = containerBuilder.Build();
 
             var generators = container.Resolve<IPluginsContainer<IGenerator>>();
@@ -48,7 +50,7 @@ namespace RhetosBuild
 
         static void SetupInitalContiner(Autofac.ContainerBuilder containerBuilder, string pluginsFolder, InstalledPackages installedPackages)
         {
-            var paths = new MockPaths
+            var paths = new Paths
             {
                 GeneratedFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Generated"),
                 GeneratedFilesCacheFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedCache")
@@ -62,13 +64,38 @@ namespace RhetosBuild
             containerBuilder.Register(c => installedPackages).As<IInstalledPackages>();
 
             containerBuilder.RegisterType<NLogProvider>().As<ILogProvider>().SingleInstance();
-            containerBuilder.RegisterType<MockInstalledPackages>().As<IInstalledPackages>();
-
             containerBuilder.RegisterGeneric(typeof(PluginsMetadataCache<>)).SingleInstance();
             containerBuilder.RegisterGeneric(typeof(PluginsContainer<>)).As(typeof(IPluginsContainer<>)).InstancePerLifetimeScope();
             containerBuilder.RegisterGeneric(typeof(NamedPlugins<>)).As(typeof(INamedPlugins<>)).InstancePerLifetimeScope();
 
-            Plugins.FindAndRegisterModules(containerBuilder, pluginsFolder);
+            containerBuilder.RegisterGeneric(typeof(Index<,>)).As(typeof(IIndex<,>));
+        }
+
+        static List<string> GetAssemblyList(string projectFolderPath)
+        {
+            var assemblyList = new List<string>();
+            var projectFile = Directory.GetFiles(projectFolderPath, "*.csproj").Single();
+
+            XNamespace msbuild = "http://schemas.microsoft.com/developer/msbuild/2003";
+            using (var fs = File.OpenRead(projectFile))
+            {
+                XDocument projDefinition = XDocument.Load(fs);
+                var a = projDefinition
+                    .Element("Project");
+                var a1 = a.Elements("ItemGroup");
+                IEnumerable<string> references = projDefinition
+                    .Element("Project")
+                    .Elements("ItemGroup")
+                    .Elements("Reference")
+                    .Select(refElem => refElem.Value);
+                foreach (string reference in references)
+                {
+                    var fullPath = Path.GetFullPath(Path.Combine(projectFolderPath, reference));
+                    assemblyList.Add(fullPath);
+                }
+            }
+
+            return assemblyList;
         }
     }
 }

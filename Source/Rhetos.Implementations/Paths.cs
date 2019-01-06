@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Rhetos
+﻿namespace Rhetos
 {
-    public class MockPaths : IPaths
+    public class Paths : IPaths
     {
         public string GeneratedFolder { get; set; }
 

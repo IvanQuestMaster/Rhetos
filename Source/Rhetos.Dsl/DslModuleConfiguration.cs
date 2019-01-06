@@ -38,9 +38,9 @@ namespace Rhetos.Dsl
 
             builder.RegisterType<DslModel>().As<IDslModel>().SingleInstance();
             builder.RegisterType<DslContainer>();
-            builder.RegisterPlugins<IDslModelIndex>();
-            //builder.RegisterType<DslModelIndexByType>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
-            //builder.RegisterType<DslModelIndexByReference>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
+            //builder.RegisterPlugins<IDslModelIndex>();
+            builder.RegisterType<DslModelIndexByType>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
+            builder.RegisterType<DslModelIndexByReference>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
         }
     }
 }

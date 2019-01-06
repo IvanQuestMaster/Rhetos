@@ -32,9 +32,9 @@ namespace Rhetos.Utilities
         private readonly FileSyncer _syncer;
         private readonly ILogger _logger;
         private readonly SHA1 _sha1;
-        private readonly IRhetosConfiguration _paths;
+        private readonly IPaths _paths;
 
-        public GeneratedFilesCache(ILogProvider logProvider, IRhetosConfiguration _paths)
+        public GeneratedFilesCache(ILogProvider logProvider, IPaths _paths)
         {
             _filesUtility = new FilesUtility(logProvider);
             _syncer = new FileSyncer(logProvider);

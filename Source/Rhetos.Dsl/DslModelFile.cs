@@ -34,12 +34,12 @@ namespace Rhetos.Dsl
         private readonly ILogger _logger;
         private readonly ILogger _dslModelConceptsLogger;
         private readonly DslContainer _dslContainer;
-        private readonly IRhetosConfiguration _paths;
+        private readonly IPaths _paths;
 
         public DslModelFile(
             ILogProvider logProvider,
             DslContainer dslContainer,
-            IRhetosConfiguration paths)
+            IPaths paths)
         {
             _performanceLogger = logProvider.GetLogger("Performance");
             _logger = logProvider.GetLogger(GetType().Name);

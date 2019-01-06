@@ -17,8 +17,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System.ComponentModel.Composition;
+
 namespace Rhetos.Dsl
 {
+    [Export(typeof(IModule))]
     public class DslModuleConfiguration : IModule
     {
         public void Load(IContainerBuilder builder)
@@ -29,15 +32,15 @@ namespace Rhetos.Dsl
             builder.RegisterType<DslParser>().As<IDslParser>();
             builder.RegisterType<MacroOrderRepository>().As<IMacroOrderRepository>();
             builder.RegisterType<ConceptMetadata>().SingleInstance();
-            builder.RegisterType<InitializationConcept>().As<IConceptInfo>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
+            //builder.RegisterType<InitializationConcept>().As<IConceptInfo>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
             builder.RegisterPlugins<IConceptInfo>();
             builder.RegisterPlugins<IConceptMacro>(typeof(IConceptMacro<>));
 
             builder.RegisterType<DslModel>().As<IDslModel>().SingleInstance();
             builder.RegisterType<DslContainer>();
             builder.RegisterPlugins<IDslModelIndex>();
-            builder.RegisterType<DslModelIndexByType>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
-            builder.RegisterType<DslModelIndexByReference>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
+            //builder.RegisterType<DslModelIndexByType>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
+            //builder.RegisterType<DslModelIndexByReference>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
         }
     }
 }

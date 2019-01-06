@@ -31,13 +31,34 @@ using System.Text;
 
 namespace Rhetos.Extensibility
 {
-    internal static class MefPluginScanner
+    public static class MefPluginScanner
     {
         /// <summary>
         /// The key is FullName of the plugin's export type (it is usually the interface it implements).
         /// </summary>
         private static MultiDictionary<string, PluginInfo> _pluginsByExport = null;
         private static object _pluginsLock = new object();
+
+        public static IEnumerable<PluginInfo> FindPlugins(Type pluginInterface, string pluginFolder)
+        {
+            try
+            {
+                lock (_pluginsLock)
+                {
+                    if (_pluginsByExport == null)
+                    {
+                        var assemblies = ListAssemblies(pluginFolder);
+                        _pluginsByExport = LoadPlugins(assemblies);
+                    }
+
+                    return _pluginsByExport.Get(pluginInterface.FullName);
+                }
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                throw new FrameworkException(CsUtility.ReportTypeLoadException(ex, "Cannot load plugins."), ex);
+            }
+        }
 
         /// <summary>
         /// Returns plugins that are registered for the given interface, sorted by dependencies (MefPovider.DependsOn).

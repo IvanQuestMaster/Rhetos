@@ -29,10 +29,6 @@ namespace Rhetos
 
         string Version { get; }
 
-        IEnumerable<IInstalledPackage> Dependencies { get; }
-
         string Folder { get; }
-
-        string Source { get;}
     }
 }

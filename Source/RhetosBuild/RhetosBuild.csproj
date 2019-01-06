@@ -7,9 +7,11 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.8.1" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Rhetos.Implementations\Rhetos.Implementations.csproj" />
     <ProjectReference Include="..\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj" />
   </ItemGroup>
 

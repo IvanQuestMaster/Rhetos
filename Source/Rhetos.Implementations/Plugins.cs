@@ -44,7 +44,7 @@ namespace Rhetos.Extensibility
         /// <summary>Find and registers Autofac modules that are implemented as plugins.</summary>
         public static void FindAndRegisterModules(Autofac.ContainerBuilder builder, string pluginsFolder)
         {
-            var modules = MefPluginScanner.FindPlugins(builder, typeof(Module), pluginsFolder);
+            var modules = MefPluginScanner.FindPlugins(builder, typeof(IModule), pluginsFolder);
 
             foreach (var module in modules)
             {

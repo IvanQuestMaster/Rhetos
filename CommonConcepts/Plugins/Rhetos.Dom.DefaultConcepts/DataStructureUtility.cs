@@ -21,7 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Rhetos.Compiler;
+using Rhetos.CodeGeneration;
 using Rhetos.Dsl.DefaultConcepts;
 
 namespace Rhetos.Dom.DefaultConcepts

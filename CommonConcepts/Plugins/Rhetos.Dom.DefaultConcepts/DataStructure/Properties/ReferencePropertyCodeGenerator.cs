@@ -24,9 +24,8 @@ using System.Text;
 using Rhetos.Dsl.DefaultConcepts;
 using System.Globalization;
 using System.ComponentModel.Composition;
-using Rhetos.Extensibility;
 using Rhetos.Dsl;
-using Rhetos.Compiler;
+using Rhetos.CodeGeneration;
 using Rhetos.DatabaseGenerator.DefaultConcepts;
 using Rhetos.Utilities;
 

@@ -17,11 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Compiler;
+using Rhetos.CodeGeneration;
 using Rhetos.Dsl;
 using Rhetos.Dsl.DefaultConcepts;
-using Rhetos.Extensibility;
-using Rhetos.Logging;
 using Rhetos.Utilities;
 using System.ComponentModel.Composition;
 using System.Diagnostics;

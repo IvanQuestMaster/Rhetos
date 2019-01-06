@@ -18,8 +18,6 @@
 */
 
 using Rhetos.Dsl;
-using Rhetos.Extensibility;
-using Rhetos.Logging;
 using Rhetos.Security;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;

@@ -24,10 +24,9 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Rhetos.Utilities;
-using Rhetos.Compiler;
+using Rhetos.CodeGeneration;
 using Rhetos.Dsl;
 using Rhetos.Dsl.DefaultConcepts;
-using Rhetos.Extensibility;
 using System.Text.RegularExpressions;
 
 namespace Rhetos.Dom.DefaultConcepts

@@ -23,12 +23,10 @@ using System.Linq;
 using System.Text;
 using System.Globalization;
 using System.ComponentModel.Composition;
-using Microsoft.CSharp.RuntimeBinder;
 using Rhetos.Utilities;
-using Rhetos.Compiler;
+using Rhetos.CodeGeneration;
 using Rhetos.Dsl.DefaultConcepts;
 using Rhetos.Dsl;
-using Rhetos.Extensibility;
 
 namespace Rhetos.Dom.DefaultConcepts
 {

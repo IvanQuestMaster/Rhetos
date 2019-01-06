@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Rhetos.Dsl;
-using Rhetos.Compiler;
+using Rhetos.CodeGeneration;
 
 namespace Rhetos.Dom.DefaultConcepts
 {

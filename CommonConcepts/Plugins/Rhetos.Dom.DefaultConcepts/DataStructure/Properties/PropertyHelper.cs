@@ -24,7 +24,7 @@ using System.Text;
 using Rhetos.Dsl;
 using Rhetos.Dsl.DefaultConcepts;
 using System.Globalization;
-using Rhetos.Compiler;
+using Rhetos.CodeGeneration;
 
 namespace Rhetos.Dom.DefaultConcepts
 {

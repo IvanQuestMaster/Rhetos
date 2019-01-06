@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace Rhetos.Implementations
+namespace Rhetos
 {
     public static class MefProvider // TODO: Create custom attributes instead of this class. PluginHandles(conceptType) and PluginDependsOn(pluginType).
     {

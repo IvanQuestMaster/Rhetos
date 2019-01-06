@@ -23,10 +23,9 @@ using System.Linq;
 using System.Text;
 using System.Globalization;
 using System.ComponentModel.Composition;
-using Rhetos.Compiler;
+using Rhetos.CodeGeneration;
 using Rhetos.Dsl.DefaultConcepts;
 using Rhetos.Dsl;
-using Rhetos.Extensibility;
 using System.Diagnostics.Contracts;
 
 namespace Rhetos.Dom.DefaultConcepts

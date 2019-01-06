@@ -19,9 +19,8 @@
 
 using Rhetos.Dsl.DefaultConcepts;
 using System.ComponentModel.Composition;
-using Rhetos.Extensibility;
 using Rhetos.Dsl;
-using Rhetos.Compiler;
+using Rhetos.CodeGeneration;
 using Rhetos.Utilities;
 using Rhetos.DatabaseGenerator.DefaultConcepts;
 

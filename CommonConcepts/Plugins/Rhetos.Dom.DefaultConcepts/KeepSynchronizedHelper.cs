@@ -17,8 +17,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Extensibility;
-using Rhetos.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;

@@ -11,11 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Dsl", "Source\Rhetos
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Dsl.Interfaces", "Source\Rhetos.Dsl.Interfaces\Rhetos.Dsl.Interfaces.csproj", "{F4ACD412-2782-4191-8708-C7AE99B0CEE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.Utilities.Test", "Source\Rhetos.Utilities.Test\Rhetos.Utilities.Test.csproj", "{48196125-9AE3-40E5-8E0D-431B85083B7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Utilities.Test", "Source\Rhetos.Utilities.Test\Rhetos.Utilities.Test.csproj", "{48196125-9AE3-40E5-8E0D-431B85083B7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.Dsl.Test", "Source\Rhetos.Dsl.Test\Rhetos.Dsl.Test.csproj", "{F54C8A50-8AB5-4F7E-A255-D6645A457E02}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Dsl.Test", "Source\Rhetos.Dsl.Test\Rhetos.Dsl.Test.csproj", "{F54C8A50-8AB5-4F7E-A255-D6645A457E02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.TestCommon", "Source\Rhetos.TestCommon\Rhetos.TestCommon.csproj", "{43BA178B-7642-473C-A43A-DBF58294635A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.TestCommon", "Source\Rhetos.TestCommon\Rhetos.TestCommon.csproj", "{43BA178B-7642-473C-A43A-DBF58294635A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{E693EAA4-7798-41E5-BC17-AC162C89C004}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Intrefaces", "Source\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj", "{B0441C39-CCD6-479A-B163-EA7B77B86086}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Implementations", "Source\Rhetos.Implementations\Rhetos.Implementations.csproj", "{136283DC-C7B2-4B42-8592-60071982441A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.Implementations.Test", "Rhetos.Implementations.Test\Rhetos.Implementations.Test.csproj", "{87545177-C0E1-4765-BDFA-493F03564CAD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -182,6 +184,24 @@ Global
 		{136283DC-C7B2-4B42-8592-60071982441A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{136283DC-C7B2-4B42-8592-60071982441A}.Release|x86.ActiveCfg = Release|Any CPU
 		{136283DC-C7B2-4B42-8592-60071982441A}.Release|x86.Build.0 = Release|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.CodeAnalysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.CodeAnalysis|Any CPU.Build.0 = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.CodeAnalysis|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.CodeAnalysis|Mixed Platforms.Build.0 = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.CodeAnalysis|x86.ActiveCfg = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.CodeAnalysis|x86.Build.0 = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Debug|x86.Build.0 = Debug|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Release|x86.ActiveCfg = Release|Any CPU
+		{87545177-C0E1-4765-BDFA-493F03564CAD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -195,6 +215,7 @@ Global
 		{43BA178B-7642-473C-A43A-DBF58294635A} = {0124322E-2731-48E8-910C-957E37181628}
 		{1072EFEA-8282-47AB-A5B8-9D97A08B5BDD} = {E693EAA4-7798-41E5-BC17-AC162C89C004}
 		{136283DC-C7B2-4B42-8592-60071982441A} = {E693EAA4-7798-41E5-BC17-AC162C89C004}
+		{87545177-C0E1-4765-BDFA-493F03564CAD} = {E693EAA4-7798-41E5-BC17-AC162C89C004}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4B8D1BEA-EAAA-484D-B00D-1D23226A5A90}

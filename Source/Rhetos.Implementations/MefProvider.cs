@@ -17,12 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Rhetos.Extensibility
+namespace Rhetos.Implementations
 {
     public static class MefProvider // TODO: Create custom attributes instead of this class. PluginHandles(conceptType) and PluginDependsOn(pluginType).
     {

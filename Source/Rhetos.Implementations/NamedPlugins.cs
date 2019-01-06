@@ -17,15 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Autofac.Features.Indexed;
-using Autofac.Features.Metadata;
-using Rhetos.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace Rhetos.Extensibility
+namespace Rhetos.Implementations
 {
     /// <summary>
     /// This is a simple wrapper around IIndex, allowing plugin projects to compile without referencing Autofac.

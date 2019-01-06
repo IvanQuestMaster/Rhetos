@@ -18,10 +18,9 @@
 */
 
 using System;
-using Rhetos;
 using NLog;
 
-namespace Rhetos
+namespace Rhetos.Implementations
 {
     public class NLogger : ILogger
     {

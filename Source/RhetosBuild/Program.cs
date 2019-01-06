@@ -6,7 +6,7 @@ using System;
 using System.Linq;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using Rhetos.Extensibility;
+using Rhetos.Implementations;
 using System.Collections.Generic;
 using System.Xml.Linq;
 
@@ -28,7 +28,7 @@ namespace RhetosBuild
 
             var containerBuilder = new Autofac.ContainerBuilder();
             SetupInitalContiner(containerBuilder, pluginsFolder, installedPackages);
-            var containerBuilderImplementation = new Rhetos.ContainerBuilder(containerBuilder, pluginsFolder);
+            var containerBuilderImplementation = new Rhetos.Implementations.ContainerBuilder(containerBuilder, pluginsFolder);
 
             var modules = MefPluginScanner.FindPlugins(typeof(IModule), pluginsFolder).Select(x => x.Type);
             foreach (var module in modules)

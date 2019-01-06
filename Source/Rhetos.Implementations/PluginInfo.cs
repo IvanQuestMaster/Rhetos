@@ -19,10 +19,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Rhetos.Extensibility
+namespace Rhetos.Implementations
 {
     public class PluginInfo
     {

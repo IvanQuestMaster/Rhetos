@@ -19,12 +19,11 @@
 
 using Autofac;
 using Autofac.Core;
-using Autofac.Builder;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Rhetos.Extensibility
+namespace Rhetos.Implementations
 {
     /// <summary>
     /// Helper functions for plugins.

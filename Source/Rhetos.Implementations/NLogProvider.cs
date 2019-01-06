@@ -24,7 +24,7 @@ using System.Text;
 using NLog;
 using Rhetos;
 
-namespace Rhetos
+namespace Rhetos.Implementations
 {
     public class NLogProvider : ILogProvider
     {

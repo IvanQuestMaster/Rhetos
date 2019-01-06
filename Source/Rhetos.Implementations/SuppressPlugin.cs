@@ -19,7 +19,7 @@
 
 using System;
 
-namespace Rhetos.Extensibility
+namespace Rhetos.Implementations
 {
     /// <summary>
     /// Using a wrapper around 'Type' to allow registration of this instances to the IoC container.

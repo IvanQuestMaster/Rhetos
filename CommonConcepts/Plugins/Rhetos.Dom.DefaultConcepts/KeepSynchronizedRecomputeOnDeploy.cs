@@ -27,7 +27,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace Rhetos.Dom.DefaultConcepts
+//TODO: Implement this
+/*namespace Rhetos.Dom.DefaultConcepts
 {
     [Export(typeof(IServerInitializer))]
     public class KeepSynchronizedRecomputeOnDeploy : IServerInitializer
@@ -118,4 +119,4 @@ namespace Rhetos.Dom.DefaultConcepts
             return ks.Source + "/" + ks.Target;
         }
     }
-}
+}*/

@@ -72,5 +72,12 @@ namespace Rhetos.Dsl.DefaultConcepts
                 throw new FrameworkException("Invalid database object name: '" + fullObjectName + "'. Expected format is 'schema.name' or 'name'.");
             return SqlUtility.Identifier(shortName);
         }
+
+        public static string QuoteText(string value)
+        {
+            return value != null
+                ? "'" + value.Replace("'", "''") + "'"
+                : "NULL";
+        }
     }
 }

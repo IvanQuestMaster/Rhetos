@@ -21,6 +21,7 @@ using Rhetos.CodeGeneration;
 using Rhetos.Dsl;
 using Rhetos.Dsl.DefaultConcepts;
 using Rhetos.Utilities;
+using Rhetos.SqlUtilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;

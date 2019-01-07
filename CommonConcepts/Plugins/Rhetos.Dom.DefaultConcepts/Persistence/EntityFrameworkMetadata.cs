@@ -17,7 +17,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Logging;
 using Rhetos.Persistence;
 using Rhetos.Utilities;
 using System;

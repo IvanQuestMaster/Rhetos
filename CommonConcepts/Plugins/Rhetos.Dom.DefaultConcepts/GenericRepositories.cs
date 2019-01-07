@@ -17,8 +17,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Autofac.Features.Indexed;
-using Rhetos.Logging;
 using Rhetos.Persistence;
 using Rhetos.Dom.DefaultConcepts;
 using System;

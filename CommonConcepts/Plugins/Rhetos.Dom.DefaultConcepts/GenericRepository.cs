@@ -17,10 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Autofac.Features.Indexed;
 using Rhetos.Dsl;
 using Rhetos.Dsl.DefaultConcepts;
-using Rhetos.Logging;
 using Rhetos.Persistence;
 using Rhetos.Processing.DefaultCommands;
 using Rhetos.Utilities;

@@ -27,7 +27,7 @@ namespace RhetosBuild
             });
 
             var containerBuilder = new Autofac.ContainerBuilder();
-            SetupInitalContiner(containerBuilder, pluginsFolder, installedPackages);
+            SetupInitalContiner(containerBuilder, pluginsFolder, installedPackages, projectFolder);
             var containerBuilderImplementation = new Rhetos.Implementations.ContainerBuilder(containerBuilder, pluginsFolder);
 
             var modules = MefPluginScanner.FindPlugins(typeof(IModule), pluginsFolder).Select(x => x.Type);
@@ -48,12 +48,12 @@ namespace RhetosBuild
             }
         }
 
-        static void SetupInitalContiner(Autofac.ContainerBuilder containerBuilder, string pluginsFolder, InstalledPackages installedPackages)
+        static void SetupInitalContiner(Autofac.ContainerBuilder containerBuilder, string pluginsFolder, InstalledPackages installedPackages, string projectFolder)
         {
             var paths = new Paths
             {
-                GeneratedFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Generated"),
-                GeneratedFilesCacheFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedCache")
+                GeneratedFolder = projectFolder + @"\bin\Generated",
+                GeneratedFilesCacheFolder = projectFolder + @"\bin\GeneratedCache"
             };
             if (!Directory.Exists(paths.GeneratedFolder))
                 Directory.CreateDirectory(paths.GeneratedFolder);
@@ -69,6 +69,7 @@ namespace RhetosBuild
             containerBuilder.RegisterGeneric(typeof(NamedPlugins<>)).As(typeof(INamedPlugins<>)).InstancePerLifetimeScope();
 
             containerBuilder.RegisterGeneric(typeof(Index<,>)).As(typeof(IIndex<,>));
+            containerBuilder.RegisterType<MockConfiguration>().As<IConfiguration>();
         }
     }
 }

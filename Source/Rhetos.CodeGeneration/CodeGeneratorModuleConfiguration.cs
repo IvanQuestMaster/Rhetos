@@ -17,27 +17,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
 
-namespace Rhetos.Dsl
+namespace Rhetos.CodeGeneration
 {
-    /// <summary>
-    /// An instance of this concept is always present as the first concept in the DSL model.
-    /// This concept can be used for code generators that generate infrastructure classes and singletons.
-    /// </summary>
-    [Export(typeof(IConceptInfo))]
-    public class InitializationConcept : IConceptInfo
+    [Export(typeof(IModule))]
+    public class DslModuleConfiguration : IModule
     {
-        /// <summary>
-        /// Version of the currently running Rhetos server.
-        /// Note that it is not compatible with System.Version because Rhetos version may contain
-        /// textual pre-release information and build metadata (see Semantic Versioning 2.0.0 for example).
-        /// </summary>
-        [ConceptKey]
-        public string RhetosVersion { get; set; }
+        public void Load(IContainerBuilder builder)
+        {
+            builder.RegisterType<CodeBuilder>().As<ICodeBuilder>();
+            builder.RegisterType<CodeGenerator>().As<ICodeGenerator>();
+            builder.RegisterPlugins<IConceptCodeGenerator>();
+        }
     }
 }

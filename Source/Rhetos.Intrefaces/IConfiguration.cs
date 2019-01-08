@@ -19,25 +19,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Rhetos.Dsl
+namespace Rhetos
 {
-    /// <summary>
-    /// An instance of this concept is always present as the first concept in the DSL model.
-    /// This concept can be used for code generators that generate infrastructure classes and singletons.
-    /// </summary>
-    [Export(typeof(IConceptInfo))]
-    public class InitializationConcept : IConceptInfo
+    public interface IConfiguration
     {
-        /// <summary>
-        /// Version of the currently running Rhetos server.
-        /// Note that it is not compatible with System.Version because Rhetos version may contain
-        /// textual pre-release information and build metadata (see Semantic Versioning 2.0.0 for example).
-        /// </summary>
-        [ConceptKey]
-        public string RhetosVersion { get; set; }
+        Lazy<string> GetString(string key, string defaultValue);
+        Lazy<int> GetInt(string key, int defaultValue);
+        Lazy<bool> GetBool(string key, bool defaultValue);
     }
 }

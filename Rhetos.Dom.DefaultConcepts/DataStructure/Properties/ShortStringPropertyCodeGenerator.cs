@@ -17,11 +17,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace Rhetos.Implementations
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Rhetos.Dsl.DefaultConcepts;
+using System.Globalization;
+using System.ComponentModel.Composition;
+using Rhetos.Dsl;
+using Rhetos.CodeGeneration;
+
+namespace Rhetos.Dom.DefaultConcepts
 {
-    public static class MefProvider // TODO: Create custom attributes instead of this class. PluginHandles(conceptType) and PluginDependsOn(pluginType).
+    [Export(typeof(IConceptCodeGenerator))]
+    [ExportMetadata(MefProvider.Implements, typeof(ShortStringPropertyInfo))]
+    public class ShortStringPropertyCodeGenerator : IConceptCodeGenerator
     {
-        public const string Implements = "Implements";
-        public const string DependsOn = "DependsOn";
+        public void GenerateCode(IConceptInfo conceptInfo, ICodeBuilder codeBuilder)
+        {
+            PropertyInfo info = (PropertyInfo)conceptInfo;
+            PropertyHelper.GenerateCodeForType(info, codeBuilder, "string");
+        }
     }
 }

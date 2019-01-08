@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CommonConcepts\Plugins\Rhetos.Dsl.DefaultConcepts\Rhetos.Dsl.DefaultConcepts.csproj" />
+    <ProjectReference Include="..\Rhetos.Dom.Interfaces\Rhetos.Dom.Interfaces.csproj" />
+    <ProjectReference Include="..\Rhetos.Dom\Rhetos.Dom.csproj" />
+    <ProjectReference Include="..\Source\Rhetos.CodeGeneration.Interfaces\Rhetos.CodeGeneration.Interfaces.csproj" />
+    <ProjectReference Include="..\Source\Rhetos.Dsl.Interfaces\Rhetos.Dsl.Interfaces.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DataStructure\Properties\" />
+  </ItemGroup>
+
+</Project>

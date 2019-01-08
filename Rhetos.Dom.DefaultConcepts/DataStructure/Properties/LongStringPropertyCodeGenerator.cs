@@ -21,14 +21,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using Rhetos.Dsl.DefaultConcepts;
+using System.Globalization;
+using System.ComponentModel.Composition;
+using Rhetos.Dsl;
+using Rhetos.CodeGeneration;
 
-namespace Rhetos.Utilities
+namespace Rhetos.Dom.DefaultConcepts
 {
-    public interface IConfiguration
+    [Export(typeof(IConceptCodeGenerator))]
+    [ExportMetadata(MefProvider.Implements, typeof(LongStringPropertyInfo))]
+    public class LongStringPropertyCodeGenerator : IConceptCodeGenerator
     {
-        Lazy<string> GetString(string key, string defaultValue);
-        Lazy<int> GetInt(string key, int defaultValue);
-        Lazy<bool> GetBool(string key, bool defaultValue);
+        public void GenerateCode(IConceptInfo conceptInfo, ICodeBuilder codeBuilder)
+        {
+            PropertyInfo info = (PropertyInfo)conceptInfo;
+            PropertyHelper.GenerateCodeForType(info, codeBuilder, "string");
+        }
     }
 }

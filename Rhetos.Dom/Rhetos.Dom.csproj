@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rhetos.Dom.Interfaces\Rhetos.Dom.Interfaces.csproj" />
+    <ProjectReference Include="..\Source\Rhetos.CodeGeneration.Interfaces\Rhetos.CodeGeneration.Interfaces.csproj" />
+    <ProjectReference Include="..\Source\Rhetos.CodeGeneration\Rhetos.CodeGeneration.csproj" />
+    <ProjectReference Include="..\Source\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj" />
+  </ItemGroup>
+
+</Project>

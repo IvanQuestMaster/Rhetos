@@ -19,25 +19,36 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
+using System.Diagnostics.Contracts;
+using System.Reflection;
 
-namespace Rhetos.Dsl
+namespace Rhetos.Dom
 {
-    /// <summary>
-    /// An instance of this concept is always present as the first concept in the DSL model.
-    /// This concept can be used for code generators that generate infrastructure classes and singletons.
-    /// </summary>
-    [Export(typeof(IConceptInfo))]
-    public class InitializationConcept : IConceptInfo
+    public enum DomAssemblies { Model, Orm, Repositories };
+
+    public interface IDomainObjectModel
     {
-        /// <summary>
-        /// Version of the currently running Rhetos server.
-        /// Note that it is not compatible with System.Version because Rhetos version may contain
-        /// textual pre-release information and build metadata (see Semantic Versioning 2.0.0 for example).
-        /// </summary>
-        [ConceptKey]
-        public string RhetosVersion { get; set; }
+        IEnumerable<Assembly> Assemblies { get; }
+    }
+
+    public static class DomainObjectModelExtensions
+    {
+        public static Type GetType(this IDomainObjectModel dom, string name)
+        {
+            foreach (Assembly a in dom.Assemblies)
+            {
+                Type type = a.GetType(name);
+                if (type != null)
+                    return type;
+            }
+            return null;
+        }
+
+        public static IEnumerable<Type> GetTypes(this IDomainObjectModel dom)
+        {
+            return dom.Assemblies.SelectMany(a => a.GetTypes());
+        }
     }
 }

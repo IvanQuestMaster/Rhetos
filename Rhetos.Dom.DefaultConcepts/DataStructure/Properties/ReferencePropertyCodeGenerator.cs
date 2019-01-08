@@ -19,25 +19,27 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
+using Rhetos.Dsl.DefaultConcepts;
+using System.Globalization;
+using System.ComponentModel.Composition;
+using Rhetos.Dsl;
+using Rhetos.CodeGeneration;
+using Rhetos.Utilities;
 
-namespace Rhetos.Dsl
+namespace Rhetos.Dom.DefaultConcepts
 {
-    /// <summary>
-    /// An instance of this concept is always present as the first concept in the DSL model.
-    /// This concept can be used for code generators that generate infrastructure classes and singletons.
-    /// </summary>
-    [Export(typeof(IConceptInfo))]
-    public class InitializationConcept : IConceptInfo
+    [Export(typeof(IConceptCodeGenerator))]
+    [ExportMetadata(MefProvider.Implements, typeof(ReferencePropertyInfo))]
+    public class ReferencePropertyCodeGenerator : IConceptCodeGenerator
     {
-        /// <summary>
-        /// Version of the currently running Rhetos server.
-        /// Note that it is not compatible with System.Version because Rhetos version may contain
-        /// textual pre-release information and build metadata (see Semantic Versioning 2.0.0 for example).
-        /// </summary>
-        [ConceptKey]
-        public string RhetosVersion { get; set; }
+        public void GenerateCode(IConceptInfo conceptInfo, ICodeBuilder codeBuilder)
+        {
+            ReferencePropertyInfo info = (ReferencePropertyInfo)conceptInfo;
+
+            var referenceGuid = new PropertyInfo { DataStructure = info.DataStructure, Name = info.Name + "ID" };
+            PropertyHelper.GenerateCodeForType(referenceGuid, codeBuilder, "Guid?");
+        }
     }
 }

@@ -19,18 +19,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Rhetos
+namespace Rhetos.DatabaseGenerator
 {
-    public interface IConfiguration
+    public interface IConceptApplicationRepository
     {
-        Lazy<string> GetString(string key, string defaultValue);
-        Lazy<int> GetInt(string key, int defaultValue);
-        Lazy<bool> GetBool(string key, bool defaultValue);
-        Lazy<IConfigurationSection> GetConfigurationSection(string configurationSectionName);
-        Lazy<T> GetConfigurationSection<T>();
+        List<string> InsertMetadataSql(NewConceptApplication ca);
+        List<string> UpdateMetadataSql(NewConceptApplication ca, ConceptApplication oldApp);
+        List<string> DeleteMetadataSql(ConceptApplication ca);
+        List<ConceptApplication> Load();
     }
 }

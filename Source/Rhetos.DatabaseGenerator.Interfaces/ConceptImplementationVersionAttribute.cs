@@ -21,16 +21,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Rhetos
+namespace Rhetos.DatabaseGenerator
 {
-    public interface IConfiguration
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public sealed class ConceptImplementationVersionAttribute : Attribute
     {
-        Lazy<string> GetString(string key, string defaultValue);
-        Lazy<int> GetInt(string key, int defaultValue);
-        Lazy<bool> GetBool(string key, bool defaultValue);
-        Lazy<IConfigurationSection> GetConfigurationSection(string configurationSectionName);
-        Lazy<T> GetConfigurationSection<T>();
+        public Version Version { get; private set; }
+
+        public ConceptImplementationVersionAttribute(int v1, int v2)
+        {
+            Version = new Version(v1, v2);
+        }
+        public ConceptImplementationVersionAttribute(int v1, int v2, int v3)
+        {
+            Version = new Version(v1, v2, v3);
+        }
+        public ConceptImplementationVersionAttribute(int v1, int v2, int v3, int v4)
+        {
+            Version = new Version(v1, v2, v3, v4);
+        }
     }
 }

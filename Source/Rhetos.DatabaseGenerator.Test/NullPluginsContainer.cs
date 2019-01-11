@@ -17,20 +17,34 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Rhetos.Extensibility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Rhetos
+namespace Rhetos.DatabaseGenerator.Test
 {
-    public interface IConfiguration
+    public class NullPluginsContainer<T> : IPluginsContainer<T>
     {
-        Lazy<string> GetString(string key, string defaultValue);
-        Lazy<int> GetInt(string key, int defaultValue);
-        Lazy<bool> GetBool(string key, bool defaultValue);
-        Lazy<IConfigurationSection> GetConfigurationSection(string configurationSectionName);
-        Lazy<T> GetConfigurationSection<T>();
+        public IEnumerable<T> GetPlugins()
+        {
+            return new T[] {};
+        }
+
+        public Type GetMetadata(T plugin, string metadataKey)
+        {
+            return null;
+        }
+
+        public Type GetMetadata(Type pluginType, string metadataKey)
+        {
+            return null;
+        }
+
+        public IEnumerable<T> GetImplementations(Type implements)
+        {
+            return new T[] { };
+        }
     }
 }

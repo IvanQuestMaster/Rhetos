@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Rhetos.CodeGeneration;
+using Rhetos.Utilities;
 
 namespace Rhetos.Dsl.DefaultConcepts
 {

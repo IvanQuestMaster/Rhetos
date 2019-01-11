@@ -21,16 +21,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Rhetos
+namespace Rhetos.DatabaseGenerator
 {
-    public interface IConfiguration
+    public interface IDatabaseGenerator
     {
-        Lazy<string> GetString(string key, string defaultValue);
-        Lazy<int> GetInt(string key, int defaultValue);
-        Lazy<bool> GetBool(string key, bool defaultValue);
-        Lazy<IConfigurationSection> GetConfigurationSection(string configurationSectionName);
-        Lazy<T> GetConfigurationSection<T>();
+        void UpdateDatabaseStructure();
     }
 }

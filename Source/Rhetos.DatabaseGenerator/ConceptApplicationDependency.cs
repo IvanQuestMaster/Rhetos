@@ -21,16 +21,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using Rhetos.Dsl;
+using Rhetos.Utilities;
 
-namespace Rhetos
+namespace Rhetos.DatabaseGenerator
 {
-    public interface IConfiguration
+    public class ConceptApplicationDependency
     {
-        Lazy<string> GetString(string key, string defaultValue);
-        Lazy<int> GetInt(string key, int defaultValue);
-        Lazy<bool> GetBool(string key, bool defaultValue);
-        Lazy<IConfigurationSection> GetConfigurationSection(string configurationSectionName);
-        Lazy<T> GetConfigurationSection<T>();
+        public ConceptApplication ConceptApplication;
+        public string DebugInfo;
     }
 }

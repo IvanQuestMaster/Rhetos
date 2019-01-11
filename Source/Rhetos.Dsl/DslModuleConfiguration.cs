@@ -41,6 +41,7 @@ namespace Rhetos.Dsl
             //builder.RegisterPlugins<IDslModelIndex>();
             builder.RegisterType<DslModelIndexByType>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
             builder.RegisterType<DslModelIndexByReference>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
+
         }
     }
 }

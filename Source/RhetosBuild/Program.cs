@@ -41,7 +41,6 @@ namespace RhetosBuild
             var container = containerBuilder.Build();
 
             var generators = container.Resolve<IPluginsContainer<IGenerator>>();
-            var a = generators.GetPlugins().Count();
             foreach (var generator in generators.GetPlugins())
             {
                 generator.Generate();

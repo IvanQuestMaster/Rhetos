@@ -9,6 +9,7 @@
     <ProjectReference Include="..\..\..\Source\Rhetos.CodeGeneration.Interfaces\Rhetos.CodeGeneration.Interfaces.csproj" />
     <ProjectReference Include="..\..\..\Source\Rhetos.Dsl.Interfaces\Rhetos.Dsl.Interfaces.csproj" />
     <ProjectReference Include="..\..\..\Source\Rhetos.Intrefaces\Rhetos.Intrefaces.csproj" />
+    <ProjectReference Include="..\..\..\Source\Rhetos.Sql\Rhetos.Sql.csproj" />
   </ItemGroup>
 
   <ItemGroup>

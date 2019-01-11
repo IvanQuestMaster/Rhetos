@@ -18,19 +18,25 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Rhetos
+namespace Rhetos.DatabaseGenerator
 {
-    public interface IConfiguration
+    public struct Dependency : IEquatable<Dependency>
     {
-        Lazy<string> GetString(string key, string defaultValue);
-        Lazy<int> GetInt(string key, int defaultValue);
-        Lazy<bool> GetBool(string key, bool defaultValue);
-        Lazy<IConfigurationSection> GetConfigurationSection(string configurationSectionName);
-        Lazy<T> GetConfigurationSection<T>();
+        public ConceptApplication DependsOn;
+        public ConceptApplication Dependent;
+        public string DebugInfo;
+
+        public bool Equals(Dependency other)
+        {
+            return other.DependsOn.GetConceptApplicationKey().Equals(DependsOn.GetConceptApplicationKey())
+                   && other.Dependent.GetConceptApplicationKey().Equals(Dependent.GetConceptApplicationKey())
+                   && other.DebugInfo == DebugInfo;
+        }
+
+        public override int GetHashCode()
+        {
+            return DependsOn.Id.GetHashCode() ^ Dependent.Id.GetHashCode() ^ DebugInfo.GetHashCode();
+        }
     }
 }

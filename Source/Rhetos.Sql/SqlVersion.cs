@@ -23,14 +23,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rhetos
+namespace Rhetos.Utilities
 {
-    public interface IConfiguration
+    public enum SqlVersion
     {
-        Lazy<string> GetString(string key, string defaultValue);
-        Lazy<int> GetInt(string key, int defaultValue);
-        Lazy<bool> GetBool(string key, bool defaultValue);
-        Lazy<IConfigurationSection> GetConfigurationSection(string configurationSectionName);
-        Lazy<T> GetConfigurationSection<T>();
+        /// <summary>
+        ///     SQL Server 8 (2000).
+        /// </summary>
+        Sql8 = 80,
+
+        /// <summary>
+        ///     SQL Server 9 (2005).
+        /// </summary>
+        Sql9 = 90,
+
+        /// <summary>
+        ///     SQL Server 10 (2008).
+        /// </summary>
+        Sql10 = 100,
+
+        /// <summary>
+        ///     SQL Server 11 (2012).
+        /// </summary>
+        Sql11 = 110,
+
+        // Higher versions go here
     }
 }

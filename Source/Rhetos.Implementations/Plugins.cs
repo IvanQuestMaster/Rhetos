@@ -181,7 +181,7 @@ namespace Rhetos.Implementations
         //================================================================
         #region Log registration statistics
 
-        public static void LogRegistrationStatistics(string title, IContainer container)
+        public static void LogRegistrationStatistics(string title, Autofac.IContainer container)
         {
             Func<string> generateReport = () =>
             {

@@ -11,6 +11,16 @@ namespace Rhetos.Implementations
             return new Lazy<bool>(() => defaultValue);
         }
 
+        public Lazy<IConfigurationSection> GetConfigurationSection(string configurationSectionName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Lazy<T> GetConfigurationSection<T>()
+        {
+            throw new NotImplementedException();
+        }
+
         public Lazy<int> GetInt(string key, int defaultValue)
         {
             return new Lazy<int>(() => defaultValue);

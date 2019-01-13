@@ -2,7 +2,7 @@
   "profiles": {
     "RhetosBuild": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\ibarbancic\\Downloads\\TestRhetosCore\\TestRhetosCore"
+      "commandLineArgs": "C:\\Users\\home\\source\\repos\\TestRhetosCore\\TestRhetosCore"
     }
   }
 }

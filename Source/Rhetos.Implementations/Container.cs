@@ -17,12 +17,22 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using System;
+using Autofac;
 
-namespace Rhetos
+namespace Rhetos.Implementations
 {
-    public interface IModule
+    public class Container : Rhetos.IContainer
     {
-        void Load(IContainerBuilder containerBuilder);
+        Autofac.IContainer _autofacContainer;
+
+        public Container(Autofac.IContainer autofacContainer)
+        {
+            _autofacContainer = autofacContainer;
+        }
+
+        public T Resolve<T>()
+        {
+            return Autofac.ResolutionExtensions.Resolve<T>(_autofacContainer);
+        }
     }
 }

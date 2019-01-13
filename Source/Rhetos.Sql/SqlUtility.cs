@@ -34,22 +34,7 @@ namespace Rhetos.Utilities
     {
         // TODO: Move most of the methods to ISqlUtility.
 
-        private static ISqlUtility _sqlUtility;
-
-        public static void Initialize(ISqlUtility sqlUtility)
-        {
-            if (_sqlUtility != null)
-                throw new Exception("SqlUtility already initialized");
-        }
-
-        private static ISqlUtility GetSqlUtilityOrException()
-        {
-            if (_sqlUtility == null)
-                throw new Exception("SqlUtility is not initialized");
-
-            return _sqlUtility;
-        }
-
+        private static int? _sqlCommandTimeout = null;
         /// <summary>
         /// In seconds.
         /// </summary>
@@ -57,32 +42,77 @@ namespace Rhetos.Utilities
         {
             get
             {
-                return GetSqlUtilityOrException().SqlCommandTimeout;
+                if (!_sqlCommandTimeout.HasValue)
+                {
+                    string value = ConfigUtility.GetAppSetting("SqlCommandTimeout");
+
+                    if (!string.IsNullOrEmpty(value))
+                        _sqlCommandTimeout = int.Parse(value);
+                    else
+                        _sqlCommandTimeout = 30;
+                }
+                return _sqlCommandTimeout.Value;
             }
+        }
+
+        private static string _databaseLanguage;
+        private static string _nationalLanguage;
+
+        private static void SetLanguageFromProviderName(string connectionStringProvider)
+        {
+            var match = new Regex(@"^Rhetos\.(?<DatabaseLanguage>\w+)(.(?<NationalLanguage>\w+))?$").Match(connectionStringProvider);
+            if (!match.Success)
+                throw new FrameworkException("Invalid 'providerName' format in 'ServerConnectionString' connection string. Expected providerName format is 'Rhetos.<database language>' or 'Rhetos.<database language>.<natural language settings>', for example 'Rhetos.MsSql' or 'Rhetos.Oracle.XGERMAN_CI'.");
+            _databaseLanguage = match.Groups["DatabaseLanguage"].Value ?? "";
+            _nationalLanguage = match.Groups["NationalLanguage"].Value ?? "";
+        }
+
+        private static string GetProviderNameFromConnectionString()
+        {
+            var connectionStringProvider = ConfigUtility.GetConnectionString().ProviderName;
+            if (string.IsNullOrEmpty(connectionStringProvider))
+                throw new FrameworkException("Missing 'providerName' attribute in 'ServerConnectionString' connection string. Expected providerName format is 'Rhetos.<database language>' or 'Rhetos.<database language>.<natural language settings>', for example 'Rhetos.MsSql' or 'Rhetos.Oracle.XGERMAN_CI'.");
+            return connectionStringProvider;
         }
 
         public static string DatabaseLanguage
         {
             get
             {
-                return GetSqlUtilityOrException().DatabaseLanguage;
+                if (_databaseLanguage == null)
+                    SetLanguageFromProviderName(GetProviderNameFromConnectionString());
+
+                return _databaseLanguage;
             }
         }
+
+        private static Lazy<bool> DatabaseLanguageIsMsSql = new Lazy<bool>(() => string.Equals(DatabaseLanguage, "MsSql", StringComparison.Ordinal));
+        private static Lazy<bool> DatabaseLanguageIsOracle = new Lazy<bool>(() => string.Equals(DatabaseLanguage, "Oracle", StringComparison.Ordinal));
 
         public static string NationalLanguage
         {
             get
             {
-                return GetSqlUtilityOrException().NationalLanguage;
+                if (_nationalLanguage == null)
+                    SetLanguageFromProviderName(GetProviderNameFromConnectionString());
+
+                return _nationalLanguage;
             }
         }
 
 
+        private static string _connectionString;
         public static string ConnectionString
         {
             get
             {
-                return GetSqlUtilityOrException().ConnectionString;
+                if (_connectionString == null)
+                {
+                    _connectionString = ConfigUtility.GetConnectionString().ConnectionString;
+                    if (string.IsNullOrEmpty(_connectionString))
+                        throw new FrameworkException("Empty 'ServerConnectionString' connection string in application configuration.");
+                }
+                return _connectionString;
             }
         }
 
@@ -90,8 +120,68 @@ namespace Rhetos.Utilities
         {
             get
             {
-                return GetSqlUtilityOrException().ProviderName;
+                if (DatabaseLanguageIsMsSql.Value)
+                    return "System.Data.SqlClient";
+                else if (DatabaseLanguageIsOracle.Value)
+                    return "Oracle.ManagedDataAccess.Client";
+                else
+                    throw new FrameworkException(UnsupportedLanguageError);
             }
+        }
+
+        public static string UserContextInfoText(IUserInfo userInfo)
+        {
+            if (!userInfo.IsUserRecognized)
+                return "";
+
+            return "Rhetos:" + userInfo.Report();
+        }
+
+        public static IUserInfo ExtractUserInfo(string contextInfo)
+        {
+            if (contextInfo == null)
+                return new ReconstructedUserInfo { IsUserRecognized = false, UserName = null, Workstation = null };
+
+            string prefix1 = "Rhetos:";
+            string prefix2 = "Alpha:";
+
+            int positionUser;
+            if (contextInfo.StartsWith(prefix1))
+                positionUser = prefix1.Length;
+            else if (contextInfo.StartsWith(prefix2))
+                positionUser = prefix2.Length;
+            else
+                return new ReconstructedUserInfo { IsUserRecognized = false, UserName = null, Workstation = null };
+
+            var result = new ReconstructedUserInfo();
+
+            int positionWorkstation = contextInfo.IndexOf(',', positionUser);
+            if (positionWorkstation > -1)
+            {
+                result.UserName = contextInfo.Substring(positionUser, positionWorkstation - positionUser);
+                result.Workstation = contextInfo.Substring(positionWorkstation + 1);
+            }
+            else
+            {
+                result.UserName = contextInfo.Substring(positionUser);
+                result.Workstation = "";
+            }
+
+            result.UserName = result.UserName.Trim();
+            if (result.UserName == "") result.UserName = null;
+            result.Workstation = result.Workstation.Trim();
+            if (result.Workstation == "") result.Workstation = null;
+
+            result.IsUserRecognized = result.UserName != null;
+            return result;
+        }
+
+        private class ReconstructedUserInfo : IUserInfo
+        {
+            public bool IsUserRecognized { get; set; }
+            public string UserName { get; set; }
+            public string Workstation { get; set; }
+            public string Report() { return UserName + "," + Workstation; }
         }
 
         /// <summary>
@@ -101,32 +191,78 @@ namespace Rhetos.Utilities
         /// </summary>
         public static string Identifier(string name)
         {
-            return GetSqlUtilityOrException().Identifier(name);
+            string error = CsUtility.GetIdentifierError(name);
+            if (error != null)
+                throw new FrameworkException("Invalid database object name: " + error);
+
+            if (DatabaseLanguageIsOracle.Value)
+                name = OracleSqlUtility.LimitIdentifierLength(name);
+            if (DatabaseLanguageIsMsSql.Value)
+                name = MsSqlUtility.LimitIdentifierLength(name);
+
+            return name;
         }
 
         public static string QuoteText(string value)
         {
-            return GetSqlUtilityOrException().QuoteText(value);
+            return value != null
+                ? "'" + value.Replace("'", "''") + "'"
+                : "NULL";
         }
 
         public static string QuoteIdentifier(string sqlIdentifier)
         {
-            return GetSqlUtilityOrException().QuoteIdentifier(sqlIdentifier);
+            if (SqlUtility.DatabaseLanguage == "MsSql")
+            {
+                sqlIdentifier = sqlIdentifier.Replace("]", "]]");
+                return "[" + sqlIdentifier + "]";
+            }
+            throw new FrameworkException("Database language " + SqlUtility.DatabaseLanguage + " not supported.");
         }
 
         public static string GetSchemaName(string fullObjectName)
         {
-            return GetSqlUtilityOrException().GetSchemaName(fullObjectName);
+            int dotPosition = fullObjectName.IndexOf('.');
+            if (dotPosition == -1)
+                if (DatabaseLanguageIsMsSql.Value)
+                    return "dbo";
+                else if (DatabaseLanguageIsOracle.Value)
+                    throw new FrameworkException("Missing schema name for database object '" + fullObjectName + "'.");
+                else
+                    throw new FrameworkException(UnsupportedLanguageError);
+
+            var schema = fullObjectName.Substring(0, dotPosition);
+            return SqlUtility.Identifier(schema);
         }
 
         public static string GetShortName(string fullObjectName)
         {
-            return GetSqlUtilityOrException().GetShortName(fullObjectName);
+            int dotPosition = fullObjectName.IndexOf('.');
+            if (dotPosition == -1)
+                return fullObjectName;
+
+            var shortName = fullObjectName.Substring(dotPosition + 1);
+
+            int secondDot = shortName.IndexOf('.');
+            if (secondDot != -1 || string.IsNullOrEmpty(shortName))
+                throw new FrameworkException("Invalid database object name: '" + fullObjectName + "'. Expected format is 'schema.name' or 'name'.");
+            return SqlUtility.Identifier(shortName);
         }
 
         public static string GetFullName(string objectName)
         {
-            return GetSqlUtilityOrException().GetFullName(objectName);
+            var schema = SqlUtility.GetSchemaName(objectName);
+            var name = SqlUtility.GetShortName(objectName);
+            return schema + "." + name;
+        }
+
+        private static string UnsupportedLanguageError
+        {
+            get
+            {
+                return "SqlUtility functions are not supported for database language '" + DatabaseLanguage + "'."
+                    + " Supported database languages are: 'MsSql', 'Oracle'.";
+            }
         }
 
         /// <summary>
@@ -134,7 +270,12 @@ namespace Rhetos.Utilities
         /// </summary>
         public static Guid ReadGuid(DbDataReader dataReader, int column)
         {
-            return GetSqlUtilityOrException().ReadGuid(dataReader, column);
+            if (DatabaseLanguageIsMsSql.Value)
+                return dataReader.GetGuid(column);
+            else if (DatabaseLanguageIsOracle.Value)
+                return new Guid(((OracleDataReader)dataReader).GetOracleBinary(column).Value);
+            else
+                throw new FrameworkException(UnsupportedLanguageError);
         }
 
         /// <summary>
@@ -142,62 +283,81 @@ namespace Rhetos.Utilities
         /// </summary>
         public static int ReadInt(DbDataReader dataReader, int column)
         {
-            return GetSqlUtilityOrException().ReadInt(dataReader, column);
+            if (DatabaseLanguageIsMsSql.Value)
+                return dataReader.GetInt32(column);
+            else if (DatabaseLanguageIsOracle.Value)
+                return Convert.ToInt32(dataReader.GetInt64(column)); // On some systems, reading from NUMERIC(10) column will return Int64, and GetInt32 would fail.
+            else
+                throw new FrameworkException(UnsupportedLanguageError);
         }
 
         public static Guid StringToGuid(string guid)
         {
-            return GetSqlUtilityOrException().StringToGuid(guid);
+            if (DatabaseLanguageIsMsSql.Value)
+                return Guid.Parse(guid);
+            else if (DatabaseLanguageIsOracle.Value)
+                return new Guid(CsUtility.HexToByteArray(guid));
+            else
+                throw new FrameworkException(UnsupportedLanguageError);
         }
 
         public static string QuoteGuid(Guid guid)
         {
-            return GetSqlUtilityOrException().QuoteGuid(guid);
+            return "'" + GuidToString(guid) + "'";
         }
 
         public static string QuoteGuid(Guid? guid)
         {
-            return GetSqlUtilityOrException().QuoteGuid(guid);
+            return guid.HasValue
+                ? "'" + GuidToString(guid.Value) + "'"
+                : "NULL";
         }
 
         public static string GuidToString(Guid? guid)
         {
-            return GetSqlUtilityOrException().GuidToString(guid);
+            return guid.HasValue ? GuidToString(guid.Value) : null;
         }
 
         public static string GuidToString(Guid guid)
         {
-            return GetSqlUtilityOrException().GuidToString(guid);
+            if (DatabaseLanguageIsMsSql.Value)
+                return guid.ToString().ToUpper();
+            else if (DatabaseLanguageIsOracle.Value)
+                return CsUtility.ByteArrayToHex(guid.ToByteArray());
+            else
+                throw new FrameworkException(UnsupportedLanguageError);
         }
 
         public static string QuoteDateTime(DateTime? dateTime)
         {
-            return GetSqlUtilityOrException().QuoteDateTime(dateTime);
+            return dateTime.HasValue
+                ? "'" + DateTimeToString(dateTime.Value) + "'"
+                : "NULL";
         }
 
         public static string DateTimeToString(DateTime? dateTime)
         {
-            return GetSqlUtilityOrException().DateTimeToString(dateTime);
+            return dateTime.HasValue ? DateTimeToString(dateTime.Value) : null;
         }
 
         public static string DateTimeToString(DateTime dateTime)
         {
-            return GetSqlUtilityOrException().DateTimeToString(dateTime);
+            return dateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff");
         }
 
         public static string QuoteBool(bool? b)
         {
-            return GetSqlUtilityOrException().QuoteBool(b);
+            return b.HasValue ? BoolToString(b.Value) : "NULL";
         }
 
         public static string BoolToString(bool? b)
         {
-            return GetSqlUtilityOrException().BoolToString(b);
+            return b.HasValue ? BoolToString(b.Value) : null;
         }
 
         public static string BoolToString(bool b)
         {
-            return GetSqlUtilityOrException().BoolToString(b);
+            return b ? "0" : "1";
         }
 
         /// <summary>
@@ -206,12 +366,40 @@ namespace Rhetos.Utilities
         /// </summary>
         public static string EmptyNullString(DbDataReader dataReader, int column)
         {
-            return GetSqlUtilityOrException().EmptyNullString(dataReader, column);
+            if (DatabaseLanguageIsMsSql.Value)
+                return dataReader.GetString(column) ?? "";
+            else if (DatabaseLanguageIsOracle.Value)
+            {
+                var s = ((OracleDataReader)dataReader).GetOracleString(column);
+                return !s.IsNull ? s.Value : "";
+            }
+            else
+                throw new FrameworkException(UnsupportedLanguageError);
         }
 
         public static string SqlConnectionInfo(string connectionString)
         {
-            return GetSqlUtilityOrException().SqlConnectionInfo(connectionString);
+            SqlConnectionStringBuilder cs;
+            try
+            {
+                cs = new SqlConnectionStringBuilder(connectionString);
+            }
+            catch
+            {
+                // This is not be a blocking error, because other database providers should be supported.
+                return "(cannot parse connection string)";
+            }
+
+            var elements = new ListOfTuples<string, string>
+            {
+                { "DataSource", cs.DataSource },
+                { "InitialCatalog", cs.InitialCatalog },
+            };
+
+            return
+                string.Join(", ", elements
+                    .Where(e => !string.IsNullOrWhiteSpace(e.Item2))
+                    .Select(e => e.Item1 + "=" + e.Item2));
         }
 
         /// <summary>
@@ -226,14 +414,21 @@ namespace Rhetos.Utilities
         /// </summary>
         public const string NoTransactionTag = "/*DatabaseGenerator:NoTransaction*/";
 
-        public static bool ScriptSupportsTransaction(string sql)
-        {
-            return GetSqlUtilityOrException().ScriptSupportsTransaction(sql);
-        }
+        public static bool ScriptSupportsTransaction(string sql) => !sql.StartsWith(NoTransactionTag);
 
         public static DateTime GetDatabaseTime(ISqlExecuter sqlExecuter)
         {
-            return GetSqlUtilityOrException().GetDatabaseTime(sqlExecuter);
+            return DatabaseTimeCache.GetDatabaseTimeCached(() =>
+            {
+                DateTime databaseTime;
+                if (DatabaseLanguageIsMsSql.Value)
+                    databaseTime = MsSqlUtility.GetDatabaseTime(sqlExecuter);
+                else if (DatabaseLanguageIsOracle.Value)
+                    throw new FrameworkException("GetDatabaseTime function is not yet supported in Rhetos for Oracle database.");
+                else
+                    throw new FrameworkException(UnsupportedLanguageError);
+                return DateTime.SpecifyKind(databaseTime, DateTimeKind.Local);
+            }, () => DateTime.Now);
         }
 
         /// <summary>
@@ -243,7 +438,9 @@ namespace Rhetos.Utilities
         /// </summary>
         public static string[] SplitBatches(string sql)
         {
-            return GetSqlUtilityOrException().SplitBatches(sql);
+            return batchSplitter.Split(sql).Select(s => s.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToArray();
         }
+
+        private static readonly Regex batchSplitter = new Regex(@"^\s*GO\s*$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
     }
 }

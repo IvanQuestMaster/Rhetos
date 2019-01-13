@@ -21,8 +21,9 @@ using System;
 
 namespace Rhetos
 {
-    public interface IModule
+    [Obsolete]
+    public interface  IContainer
     {
-        void Load(IContainerBuilder containerBuilder);
+        T Resolve<T>();
     }
 }

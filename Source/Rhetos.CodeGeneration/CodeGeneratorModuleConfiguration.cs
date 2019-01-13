@@ -22,7 +22,7 @@ using System.ComponentModel.Composition;
 namespace Rhetos.CodeGeneration
 {
     [Export(typeof(IModule))]
-    public class DslModuleConfiguration : IModule
+    public class CodeGeneratorModuleConfiguration : IModule
     {
         public void Load(IContainerBuilder builder)
         {

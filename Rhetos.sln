@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{0124322E-2731-48E8-910C-957E37181628}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dsl", "Dsl", "{0124322E-2731-48E8-910C-957E37181628}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Utilities", "Source\Rhetos.Utilities\Rhetos.Utilities.csproj", "{71E63722-57BC-41DF-9FF5-57ECC67E4BC1}"
 EndProject
@@ -35,19 +35,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.CodeGeneration", "So
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.CodeGeneration.Interfaces", "Source\Rhetos.CodeGeneration.Interfaces\Rhetos.CodeGeneration.Interfaces.csproj", "{833B2D9E-DFA7-4F2E-842A-ABB894F5EB57}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.Dom.DefaultConcepts", "Rhetos.Dom.DefaultConcepts\Rhetos.Dom.DefaultConcepts.csproj", "{D8030B9E-7F2E-4ECD-B3FB-2609C9341C09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Dom.DefaultConcepts", "Rhetos.Dom.DefaultConcepts\Rhetos.Dom.DefaultConcepts.csproj", "{D8030B9E-7F2E-4ECD-B3FB-2609C9341C09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.Dom.Interfaces", "Rhetos.Dom.Interfaces\Rhetos.Dom.Interfaces.csproj", "{29B405E3-D449-4691-8149-1A3B6D336430}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Dom.Interfaces", "Rhetos.Dom.Interfaces\Rhetos.Dom.Interfaces.csproj", "{29B405E3-D449-4691-8149-1A3B6D336430}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.Dom", "Rhetos.Dom\Rhetos.Dom.csproj", "{15A898A0-FD93-4A33-9D9E-BB19E825AC66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Dom", "Rhetos.Dom\Rhetos.Dom.csproj", "{15A898A0-FD93-4A33-9D9E-BB19E825AC66}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DatabaseGenerator", "DatabaseGenerator", "{6494F433-5ABC-498C-B1C3-6D755F344A7C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{6494F433-5ABC-498C-B1C3-6D755F344A7C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.DatabaseGenerator", "Source\Rhetos.DatabaseGenerator\Rhetos.DatabaseGenerator.csproj", "{66278250-0CDF-4B2B-ACBA-1B264AF58721}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.DatabaseGenerator.Interfaces", "Source\Rhetos.DatabaseGenerator.Interfaces\Rhetos.DatabaseGenerator.Interfaces.csproj", "{8B209117-BA59-4645-AE05-8F3F1281E71A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhetos.Sql", "Source\Rhetos.Sql\Rhetos.Sql.csproj", "{5EB65DEA-7270-4BB9-A888-0AA6A319BD62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhetos.Sql", "Source\Rhetos.Sql\Rhetos.Sql.csproj", "{5EB65DEA-7270-4BB9-A888-0AA6A319BD62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

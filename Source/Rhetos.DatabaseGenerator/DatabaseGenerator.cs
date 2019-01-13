@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.ComponentModel.Composition;
 using Rhetos.Dsl;
 using System.Globalization;
 using Rhetos.Utilities;
@@ -29,7 +30,8 @@ using System.Text;
 
 namespace Rhetos.DatabaseGenerator
 {
-    public class DatabaseGenerator : IDatabaseGenerator
+    [Export(typeof(IServerInitializer))]
+    public class DatabaseGenerator : IDatabaseGenerator, IServerInitializer
     {
         protected readonly SqlTransactionBatches _sqlTransactionBatches;
         protected readonly IDslModel _dslModel;
@@ -65,6 +67,11 @@ namespace Rhetos.DatabaseGenerator
             _options = options;
         }
 
+        public void Initialize()
+        {
+            UpdateDatabaseStructure();
+        }
+
         public void UpdateDatabaseStructure()
         {
             if (DatabaseUpdated) // performance optimization
@@ -77,6 +84,7 @@ namespace Rhetos.DatabaseGenerator
 
                 _logger.Trace("Updating database structure.");
                 var stopwatchTotal = Stopwatch.StartNew();
+
                 var stopwatch = Stopwatch.StartNew();
 
                 var oldApplications = _conceptApplicationRepository.Load();

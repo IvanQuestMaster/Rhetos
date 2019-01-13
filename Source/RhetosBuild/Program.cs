@@ -45,6 +45,12 @@ namespace RhetosBuild
             {
                 generator.Generate();
             }
+
+            var initalizers = container.Resolve<IPluginsContainer<IServerInitializer>>();
+            foreach (var initializer in initalizers.GetPlugins())
+            {
+                initializer.Initialize();
+            }
         }
 
         static void SetupInitalContiner(Autofac.ContainerBuilder containerBuilder, string pluginsFolder, InstalledPackages installedPackages, string projectFolder)

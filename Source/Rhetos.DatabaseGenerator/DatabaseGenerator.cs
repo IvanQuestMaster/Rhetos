@@ -43,6 +43,7 @@ namespace Rhetos.DatabaseGenerator
         protected readonly ILogger _deployPackagesLogger;
         protected readonly ILogger _performanceLogger;
         protected readonly DatabaseGeneratorOptions _options;
+        protected readonly ISqlUtility _sqlUtility;
 
         protected bool DatabaseUpdated = false;
 
@@ -54,7 +55,8 @@ namespace Rhetos.DatabaseGenerator
             IPluginsContainer<IConceptDatabaseDefinition> plugins,
             IConceptApplicationRepository conceptApplicationRepository,
             ILogProvider logProvider,
-            DatabaseGeneratorOptions options)
+            DatabaseGeneratorOptions options,
+            ISqlUtility sqlUtility)
         {
             _sqlTransactionBatches = sqlTransactionBatches;
             _dslModel = dslModel;
@@ -65,6 +67,7 @@ namespace Rhetos.DatabaseGenerator
             _deployPackagesLogger = logProvider.GetLogger("DeployPackages");
             _performanceLogger = logProvider.GetLogger("Performance");
             _options = options;
+            _sqlUtility = sqlUtility;
         }
 
         public void UpdateDatabaseStructure()
@@ -590,12 +593,12 @@ namespace Rhetos.DatabaseGenerator
         private IEnumerable<string> MaybeCommitMetadataAfterDdl(string[] databaseModificationScripts)
         {
             if (_options.ShortTransactions)
-                yield return SqlUtility.NoTransactionTag; // The NoTransaction script will force commit of the previous (metadata) scripts.
+                yield return SqlScriptUtility.NoTransactionTag; // The NoTransaction script will force commit of the previous (metadata) scripts.
 
             // If a DDL script is executed out of transaction, its metadata should also be committed immediately,
             // to avoid rolling back the concept application's metadata in case of any error that might occur later in the transaction.
-            else if (databaseModificationScripts.Any(script => script.StartsWith(SqlUtility.NoTransactionTag)))
-                yield return SqlUtility.NoTransactionTag;
+            else if (databaseModificationScripts.Any(script => script.StartsWith(SqlScriptUtility.NoTransactionTag)))
+                yield return SqlScriptUtility.NoTransactionTag;
 
             // Oracle must commit metadata changes before modifying next database object, to ensure metadata consistency if next DDL command fails
             // (Oracle db automatically commits changes on DDL commands, so the previous DDL command has already been committed).
@@ -629,7 +632,7 @@ namespace Rhetos.DatabaseGenerator
         {
             if (string.IsNullOrEmpty(script))
                 return new string[] { };
-            return script.Split(new[] { SqlUtility.ScriptSplitterTag }, StringSplitOptions.RemoveEmptyEntries)
+            return script.Split(new[] { SqlScriptUtility.ScriptSplitterTag }, StringSplitOptions.RemoveEmptyEntries)
                 .Where(query => !string.IsNullOrWhiteSpace(query))
                 .Select(query => query.Trim()).ToArray();
         }
@@ -639,7 +642,7 @@ namespace Rhetos.DatabaseGenerator
             _conceptsLogger.Trace("{0} {1}, ID={2}.{3}{4}",
                 action,
                 conceptApplication.GetConceptApplicationKey(),
-                SqlUtility.GuidToString(conceptApplication.Id),
+                _sqlUtility.GuidToString(conceptApplication.Id),
                 additionalInfo != null ? " " : null,
                 additionalInfo != null ? additionalInfo() : null);
         }

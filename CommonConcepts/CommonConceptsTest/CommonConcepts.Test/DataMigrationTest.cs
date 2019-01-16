@@ -82,7 +82,7 @@ namespace CommonConcepts.Test
                     {
                         { "DataMigration.SkipScriptsWithWrongOrder", skipScriptsWithWrongOrder }
                     };
-                    var dataMigration = new DataMigration(sqlExecuter, container.Resolve<ILogProvider>(), scriptsProvider, configuration, sqlBatches);
+                    var dataMigration = new DataMigration(sqlExecuter, container.Resolve<ILogProvider>(), scriptsProvider, configuration, sqlBatches, new MsSqlUtility2(new MockConfiguration(), new ConnectionStringConfiguration()));
                     dataMigration.ExecuteDataMigrationScripts();
                 }
 

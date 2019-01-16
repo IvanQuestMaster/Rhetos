@@ -176,12 +176,12 @@ namespace Rhetos.Utilities
 
         public string GuidToString(Guid? guid)
         {
-            return "'" + GuidToString(guid) + "'";
+            return guid.HasValue ? GuidToString(guid.Value) : null;
         }
 
         public string GuidToString(Guid guid)
         {
-            return "'" + GuidToString(guid) + "'";
+            return guid.ToString().ToUpper();
         }
 
         public string Identifier(string name)

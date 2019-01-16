@@ -43,6 +43,7 @@ namespace Rhetos.Deployment
         private readonly DataMigration _dataMigration;
         private readonly IDatabaseGenerator _databaseGenerator;
         private readonly IDslScriptsProvider _dslScriptsLoader;
+        private readonly ISqlUtility _sqlUtility;
 
         public ApplicationGenerator(
             ILogProvider logProvider,
@@ -53,7 +54,8 @@ namespace Rhetos.Deployment
             DatabaseCleaner databaseCleaner,
             DataMigration dataMigration,
             IDatabaseGenerator databaseGenerator,
-            IDslScriptsProvider dslScriptsLoader)
+            IDslScriptsProvider dslScriptsLoader,
+            ISqlUtility sqlUtility)
         {
             _deployPackagesLogger = logProvider.GetLogger("DeployPackages");
             _performanceLogger = logProvider.GetLogger("Performance");
@@ -65,6 +67,7 @@ namespace Rhetos.Deployment
             _dataMigration = dataMigration;
             _databaseGenerator = databaseGenerator;
             _dslScriptsLoader = dslScriptsLoader;
+            _sqlUtility = sqlUtility;
         }
 
         public void ExecuteGenerators(bool deployDatabaseOnly)
@@ -152,7 +155,7 @@ namespace Rhetos.Deployment
                 throw new FrameworkException("Cannot find resource '" + rhetosDatabaseScriptResourceName + "'.");
             var sql = new StreamReader(resourceStream).ReadToEnd();
 
-            var sqlScripts = SqlUtility.SplitBatches(sql);
+            var sqlScripts = _sqlUtility.SplitBatches(sql);
             _sqlExecuter.ExecuteSql(sqlScripts);
         }
 
@@ -188,8 +191,8 @@ namespace Rhetos.Deployment
 
             sql.AddRange(_dslScriptsLoader.DslScripts.Select(dslScript => Sql.Format(
                 "DslScriptManager_Insert",
-                SqlUtility.QuoteText(dslScript.Name),
-                SqlUtility.QuoteText(dslScript.Script))));
+                _sqlUtility.QuoteText(dslScript.Name),
+                _sqlUtility.QuoteText(dslScript.Script))));
 
             _sqlExecuter.ExecuteSql(sql);
 

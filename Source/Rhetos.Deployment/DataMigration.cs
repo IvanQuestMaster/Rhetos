@@ -40,8 +40,14 @@ namespace Rhetos.Deployment
         protected readonly IDataMigrationScriptsProvider _scriptsProvider;
         protected readonly IConfiguration _configuration;
         protected readonly SqlTransactionBatches _sqlTransactionBatches;
+        protected readonly ISqlUtility _sqlUtility;
 
-        public DataMigration(ISqlExecuter sqlExecuter, ILogProvider logProvider, IDataMigrationScriptsProvider scriptsProvider, IConfiguration configuration, SqlTransactionBatches sqlTransactionBatches)
+        public DataMigration(ISqlExecuter sqlExecuter,
+            ILogProvider logProvider,
+            IDataMigrationScriptsProvider scriptsProvider,
+            IConfiguration configuration,
+            SqlTransactionBatches sqlTransactionBatches,
+            ISqlUtility sqlUtility)
         {
             _sqlExecuter = sqlExecuter;
             _logger = logProvider.GetLogger("DataMigration");
@@ -49,6 +55,7 @@ namespace Rhetos.Deployment
             _scriptsProvider = scriptsProvider;
             _configuration = configuration;
             _sqlTransactionBatches = sqlTransactionBatches;
+            _sqlUtility = sqlUtility;
         }
 
         public DataMigrationReport ExecuteDataMigrationScripts()
@@ -127,14 +134,14 @@ namespace Rhetos.Deployment
                 }));
         }
 
-        protected static string SaveDataMigrationScriptMetadata(DataMigrationScript script)
+        protected string SaveDataMigrationScriptMetadata(DataMigrationScript script)
         {
             return string.Format(
                 "DELETE FROM Rhetos.DataMigrationScript WHERE Active = 0 AND Tag = {0};\r\n"
                 + "INSERT INTO Rhetos.DataMigrationScript (Tag, Path, Content, Active) VALUES ({0}, {1}, {2}, 1);",
-                SqlUtility.QuoteText(script.Tag),
-                SqlUtility.QuoteText(script.Path),
-                SqlUtility.QuoteText(script.Content));
+                _sqlUtility.QuoteText(script.Tag),
+                _sqlUtility.QuoteText(script.Path),
+                _sqlUtility.QuoteText(script.Content));
         }
 
         protected List<DataMigrationScript> FindSkipedScriptsInEachPackage(List<DataMigrationScript> oldScripts, List<DataMigrationScript> newScripts)

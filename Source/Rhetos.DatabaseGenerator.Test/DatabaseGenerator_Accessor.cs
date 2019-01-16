@@ -22,6 +22,7 @@ using Rhetos.Dom;
 using Rhetos.Dsl;
 using Rhetos.Extensibility;
 using Rhetos.Logging;
+using Rhetos.TestCommon;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
@@ -33,19 +34,22 @@ namespace Rhetos.DatabaseGenerator.Test
     class DatabaseGenerator_Accessor : DatabaseGenerator
     {
         public DatabaseGenerator_Accessor()
-            : base(null, null, new NullPluginsContainer<IConceptDatabaseDefinition>(), null, new ConsoleLogProvider(), new DatabaseGeneratorOptions { ShortTransactions = false })
+            : base(null, null, new NullPluginsContainer<IConceptDatabaseDefinition>(), null, new ConsoleLogProvider(), new DatabaseGeneratorOptions { ShortTransactions = false },
+                new MsSqlUtility2(new MockConfiguration(), new ConnectionStringConfiguration()))
         {
         }
 
         public DatabaseGenerator_Accessor(IDslModel dslModel, PluginsContainer<IConceptDatabaseDefinition> plugins)
-            : base(null, dslModel, plugins, null, new ConsoleLogProvider(), new DatabaseGeneratorOptions { ShortTransactions = false })
+            : base(null, dslModel, plugins, null, new ConsoleLogProvider(), new DatabaseGeneratorOptions { ShortTransactions = false },
+            new MsSqlUtility2(new MockConfiguration(), new ConnectionStringConfiguration()))
         {
         }
 
         public DatabaseGenerator_Accessor(SqlTransactionBatches sqlTransactionBatches)
             : base(sqlTransactionBatches, null, new NullPluginsContainer<IConceptDatabaseDefinition>(),
             new MockConceptApplicationRepository(),
-            new ConsoleLogProvider(), new DatabaseGeneratorOptions { ShortTransactions = false })
+            new ConsoleLogProvider(), new DatabaseGeneratorOptions { ShortTransactions = false },
+            new MsSqlUtility2(new MockConfiguration(), new ConnectionStringConfiguration()))
         {
         }
 

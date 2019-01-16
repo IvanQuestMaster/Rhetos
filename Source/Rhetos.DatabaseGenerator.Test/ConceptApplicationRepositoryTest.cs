@@ -200,7 +200,8 @@ namespace Rhetos.DatabaseGenerator.Test
             return new ConceptApplicationRepository(
                 new MockSqlExecuter(conceptApplications),
                 new ConsoleLogProvider(),
-                new XmlUtility(new DomainObjectModelMock()));
+                new XmlUtility(new DomainObjectModelMock()),
+                new MsSqlUtility2(new MockConfiguration(), new ConnectionStringConfiguration()));
         }
 
         [TestMethod]

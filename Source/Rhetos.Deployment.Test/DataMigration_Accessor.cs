@@ -18,6 +18,7 @@
 */
 
 using Rhetos.Logging;
+using Rhetos.TestCommon;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,8 @@ namespace Rhetos.Deployment.Test
     class DataMigration_Accessor : DataMigration
     {
         public DataMigration_Accessor()
-            : base(null, new ConsoleLogProvider(), null, null, null)
+            : base(null, new ConsoleLogProvider(), null, null, null,
+                new MsSqlUtility2(new MockConfiguration(), new ConnectionStringConfiguration()))
         {
         }
 

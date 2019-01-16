@@ -32,6 +32,29 @@ namespace Rhetos.Utilities.Test
     [DeploymentItem("ConnectionStrings.config")]
     public class SqlUtilityTest
     {
+        internal class NullConfiguration : IConfiguration
+        {
+            public Lazy<bool> GetBool(string key, bool defaultValue)
+            {
+                return new Lazy<bool>(() => defaultValue);
+            }
+
+            public Lazy<int> GetInt(string key, int defaultValue)
+            {
+                return new Lazy<int>(() => defaultValue);
+            }
+
+            public Lazy<string> GetString(string key, string defaultValue)
+            {
+                return new Lazy<string>(() => defaultValue);
+            }
+        }
+
+        private ISqlUtility GetMsSqlUtility()
+        {
+            return new MsSqlUtility2(new NullConfiguration(), new ConnectionStringConfiguration());
+        }
+
         [TestMethod]
         public void OracleLimitIdentifierLength()
         {
@@ -53,13 +76,13 @@ namespace Rhetos.Utilities.Test
         [TestMethod]
         public void SingleQuote_SimpleTest()
         {
-            Assert.AreEqual("'abc'", SqlUtility.QuoteText("abc"));
+            Assert.AreEqual("'abc'", GetMsSqlUtility().QuoteText("abc"));
         }
 
         [TestMethod]
         public void SingleQuote_EscapeSequenceTest()
         {
-            Assert.AreEqual("'ab''c'", SqlUtility.QuoteText("ab'c"));
+            Assert.AreEqual("'ab''c'", GetMsSqlUtility().QuoteText("ab'c"));
         }
 
         [TestMethod]
@@ -67,11 +90,11 @@ namespace Rhetos.Utilities.Test
         {
             TestUtility.CheckDatabaseAvailability();
 
-            Assert.AreEqual("someschema", SqlUtility.GetSchemaName("someschema.someview"));
-            Assert.AreEqual("someview", SqlUtility.GetShortName("someschema.someview"));
+            Assert.AreEqual("someschema", GetMsSqlUtility().GetSchemaName("someschema.someview"));
+            Assert.AreEqual("someview", GetMsSqlUtility().GetShortName("someschema.someview"));
 
-            TestUtility.ShouldFail(() => SqlUtility.GetShortName("a.b.c"), "Invalid database object name");
-            TestUtility.ShouldFail(() => SqlUtility.GetShortName("a."), "Invalid database object name");
+            TestUtility.ShouldFail(() => GetMsSqlUtility().GetShortName("a.b.c"), "Invalid database object name");
+            TestUtility.ShouldFail(() => GetMsSqlUtility().GetShortName("a."), "Invalid database object name");
         }
 
         [TestMethod]
@@ -79,8 +102,8 @@ namespace Rhetos.Utilities.Test
         {
             TestUtility.CheckDatabaseAvailability("MsSql");
 
-            Assert.AreEqual("dbo", SqlUtility.GetSchemaName("someview"));
-            Assert.AreEqual("someview", SqlUtility.GetShortName("someview"));
+            Assert.AreEqual("dbo", GetMsSqlUtility().GetSchemaName("someview"));
+            Assert.AreEqual("someview", GetMsSqlUtility().GetShortName("someview"));
         }
 
         [TestMethod]
@@ -88,8 +111,8 @@ namespace Rhetos.Utilities.Test
         {
             TestUtility.CheckDatabaseAvailability("Oracle");
 
-            TestUtility.ShouldFail(() => SqlUtility.GetSchemaName("someview"), "Missing schema");
-            Assert.AreEqual("someview", SqlUtility.GetShortName("someview"));
+            TestUtility.ShouldFail(() => GetMsSqlUtility().GetSchemaName("someview"), "Missing schema");
+            Assert.AreEqual("someview", GetMsSqlUtility().GetShortName("someview"));
         }
 
         [TestMethod]
@@ -115,7 +138,7 @@ namespace Rhetos.Utilities.Test
             foreach (var test in tests)
             {
                 Console.WriteLine(test.Item1);
-                string report = SqlUtility.SqlConnectionInfo(test.Item1);
+                string report = new ConnectionStringConfiguration().SqlConnectionInfo(test.Item1);
                 Console.WriteLine("=> " + report);
 
                 TestUtility.AssertNotContains(report, "j", "Username or password leaked.");
@@ -162,10 +185,10 @@ namespace Rhetos.Utilities.Test
 
             var sqlExecuter = new MockSqlExecuter();
 
-            Enumerable.Range(0, 4).Select(x => SqlUtility.GetDatabaseTime(sqlExecuter)); // Caching initialization.
+            Enumerable.Range(0, 4).Select(x => GetMsSqlUtility().GetDatabaseTime(sqlExecuter)); // Caching initialization.
 
-            var notCachedDatabaseTime = MsSqlUtility.GetDatabaseTime(sqlExecuter);
-            var cachedTime = SqlUtility.GetDatabaseTime(sqlExecuter);
+            var notCachedDatabaseTime = GetMsSqlUtility().GetDatabaseTime(sqlExecuter);
+            var cachedTime = GetMsSqlUtility().GetDatabaseTime(sqlExecuter);
 
             Console.WriteLine(notCachedDatabaseTime.ToString("o"));
             Console.WriteLine(cachedTime.ToString("o"));
@@ -178,7 +201,7 @@ namespace Rhetos.Utilities.Test
         public void ExtractUserInfoTestFormat()
         {
             var initialUserInfo = new TestUserInfo(@"os\ab", "cd.ef", true);
-            var processedUserInfo = SqlUtility.ExtractUserInfo(SqlUtility.UserContextInfoText(initialUserInfo));
+            var processedUserInfo = GetMsSqlUtility().ExtractUserInfo(GetMsSqlUtility().UserContextInfoText(initialUserInfo));
             Assert.AreEqual(
                 initialUserInfo.UserName + "|" + initialUserInfo.Workstation,
                 processedUserInfo.UserName + "|" + processedUserInfo.Workstation);
@@ -207,7 +230,7 @@ namespace Rhetos.Utilities.Test
 
             foreach (var test in tests)
             {
-                var result = SqlUtility.ExtractUserInfo(test.Key == "<null>" ? null : test.Key);
+                var result = GetMsSqlUtility().ExtractUserInfo(test.Key == "<null>" ? null : test.Key);
                 Assert.AreEqual(test.Value, (result.UserName ?? "null") + "|" + (result.Workstation ?? "null"), "Input: " + test.Key);
             }
         }
@@ -225,7 +248,7 @@ namespace Rhetos.Utilities.Test
             };
 
             foreach (var test in tests)
-                Assert.AreEqual(test.Value, SqlUtility.QuoteIdentifier(test.Key));
+                Assert.AreEqual(test.Value, GetMsSqlUtility().QuoteIdentifier(test.Key));
         }
 
         [TestMethod]
@@ -248,7 +271,7 @@ namespace Rhetos.Utilities.Test
                 { "\r\n  \r\n  GO  \r\n  \r\n", new string[] { } } // Empty batches
             };
             foreach (var test in tests)
-                Assert.AreEqual(TestUtility.Dump(test.Value), TestUtility.Dump(SqlUtility.SplitBatches(test.Key)), "Input: " + test.Key);
+                Assert.AreEqual(TestUtility.Dump(test.Value), TestUtility.Dump(GetMsSqlUtility().SplitBatches(test.Key)), "Input: " + test.Key);
         }
     }
 }

@@ -28,7 +28,7 @@ using System.Text.RegularExpressions;
 
 namespace Rhetos.Utilities
 {
-    public class MsSqlUtility : ISqlUtility
+    public class MsSqlUtility
     {
         /// <summary>
         /// Creates an SQL query that sets context_info connection variable to contain data about the user.

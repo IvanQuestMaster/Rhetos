@@ -25,7 +25,7 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Rhetos.Utilities
 {
-    public class OracleSqlUtility : ISqlUtility
+    public class OracleSqlUtility
     {
         public static string LimitIdentifierLength(string name)
         {

@@ -18,10 +18,7 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data.Common;
 
 namespace Rhetos.Utilities
 {
@@ -37,5 +34,91 @@ namespace Rhetos.Utilities
         /// Simplifies ORM exception by detecting the SQL exception that caused it.
         /// </summary>
         Exception ExtractSqlException(Exception exception);
+
+        /// <summary>
+        /// In seconds.
+        /// </summary>
+        int SqlCommandTimeout { get; }
+
+        string ProviderName { get; }
+
+        string UserContextInfoText(IUserInfo userInfo);
+
+        IUserInfo ExtractUserInfo(string contextInfo);
+
+        /// <summary>
+        /// Throws an exception if 'name' is not a valid SQL database object name.
+        /// Function returns given argument so it can be used as fluent interface.
+        /// In some cases the function may change the identifier (limit identifier length to 30 on Oracle database, e.g.).
+        /// </summary>
+        string Identifier(string name);
+
+        string QuoteText(string value);
+
+        string QuoteIdentifier(string sqlIdentifier);
+
+        string GetSchemaName(string fullObjectName);
+
+        string GetShortName(string fullObjectName);
+
+        string GetFullName(string objectName);
+
+        /// <summary>
+        /// Vendor-independent database reader.
+        /// </summary>
+        Guid ReadGuid(DbDataReader dataReader, int column);
+
+        /// <summary>
+        /// Vendor-independent database reader.
+        /// </summary>
+        int ReadInt(DbDataReader dataReader, int column);
+
+        /// <summary>
+        /// Returns empty string if the string value is null.
+        /// This function is used for compatibility between MsSql and Oracle string behavior.
+        /// </summary>
+        string EmptyNullString(DbDataReader dataReader, int column);
+
+        Guid StringToGuid(string guid);
+
+        string QuoteGuid(Guid guid);
+
+        string QuoteGuid(Guid? guid);
+
+        string GuidToString(Guid? guid);
+
+        string GuidToString(Guid guid);
+
+        string QuoteDateTime(DateTime? dateTime);
+
+        string DateTimeToString(DateTime? dateTime);
+
+        string DateTimeToString(DateTime dateTime);
+
+        string QuoteBool(bool? b);
+
+        string BoolToString(bool? b);
+
+        string BoolToString(bool b);
+
+        DateTime GetDatabaseTime(ISqlExecuter sqlExecuter);
+
+        /// <summary>
+        /// Creates an SQL query that sets context_info connection variable to contain data about the user.
+        /// The context_info variable can be used in SQL server to extract user info in certain situations such as logging trigger.
+        /// </summary>
+        string SetUserContextInfoQuery(IUserInfo userInfo);
+
+        string LimitIdentifierLength(string name);
+
+        bool IsUniqueError(RhetosException interpretedException, string table, string constraintName);
+
+        bool IsReferenceErrorOnInsertUpdate(RhetosException interpretedException, string referencedTable, string referencedColumn, string constraintName);
+
+        bool IsReferenceErrorOnDelete(RhetosException interpretedException, string dependentTable, string dependentColumn, string constraintName);
+
+        void ThrowIfPrimaryKeyErrorOnInsert(RhetosException interpretedException, string tableName);
+
+        string[] SplitBatches(string sql);
     }
 }

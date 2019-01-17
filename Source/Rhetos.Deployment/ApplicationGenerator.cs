@@ -45,6 +45,7 @@ namespace Rhetos.Deployment
         private readonly IDslScriptsProvider _dslScriptsLoader;
         private readonly ISqlUtility _sqlUtility;
         private readonly IConnectionStringConfiguration _connectionStringConfiguration;
+        private readonly ISqlResourceProvider _sqlResourceProvider;
 
         public ApplicationGenerator(
             ILogProvider logProvider,
@@ -57,7 +58,8 @@ namespace Rhetos.Deployment
             IDatabaseGenerator databaseGenerator,
             IDslScriptsProvider dslScriptsLoader,
             ISqlUtility sqlUtility,
-            IConnectionStringConfiguration connectionStringConfiguration)
+            IConnectionStringConfiguration connectionStringConfiguration,
+            ISqlResourceProvider sqlResourceProvider)
         {
             _deployPackagesLogger = logProvider.GetLogger("DeployPackages");
             _performanceLogger = logProvider.GetLogger("Performance");
@@ -71,6 +73,7 @@ namespace Rhetos.Deployment
             _dslScriptsLoader = dslScriptsLoader;
             _sqlUtility = sqlUtility;
             _connectionStringConfiguration = connectionStringConfiguration;
+            _sqlResourceProvider = sqlResourceProvider;
         }
 
         public void ExecuteGenerators(bool deployDatabaseOnly)
@@ -190,9 +193,9 @@ namespace Rhetos.Deployment
         {
             List<string> sql = new List<string>();
 
-            sql.Add(Sql.Get("DslScriptManager_Delete"));
+            sql.Add(_sqlResourceProvider.Get("DslScriptManager_Delete"));
 
-            sql.AddRange(_dslScriptsLoader.DslScripts.Select(dslScript => Sql.Format(
+            sql.AddRange(_dslScriptsLoader.DslScripts.Select(dslScript => _sqlResourceProvider.Format(
                 "DslScriptManager_Insert",
                 _sqlUtility.QuoteText(dslScript.Name),
                 _sqlUtility.QuoteText(dslScript.Script))));

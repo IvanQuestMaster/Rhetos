@@ -83,6 +83,7 @@
     <Compile Include="DeploymentModuleConfiguration.cs" />
     <Compile Include="IDataMigrationScriptsProvider.cs" />
     <Compile Include="InstalledPackages.cs" />
+    <Compile Include="ISqlResourceProvider.cs" />
     <Compile Include="LoggerForNuget.cs" />
     <Compile Include="PackageDownloaderOptions.cs" />
     <Compile Include="PackageSource.cs" />
@@ -95,6 +96,7 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Sql.cs" />
+    <Compile Include="SqlResourceProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Rhetos.Utilities\Rhetos.Utilities.csproj">

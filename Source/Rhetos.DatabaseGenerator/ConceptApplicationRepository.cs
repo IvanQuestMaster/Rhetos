@@ -51,7 +51,7 @@ namespace Rhetos.DatabaseGenerator
         public List<ConceptApplication> Load()
         {
             var previoslyAppliedConcepts = LoadOldConceptApplicationsFromDatabase();
-            CheckKeyUniqueness(previoslyAppliedConcepts, "loaded");
+            CheckKeyUniqueness(_sqlUtility, previoslyAppliedConcepts, "loaded");
 
             var dependencies = LoadDependenciesFromDatabase();
             EvaluateDependencies(previoslyAppliedConcepts, dependencies); // Replace guids with actual ConceptApplication instances.
@@ -106,12 +106,21 @@ namespace Rhetos.DatabaseGenerator
             return dependencies;
         }
 
+        [Obsolete]
         public static void CheckKeyUniqueness(IEnumerable<ConceptApplication> appliedConcepts, string errorContext)
         {
             var firstError = appliedConcepts.GroupBy(pca => pca.GetConceptApplicationKey()).Where(g => g.Count() > 1).FirstOrDefault();
             if (firstError != null)
                 throw new FrameworkException(String.Format("More than one concept application with same key {2} ('{0}') loaded in repository. Concept application IDs: {1}.",
                     firstError.Key, string.Join(", ", firstError.Select(ca => SqlUtility.QuoteGuid(ca.Id))), errorContext));
+        }
+
+        public static void CheckKeyUniqueness(ISqlUtility sqlUtility, IEnumerable<ConceptApplication> appliedConcepts, string errorContext)
+        {
+            var firstError = appliedConcepts.GroupBy(pca => pca.GetConceptApplicationKey()).Where(g => g.Count() > 1).FirstOrDefault();
+            if (firstError != null)
+                throw new FrameworkException(String.Format("More than one concept application with same key {2} ('{0}') loaded in repository. Concept application IDs: {1}.",
+                    firstError.Key, string.Join(", ", firstError.Select(ca => sqlUtility.QuoteGuid(ca.Id))), errorContext));
         }
 
         private static void EvaluateDependencies(List<ConceptApplication> previoslyAppliedConcepts, List<DependencyGuids> dependencies)

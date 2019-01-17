@@ -89,7 +89,7 @@ namespace Rhetos.DatabaseGenerator
 
                 var newApplications = CreateNewApplications(oldApplications);
                 _performanceLogger.Write(stopwatch, "DatabaseGenerator: Created new concept applications.");
-                ConceptApplicationRepository.CheckKeyUniqueness(newApplications, "created");
+                ConceptApplicationRepository.CheckKeyUniqueness(_sqlUtility, newApplications, "created");
                 _performanceLogger.Write(stopwatch, "DatabaseGenerator: Verify new concept applications' integrity.");
                 newApplications = TrimEmptyApplications(newApplications);
                 _performanceLogger.Write(stopwatch, "DatabaseGenerator: Removed unused concept applications.");

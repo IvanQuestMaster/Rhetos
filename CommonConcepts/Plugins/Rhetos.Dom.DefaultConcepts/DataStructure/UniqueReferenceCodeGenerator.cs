@@ -69,7 +69,7 @@ namespace Rhetos.Dom.DefaultConcepts
             {
                 var ormDataStructure = (IOrmDataStructure)info.Extension;
                 string systemMessage = "DataStructure:" + info.Extension + ",Property:ID,Referenced:" + info.Base;
-                string onDeleteInterpretSqlError = @"if (interpretedException is Rhetos.UserException && Rhetos.Utilities.MsSqlUtility.IsReferenceErrorOnDelete(interpretedException, "
+                string onDeleteInterpretSqlError = @"if (interpretedException is Rhetos.UserException && _sqlUtility.IsReferenceErrorOnDelete(interpretedException, "
                     + CsUtility.QuotedString(ormDataStructure.GetOrmSchema() + "." + ormDataStructure.GetOrmDatabaseObject()) + @", "
                     + CsUtility.QuotedString("ID") + @", "
                     + CsUtility.QuotedString(UniqueReferenceDatabaseDefinition.GetConstraintName(info)) + @"))

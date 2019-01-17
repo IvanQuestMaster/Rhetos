@@ -201,7 +201,8 @@ namespace Rhetos.DatabaseGenerator.Test
                 new MockSqlExecuter(conceptApplications),
                 new ConsoleLogProvider(),
                 new XmlUtility(new DomainObjectModelMock()),
-                new MsSqlUtility2());
+                new MsSqlUtility2(),
+                new SqlResourceProvider());
         }
 
         [TestMethod]

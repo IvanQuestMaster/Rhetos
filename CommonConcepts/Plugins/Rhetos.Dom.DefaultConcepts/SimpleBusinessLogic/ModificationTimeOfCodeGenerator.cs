@@ -42,7 +42,7 @@ namespace Rhetos.Dom.DefaultConcepts
 
             string snippet =
             $@"{{ 
-                var now = SqlUtility.GetDatabaseTime(_executionContext.SqlExecuter);
+                var now = _sqlUtility.GetDatabaseTime(_executionContext.SqlExecuter);
 
                 foreach (var newItem in insertedNew)
                     if(newItem.{timeProperty} == null)

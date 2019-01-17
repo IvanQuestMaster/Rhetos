@@ -35,17 +35,20 @@ namespace Rhetos.DatabaseGenerator
         private readonly ILogger _logger;
         private readonly XmlUtility _xmlUtility;
         private readonly ISqlUtility _sqlUtility;
+        private readonly ISqlResourceProvider _sql;
 
         public ConceptApplicationRepository(
             ISqlExecuter sqlExecuter,
             ILogProvider logProvider,
             XmlUtility xmlUtility,
-            ISqlUtility sqlUtility)
+            ISqlUtility sqlUtility,
+            ISqlResourceProvider sqlResourceProvider)
         {
             _sqlExecuter = sqlExecuter;
             _logger = logProvider.GetLogger("ConceptApplicationRepository");
             _xmlUtility = xmlUtility;
             _sqlUtility = sqlUtility;
+            _sql = sqlResourceProvider;
         }
 
         public List<ConceptApplication> Load()
@@ -165,7 +168,7 @@ namespace Rhetos.DatabaseGenerator
         {
             return new List<string>
             {
-                Sql.Format("ConceptApplicationRepository_Delete", _sqlUtility.QuoteGuid(ca.Id))
+                _sql.Format("ConceptApplicationRepository_Delete", _sqlUtility.QuoteGuid(ca.Id))
             };
         }
 
@@ -173,7 +176,7 @@ namespace Rhetos.DatabaseGenerator
         {
             var sql = new List<string>();
 
-            sql.Add(Sql.Format("ConceptApplicationRepository_Insert",
+            sql.Add(_sql.Format("ConceptApplicationRepository_Insert",
                 _sqlUtility.QuoteGuid(ca.Id),
                 _sqlUtility.QuoteText(ca.ConceptInfoTypeName),
                 _sqlUtility.QuoteText(ca.ConceptInfoKey),
@@ -184,7 +187,7 @@ namespace Rhetos.DatabaseGenerator
                 _sqlUtility.QuoteText(ca.ConceptImplementationVersion.ToString())));
 
             foreach (var dependsOnId in ca.DependsOn.Select(d => d.ConceptApplication.Id).Distinct())
-                sql.Add(Sql.Format("ConceptApplicationRepository_InsertDependency",
+                sql.Add(_sql.Format("ConceptApplicationRepository_InsertDependency",
                     _sqlUtility.QuoteGuid(ca.Id),
                     _sqlUtility.QuoteGuid(dependsOnId)));
 
@@ -195,7 +198,7 @@ namespace Rhetos.DatabaseGenerator
         {
             var sql = new List<string>();
             if (oldApp.RemoveQuery != ca.RemoveQuery)
-                sql.Add(Sql.Format("ConceptApplicationRepository_Update",
+                sql.Add(_sql.Format("ConceptApplicationRepository_Update",
                     _sqlUtility.QuoteGuid(ca.Id),
                     _sqlUtility.QuoteText(ca.ConceptInfoTypeName),
                     _sqlUtility.QuoteText(ca.ConceptInfoKey),
@@ -210,13 +213,13 @@ namespace Rhetos.DatabaseGenerator
 
             foreach (var dependsOnId in ca.DependsOn.Select(d => d.ConceptApplication.Id).Distinct())
                 if (!oldDependsOn.Contains(dependsOnId))
-                    sql.Add(Sql.Format("ConceptApplicationRepository_InsertDependency",
+                    sql.Add(_sql.Format("ConceptApplicationRepository_InsertDependency",
                         _sqlUtility.QuoteGuid(ca.Id),
                         _sqlUtility.QuoteGuid(dependsOnId)));
 
             foreach (var dependsOnId in oldApp.DependsOn.Select(d => d.ConceptApplication.Id).Distinct())
                 if (!newDependsOn.Contains(dependsOnId))
-                    sql.Add(Sql.Format("ConceptApplicationRepository_DeleteDependency",
+                    sql.Add(_sql.Format("ConceptApplicationRepository_DeleteDependency",
                         _sqlUtility.QuoteGuid(ca.Id),
                         _sqlUtility.QuoteGuid(dependsOnId)));
 

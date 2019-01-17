@@ -136,7 +136,7 @@ namespace Rhetos.Dom.DefaultConcepts
         		Rhetos.RhetosException interpretedException = _sqlUtility.InterpretSqlException(saveException);
         		" + OnDatabaseErrorTag.Evaluate(info) + @"
                 if (checkUserPermissions)
-                    Rhetos.Utilities.MsSqlUtility.ThrowIfPrimaryKeyErrorOnInsert(interpretedException, ""{0}.{1}"");
+                    _sqlUtility.ThrowIfPrimaryKeyErrorOnInsert(interpretedException, ""{0}.{1}"");
 
                 if (interpretedException != null)
         			Rhetos.Utilities.ExceptionsUtility.Rethrow(interpretedException);

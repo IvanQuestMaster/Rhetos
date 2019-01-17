@@ -69,7 +69,7 @@ namespace Rhetos.Dom.DefaultConcepts
 
                 if (info.DataStructure is IWritableOrmDataStructure)
                 {
-                    string onEnterInterpretSqlError = @"if (interpretedException is Rhetos.UserException && Rhetos.Utilities.MsSqlUtility.IsReferenceErrorOnInsertUpdate(interpretedException, "
+                    string onEnterInterpretSqlError = @"if (interpretedException is Rhetos.UserException && _sqlUtility.IsReferenceErrorOnInsertUpdate(interpretedException, "
                         + CsUtility.QuotedString(referencedOrmDataStructure.GetOrmSchema() + "." + referencedOrmDataStructure.GetOrmDatabaseObject()) + @", "
                         + CsUtility.QuotedString("ID") + @", "
                         + CsUtility.QuotedString(ReferencePropertyConstraintDatabaseDefinition.GetConstraintName(info)) + @"))
@@ -80,7 +80,7 @@ namespace Rhetos.Dom.DefaultConcepts
 
                 if (info.Referenced is IWritableOrmDataStructure)
                 {
-                    string onDeleteInterpretSqlError = @"if (interpretedException is Rhetos.UserException && Rhetos.Utilities.MsSqlUtility.IsReferenceErrorOnDelete(interpretedException, "
+                    string onDeleteInterpretSqlError = @"if (interpretedException is Rhetos.UserException && _sqlUtility.IsReferenceErrorOnDelete(interpretedException, "
                         + CsUtility.QuotedString(ormDataStructure.GetOrmSchema() + "." + ormDataStructure.GetOrmDatabaseObject()) + @", "
                         + CsUtility.QuotedString(info.GetSimplePropertyName()) + @", "
                         + CsUtility.QuotedString(ReferencePropertyConstraintDatabaseDefinition.GetConstraintName(info)) + @"))

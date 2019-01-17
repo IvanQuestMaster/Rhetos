@@ -90,7 +90,7 @@ namespace Rhetos.Dom.DefaultConcepts
             return string.Format(
 @"			if (insertedNew.Count() > 0 || updatedNew.Count() > 0)
             {{
-                var now = SqlUtility.GetDatabaseTime(_executionContext.SqlExecuter);
+                var now = _sqlUtility.GetDatabaseTime(_executionContext.SqlExecuter);
 
                 const double errorMarginSeconds = 0.01; // Including database DataTime type imprecision.
                 

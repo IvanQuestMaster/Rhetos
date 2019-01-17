@@ -32,23 +32,31 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     [ExportMetadata(MefProvider.Implements, typeof(SqlFunctionInfo))]
     public class SqlFunctionDatabaseDefinition : IConceptDatabaseDefinition
     {
+        ISqlUtility _sqlUtility;
+
+        public SqlFunctionDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
+
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (SqlFunctionInfo)conceptInfo;
 
             return Sql.Format("SqlFunctionDatabaseDefinition_Create",
-                    SqlUtility.Identifier(info.Module.Name),
-                    SqlUtility.Identifier(info.Name),
+                    _sqlUtility.Identifier(info.Module.Name),
+                    _sqlUtility.Identifier(info.Name),
                     info.Arguments,
                     info.Source,
-                    SqlUtility.ScriptSplitterTag);
+                    SqlScriptUtility.ScriptSplitterTag);
         }
 
         public string RemoveDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (SqlFunctionInfo)conceptInfo;
 
-            return Sql.Format("SqlFunctionDatabaseDefinition_Remove", SqlUtility.Identifier(info.Module.Name), SqlUtility.Identifier(info.Name));
+            return Sql.Format("SqlFunctionDatabaseDefinition_Remove", _sqlUtility.Identifier(info.Module.Name), _sqlUtility.Identifier(info.Name));
         }
     }
 }

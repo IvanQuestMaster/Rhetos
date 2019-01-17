@@ -38,12 +38,13 @@ namespace Rhetos.Persistence
         private readonly ILogger _logger;
         private readonly ILogger _performanceLogger;
         private readonly IPersistenceTransaction _persistenceTransaction;
+        private readonly SqlCommandConfig _sqlCommandConfig;
 
         /// <summary>
         /// This constructor is typically used in deployment time, when persistence transaction does not exist.
         /// </summary>
-        public MsSqlExecuter(ConnectionString connectionString, ILogProvider logProvider, IUserInfo userInfo)
-            : this(connectionString, logProvider, userInfo, null)
+        public MsSqlExecuter(ConnectionString connectionString, ILogProvider logProvider, IUserInfo userInfo, SqlCommandConfig sqlCommandConfig)
+            : this(connectionString, logProvider, userInfo, null, sqlCommandConfig)
         {
         }
 
@@ -51,13 +52,18 @@ namespace Rhetos.Persistence
         /// This constructor is typically used in run-time, when persistence transaction is active, in order to execute
         /// the SQL queries in the same transaction.
         /// </summary>
-        public MsSqlExecuter(ConnectionString connectionString, ILogProvider logProvider, IUserInfo userInfo, IPersistenceTransaction persistenceTransaction)
+        public MsSqlExecuter(ConnectionString connectionString,
+            ILogProvider logProvider,
+            IUserInfo userInfo,
+            IPersistenceTransaction persistenceTransaction,
+            SqlCommandConfig sqlCommandConfig)
         {
             _connectionString = connectionString;
             _userInfo = userInfo;
             _logger = logProvider.GetLogger("MsSqlExecuter");
             _performanceLogger = logProvider.GetLogger("Performance");
             _persistenceTransaction = persistenceTransaction;
+            _sqlCommandConfig = sqlCommandConfig;
         }
 
         public void ExecuteSql(IEnumerable<string> commands, bool useTransaction)
@@ -184,7 +190,7 @@ namespace Rhetos.Persistence
                         connection.Open();
 
                     command = connection.CreateCommand();
-                    command.CommandTimeout = SqlUtility.SqlCommandTimeout;
+                    command.CommandTimeout = _sqlCommandConfig.CommandTimeout;
                     if (createOwnConnection)
                     {
                         if (useTransaction)

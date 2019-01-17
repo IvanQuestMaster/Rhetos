@@ -17,12 +17,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Autofac;
+using DeployPackages;
 using Rhetos;
 using Rhetos.Deployment;
+using Rhetos.Logging;
 using Rhetos.Persistence;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
@@ -30,18 +34,17 @@ namespace CleanupOldData
 {
     class Program
     {
+        public static object Plugins { get; private set; }
+
         static int Main(string[] args)
         {
             try
             {
+                //TODO:
                 Paths.InitializeRhetosServerRootPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".."));
 
-                string connectionString = SqlUtility.ConnectionString;
-                Console.WriteLine("SQL connection: " + SqlUtility.SqlConnectionInfo(connectionString));
-                var sqlExecuter = GetSqlExecuterImplementation(connectionString);
+                GenerateApplication(new ConsoleLogger(), new DeployArguments(args));
 
-                var databaseCleaner = new DatabaseCleaner(new ConsoleLogProvider(), sqlExecuter);
-                databaseCleaner.DeleteAllMigrationData();
                 return 0;
             }
             catch (Exception ex)
@@ -56,20 +59,25 @@ namespace CleanupOldData
             }
         }
 
-        private static ISqlExecuter GetSqlExecuterImplementation(string connectionString)
+        private static void GenerateApplication(ILogger logger, DeployArguments arguments)
         {
-            var sqlExecuterImplementations = new Dictionary<string, Lazy<ISqlExecuter>>()
+            logger.Trace("Loading plugins.");
+            var stopwatch = Stopwatch.StartNew();
+
+            var builder = new ContainerBuilder();
+            builder.RegisterModule(new AutofacModuleConfiguration(
+                deploymentTime: true,
+                configurationArguments: arguments));
+
+            using (var container = builder.Build())
             {
-                { "MsSql", new Lazy<ISqlExecuter>(() => new MsSqlExecuter(connectionString, new ConsoleLogProvider(), new NullUserInfo(), null)) },
-                { "Oracle", new Lazy<ISqlExecuter>(() => new OracleSqlExecuter(connectionString, new ConsoleLogProvider(), new NullUserInfo())) }
-            };
+                logger.Write(stopwatch, "CleanupOldData.Program: Modules and plugins registered.");
+                
+                var connnectionStringConfiguration = container.Resolve<IConnectionStringConfiguration>();
+                Console.WriteLine("SQL connection: " + connnectionStringConfiguration.SqlConnectionInfo(connnectionStringConfiguration.ConnectionString));
 
-            Lazy<ISqlExecuter> sqlExecuter;
-            if (!sqlExecuterImplementations.TryGetValue(SqlUtility.DatabaseLanguage, out sqlExecuter))
-                throw new FrameworkException("Unsupported database language '" + SqlUtility.DatabaseLanguage
-                    + "'. Supported languages are: " + string.Join(", ", sqlExecuterImplementations.Keys) + ".");
-
-            return sqlExecuter.Value;
+                container.Resolve<DatabaseCleaner>().DeleteAllMigrationData();
+            }
         }
     }
 }

@@ -41,6 +41,13 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         public static readonly SqlTag<EntityLoggingInfo> TempFromTag = "TempFrom";
         public static readonly SqlTag<EntityLoggingInfo> AfterInsertLogTag = "AfterInsertLog";
 
+        ISqlUtility _sqlUtility;
+
+        public EntityLoggingDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
         public static string GetTriggerNameInsert(EntityLoggingInfo conceptInfo)
         {
             return SqlUtility.Identifier(Sql.Format(
@@ -70,12 +77,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (EntityLoggingInfo)conceptInfo;
 
             return Sql.Format("EntityLoggingDefinition_Create",
-                SqlUtility.Identifier(info.Entity.Module.Name),
-                SqlUtility.Identifier(info.Entity.Name),
+                _sqlUtility.Identifier(info.Entity.Module.Name),
+                _sqlUtility.Identifier(info.Entity.Name),
                 GetTriggerNameInsert(info),
                 GetTriggerNameUpdate(info),
                 GetTriggerNameDelete(info),
-                SqlUtility.ScriptSplitterTag,
+                SqlScriptUtility.ScriptSplitterTag,
                 LogPropertyTag.Evaluate(info),
                 TempColumnDefinitionTag.Evaluate(info),
                 TempColumnListTag.Evaluate(info),
@@ -89,7 +96,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (EntityLoggingInfo)conceptInfo;
 
             return Sql.Format("EntityLoggingDefinition_Remove",
-                SqlUtility.Identifier(info.Entity.Module.Name),
+                _sqlUtility.Identifier(info.Entity.Module.Name),
                 GetTriggerNameInsert(info),
                 GetTriggerNameUpdate(info),
                 GetTriggerNameDelete(info));

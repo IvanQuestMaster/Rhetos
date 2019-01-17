@@ -34,17 +34,19 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class DatePropertyDatabaseDefinition : IConceptDatabaseDefinition
     {
         ConceptMetadata _conceptMetadata;
+        ISqlUtility _sqlUtility;
 
-        public DatePropertyDatabaseDefinition(ConceptMetadata conceptMetadata)
+        public DatePropertyDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
         {
             _conceptMetadata = conceptMetadata;
+            _sqlUtility = sqlUtility;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (DatePropertyInfo)conceptInfo;
 
-            PropertyDatabaseDefinition.RegisterColumnMetadata(_conceptMetadata, info, SqlUtility.Identifier(info.Name), Sql.Get("DatePropertyDatabaseDefinition_DataType"));
+            PropertyDatabaseDefinition.RegisterColumnMetadata(_conceptMetadata, info, _sqlUtility.Identifier(info.Name), Sql.Get("DatePropertyDatabaseDefinition_DataType"));
             if (info.DataStructure is EntityInfo)
                 return PropertyDatabaseDefinition.AddColumn(_conceptMetadata, info);
 
@@ -55,7 +57,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         {
             var info = (DatePropertyInfo)conceptInfo;
             if (info.DataStructure is EntityInfo)
-                return PropertyDatabaseDefinition.RemoveColumn(info, SqlUtility.Identifier(info.Name));
+                return PropertyDatabaseDefinition.RemoveColumn(info, _sqlUtility.Identifier(info.Name));
             return "";
         }
     }

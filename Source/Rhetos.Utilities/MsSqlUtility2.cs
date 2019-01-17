@@ -16,30 +16,6 @@ namespace Rhetos.Utilities
 
         private const string InsertingDuplicateIdMessage = "Inserting a record that already exists in database.";
 
-        private readonly IConfiguration _configuration;
-
-        private readonly IConnectionStringConfiguration _connectionStringConfiguration;
-
-        int? _sqlCommandTimeout;
-
-        public MsSqlUtility2(IConfiguration configuration, IConnectionStringConfiguration connectionStringConfiguration)
-        {
-            _configuration = configuration;
-            _connectionStringConfiguration = connectionStringConfiguration;
-        }
-
-        public int SqlCommandTimeout
-        {
-            get
-            {
-                if (!_sqlCommandTimeout.HasValue)
-                {
-                    _sqlCommandTimeout = _configuration.GetInt("SqlCommandTimeout", 30).Value;
-                }
-                return _sqlCommandTimeout.Value;
-            }
-        }
-
         public string ProviderName
         {
             get

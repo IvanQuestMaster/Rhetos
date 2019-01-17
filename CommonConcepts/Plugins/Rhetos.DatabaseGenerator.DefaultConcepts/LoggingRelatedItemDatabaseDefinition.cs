@@ -34,6 +34,13 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     [ConceptImplementationVersion(2, 0)]
     public class LoggingRelatedItemDatabaseDefinition : IConceptDatabaseDefinitionExtension
     {
+        ISqlUtility _sqlUtility;
+
+        public LoggingRelatedItemDatabaseDefinition(ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             return null;
@@ -63,26 +70,26 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             createdDependencies = new[] { Tuple.Create(logRelatedItemTableMustBeFullyCreated, conceptInfo) };
         }
 
-        private static void InsertCode(ICodeBuilder codeBuilder, LoggingRelatedItemInfo info, string sqlResource, SqlTag<EntityLoggingInfo> tag)
+        private void InsertCode(ICodeBuilder codeBuilder, LoggingRelatedItemInfo info, string sqlResource, SqlTag<EntityLoggingInfo> tag)
         {
             string codeSnippet = Sql.Format(sqlResource,
                 GetTempColumnNameOld(info),
                 GetTempColumnNameNew(info),
                 info.Table,
-                SqlUtility.Identifier(info.Column),
-                SqlUtility.QuoteText(info.Relation));
+                _sqlUtility.Identifier(info.Column),
+                _sqlUtility.QuoteText(info.Relation));
 
             codeBuilder.InsertCode(codeSnippet, tag, info.Logging);
         }
 
-        private static string GetTempColumnNameOld(LoggingRelatedItemInfo info)
+        private string GetTempColumnNameOld(LoggingRelatedItemInfo info)
         {
-            return SqlUtility.Identifier("Old_" + CsUtility.TextToIdentifier(info.Relation) + "_" + info.Column);
+            return _sqlUtility.Identifier("Old_" + CsUtility.TextToIdentifier(info.Relation) + "_" + info.Column);
         }
 
-        private static string GetTempColumnNameNew(LoggingRelatedItemInfo info)
+        private string GetTempColumnNameNew(LoggingRelatedItemInfo info)
         {
-            return SqlUtility.Identifier("New_" + CsUtility.TextToIdentifier(info.Relation) + "_" + info.Column);
+            return _sqlUtility.Identifier("New_" + CsUtility.TextToIdentifier(info.Relation) + "_" + info.Column);
         }
     }
 }

@@ -32,22 +32,29 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     [ExportMetadata(MefProvider.Implements, typeof(SqlTriggerInfo))]
     public class SqlTriggerDatabaseDefinition : IConceptDatabaseDefinition
     {
+        private readonly ISqlUtility _sqlUtility;
+
+        public SqlTriggerDatabaseDefinition(ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (SqlTriggerInfo) conceptInfo;
             var orm = (IOrmDataStructure) info.Structure;
 
             return Sql.Format("SqlTriggerDatabaseDefinition_Create",
-                SqlUtility.Identifier(orm.GetOrmSchema()),
+                _sqlUtility.Identifier(orm.GetOrmSchema()),
                 TriggerName(info),
-                SqlUtility.Identifier(orm.GetOrmDatabaseObject()),
+                _sqlUtility.Identifier(orm.GetOrmDatabaseObject()),
                 info.Events,
                 info.TriggerSource);
         }
 
-        private static string TriggerName(SqlTriggerInfo info)
+        private string TriggerName(SqlTriggerInfo info)
         {
-            return SqlUtility.Identifier(Sql.Format("SqlTriggerDatabaseDefinition_TriggerName", info.Structure.Name, info.Name));
+            return _sqlUtility.Identifier(Sql.Format("SqlTriggerDatabaseDefinition_TriggerName", info.Structure.Name, info.Name));
         }
 
         public string RemoveDatabaseStructure(IConceptInfo conceptInfo)
@@ -56,7 +63,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var orm = (IOrmDataStructure) info.Structure;
 
             return Sql.Format("SqlTriggerDatabaseDefinition_Remove",
-                SqlUtility.Identifier(orm.GetOrmSchema()),
+                _sqlUtility.Identifier(orm.GetOrmSchema()),
                 TriggerName(info));
         }
     }

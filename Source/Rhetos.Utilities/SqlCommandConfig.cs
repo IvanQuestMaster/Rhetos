@@ -17,27 +17,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Logging;
-using Rhetos.TestCommon;
-using Rhetos.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Rhetos.Deployment.Test
+namespace Rhetos.Utilities
 {
-    class DataMigration_Accessor : DataMigration
+    public class SqlCommandConfig
     {
-        public DataMigration_Accessor()
-            : base(null, new ConsoleLogProvider(), null, null, null,
-                new MsSqlUtility2(), new ConnectionStringConfiguration())
-        {
-        }
+        int _commandTimeout;
 
-        new public List<DataMigrationScript> FindSkipedScriptsInEachPackage(List<DataMigrationScript> oldScripts, List<DataMigrationScript> newScripts)
+        /// <summary>
+        /// In seconds.
+        /// </summary>
+        public int CommandTimeout
         {
-            return base.FindSkipedScriptsInEachPackage(oldScripts, newScripts);
+            get
+            {
+                return _commandTimeout;
+            }
+        }
+        public SqlCommandConfig(IConfiguration configuration)
+        {
+            _commandTimeout = configuration.GetInt("SqlCommandTimeout", 30).Value;
         }
     }
 }

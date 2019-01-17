@@ -17,27 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Logging;
-using Rhetos.TestCommon;
-using Rhetos.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Rhetos.Deployment.Test
+namespace CleanupOldData
 {
-    class DataMigration_Accessor : DataMigration
+    internal class DomGeneratorOptions
     {
-        public DataMigration_Accessor()
-            : base(null, new ConsoleLogProvider(), null, null, null,
-                new MsSqlUtility2(), new ConnectionStringConfiguration())
-        {
-        }
-
-        new public List<DataMigrationScript> FindSkipedScriptsInEachPackage(List<DataMigrationScript> oldScripts, List<DataMigrationScript> newScripts)
-        {
-            return base.FindSkipedScriptsInEachPackage(oldScripts, newScripts);
-        }
     }
 }

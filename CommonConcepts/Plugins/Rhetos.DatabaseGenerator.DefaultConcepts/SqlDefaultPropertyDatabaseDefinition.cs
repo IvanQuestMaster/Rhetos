@@ -33,20 +33,22 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     [ExportMetadata(MefProvider.Implements, typeof(SqlDefaultPropertyInfo))]
     public class SqlDefaultPropertyDatabaseDefinition : IConceptDatabaseDefinition
     {
-        public static string GetConstraintName(PropertyInfo info)
-        {
-            return SqlUtility.Identifier(Sql.Format("SqlDefaultPropertyDatabaseDefinition_ConstraintName", info.DataStructure.Name, info.Name));
-        }
+        ISqlUtility _sqlUtility;
 
+        public SqlDefaultPropertyDatabaseDefinition(ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+        
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (SqlDefaultPropertyInfo)conceptInfo;
 
             if (info.Property.DataStructure is EntityInfo)
                 return Sql.Format("SqlDefaultPropertyDatabaseDefinition_Create",
-                    SqlUtility.Identifier(info.Property.DataStructure.Module.Name),
-                    SqlUtility.Identifier(info.Property.DataStructure.Name),
-                    SqlUtility.Identifier(info.Property.Name),
+                    _sqlUtility.Identifier(info.Property.DataStructure.Module.Name),
+                    _sqlUtility.Identifier(info.Property.DataStructure.Name),
+                    _sqlUtility.Identifier(info.Property.Name),
                     GetConstraintName(info.Property),
                     info.Definition);
             return "";
@@ -57,12 +59,17 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (SqlDefaultPropertyInfo)conceptInfo;
             if (info.Property.DataStructure is EntityInfo)
                 return Sql.Format("SqlDefaultPropertyDatabaseDefinition_Remove",
-                    SqlUtility.Identifier(info.Property.DataStructure.Module.Name),
-                    SqlUtility.Identifier(info.Property.DataStructure.Name),
-                    SqlUtility.Identifier(info.Property.Name),
+                    _sqlUtility.Identifier(info.Property.DataStructure.Module.Name),
+                    _sqlUtility.Identifier(info.Property.DataStructure.Name),
+                    _sqlUtility.Identifier(info.Property.Name),
                     GetConstraintName(info.Property),
                     info.Definition);
             return "";
+        }
+
+        public static string GetConstraintName(PropertyInfo info)
+        {
+            return SqlUtility.Identifier(Sql.Format("SqlDefaultPropertyDatabaseDefinition_ConstraintName", info.DataStructure.Name, info.Name));
         }
     }
 }

@@ -33,12 +33,20 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     [ExportMetadata(MefProvider.Implements, typeof(PropertyLoggingInfo))]
     public class PropertyLoggingDefinition : IConceptDatabaseDefinitionExtension
     {
-        private static string GetColumnName(PropertyInfo property)
+        ISqlUtility _sqlUtility;
+
+        public PropertyLoggingDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
+
+        private string GetColumnName(PropertyInfo property)
         {
             if (property is ReferencePropertyInfo)
-                return SqlUtility.Identifier(property.Name + "ID");
+                return _sqlUtility.Identifier(property.Name + "ID");
 
-            return SqlUtility.Identifier(property.Name);
+            return _sqlUtility.Identifier(property.Name);
         }
 
         public void ExtendDatabaseStructure(IConceptInfo conceptInfo, ICodeBuilder codeBuilder, out IEnumerable<Tuple<IConceptInfo, IConceptInfo>> createdDependencies)

@@ -34,12 +34,19 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     [ExportMetadata(MefProvider.Implements, typeof(SqlQueryableInfo))]
     public class SqlQueryableDatabaseDefinition : IConceptDatabaseDefinition
     {
+        private readonly ISqlUtility _sqlUtility;
+
+        public SqlQueryableDatabaseDefinition(ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (SqlQueryableInfo)conceptInfo;
             return Sql.Format("SqlQueryableDatabaseDefinition_Create",
-                    SqlUtility.Identifier(info.Module.Name),
-                    SqlUtility.Identifier(info.Name),
+                    _sqlUtility.Identifier(info.Module.Name),
+                    _sqlUtility.Identifier(info.Name),
                     info.SqlSource);
         }
 
@@ -47,8 +54,8 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         {
             var info = (SqlQueryableInfo)conceptInfo;
             return Sql.Format("SqlQueryableDatabaseDefinition_Remove",
-                    SqlUtility.Identifier(info.Module.Name),
-                    SqlUtility.Identifier(info.Name));
+                    _sqlUtility.Identifier(info.Module.Name),
+                    _sqlUtility.Identifier(info.Name));
         }
     }
 }

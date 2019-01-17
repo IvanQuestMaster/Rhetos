@@ -41,13 +41,15 @@ namespace Rhetos.Deployment
         protected readonly IConfiguration _configuration;
         protected readonly SqlTransactionBatches _sqlTransactionBatches;
         protected readonly ISqlUtility _sqlUtility;
+        private readonly IConnectionStringConfiguration _connectionStringConfiguration;
 
         public DataMigration(ISqlExecuter sqlExecuter,
             ILogProvider logProvider,
             IDataMigrationScriptsProvider scriptsProvider,
             IConfiguration configuration,
             SqlTransactionBatches sqlTransactionBatches,
-            ISqlUtility sqlUtility)
+            ISqlUtility sqlUtility,
+            IConnectionStringConfiguration connectionStringConfiguration)
         {
             _sqlExecuter = sqlExecuter;
             _logger = logProvider.GetLogger("DataMigration");
@@ -56,13 +58,14 @@ namespace Rhetos.Deployment
             _configuration = configuration;
             _sqlTransactionBatches = sqlTransactionBatches;
             _sqlUtility = sqlUtility;
+            _connectionStringConfiguration = connectionStringConfiguration;
         }
 
         public DataMigrationReport ExecuteDataMigrationScripts()
         {
             var newScripts = _scriptsProvider.Load();
 
-            var scriptsInOtherLanguages = FindScriptsInOtherLanguages(newScripts, SqlUtility.DatabaseLanguage);
+            var scriptsInOtherLanguages = FindScriptsInOtherLanguages(newScripts, _connectionStringConfiguration.DatabaseLanguage);
             LogScripts("Ignoring scripts in other database languages", scriptsInOtherLanguages);
             newScripts = newScripts.Except(scriptsInOtherLanguages).ToList();
             LogScripts("Script on disk", newScripts);
@@ -106,7 +109,7 @@ namespace Rhetos.Deployment
         public void UndoDataMigrationScripts(List<string> createdTags)
         {
             _sqlExecuter.ExecuteSql(createdTags.Select(tag =>
-                "UPDATE Rhetos.DataMigrationScript SET Active = 0 WHERE Tag = " + SqlUtility.QuoteText(tag)));
+                "UPDATE Rhetos.DataMigrationScript SET Active = 0 WHERE Tag = " + _sqlUtility.QuoteText(tag)));
         }
 
         protected static readonly Regex ScriptLanguageRegex = new Regex(@"\((?<DatabaseLanguage>\w*)\).sql$", RegexOptions.IgnoreCase | RegexOptions.Compiled);

@@ -29,19 +29,24 @@ namespace Rhetos.Deployment
         private readonly ISqlExecuter _sqlExecuter;
         private readonly ILogger _logger;
         private readonly ILogger _deployPackagesLogger;
+        private readonly ISqlUtility _sqlUtility;
+        private readonly IConnectionStringConfiguration _connectionStringConfiguration;
 
-        public DatabaseCleaner(ILogProvider logProvider, ISqlExecuter sqlExecuter)
+        public DatabaseCleaner(ILogProvider logProvider, ISqlExecuter sqlExecuter, ISqlUtility sqlUtility,
+            IConnectionStringConfiguration connectionStringConfiguration)
         {
             _logger = logProvider.GetLogger("DatabaseCleaner");
             _deployPackagesLogger = logProvider.GetLogger("DeployPackages");
             _sqlExecuter = sqlExecuter;
+            _sqlUtility = sqlUtility;
+            _connectionStringConfiguration = connectionStringConfiguration;
         }
 
         public string DeleteAllMigrationData()
         {
-            if (SqlUtility.DatabaseLanguage != "MsSql")
+            if (_connectionStringConfiguration.DatabaseLanguage != "MsSql")
             {
-                var reportSkip = "Skipped DatabaseCleaner.DeleteAllMigrationData (DatabaseLanguage=" + SqlUtility.DatabaseLanguage + ").";
+                var reportSkip = "Skipped DatabaseCleaner.DeleteAllMigrationData (DatabaseLanguage=" + _connectionStringConfiguration.DatabaseLanguage + ").";
                 _logger.Info(reportSkip);
                 return reportSkip;
             }
@@ -57,9 +62,9 @@ namespace Rhetos.Deployment
 
         public string RefreshDataMigrationRows()
         {
-            if (SqlUtility.DatabaseLanguage != "MsSql")
+            if (_connectionStringConfiguration.DatabaseLanguage != "MsSql")
             {
-                var reportSkip = "Skipped DatabaseCleaner.RefreshDataMigrationRows (DatabaseLanguage=" + SqlUtility.DatabaseLanguage + ").";
+                var reportSkip = "Skipped DatabaseCleaner.RefreshDataMigrationRows (DatabaseLanguage=" + _connectionStringConfiguration.DatabaseLanguage + ").";
                 _logger.Info(reportSkip);
                 return reportSkip;
             }
@@ -70,9 +75,9 @@ namespace Rhetos.Deployment
 
         public void RemoveRedundantMigrationColumns()
         {
-            if (SqlUtility.DatabaseLanguage != "MsSql")
+            if (_connectionStringConfiguration.DatabaseLanguage != "MsSql")
             {
-                _deployPackagesLogger.Info("Skipped DatabaseCleaner.RemoveRedundantMigrationColumns (DatabaseLanguage=" + SqlUtility.DatabaseLanguage + ").");
+                _deployPackagesLogger.Info("Skipped DatabaseCleaner.RemoveRedundantMigrationColumns (DatabaseLanguage=" + _connectionStringConfiguration.DatabaseLanguage + ").");
                 return;
             }
 
@@ -171,24 +176,24 @@ namespace Rhetos.Deployment
         {
             return string.Format(
                 "ALTER TABLE {0}.{1} DROP COLUMN {2}",
-                SqlUtility.QuoteIdentifier(column.SchemaName),
-                SqlUtility.QuoteIdentifier(column.TableName),
-                SqlUtility.QuoteIdentifier(column.ColumnName));
+                _sqlUtility.QuoteIdentifier(column.SchemaName),
+                _sqlUtility.QuoteIdentifier(column.TableName),
+                _sqlUtility.QuoteIdentifier(column.ColumnName));
         }
 
         private string DropTable(TableInfo table)
         {
             return string.Format(
                 "DROP TABLE {0}.{1}",
-                SqlUtility.QuoteIdentifier(table.SchemaName),
-                SqlUtility.QuoteIdentifier(table.TableName));
+                _sqlUtility.QuoteIdentifier(table.SchemaName),
+                _sqlUtility.QuoteIdentifier(table.TableName));
         }
 
         private string DropSchema(string schema)
         {
             return string.Format(
                 "DROP SCHEMA {0}",
-                SqlUtility.QuoteIdentifier(schema));
+                _sqlUtility.QuoteIdentifier(schema));
         }
     }
 

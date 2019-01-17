@@ -35,11 +35,6 @@ namespace Rhetos.Utilities
         /// </summary>
         Exception ExtractSqlException(Exception exception);
 
-        /// <summary>
-        /// In seconds.
-        /// </summary>
-        int SqlCommandTimeout { get; }
-
         string ProviderName { get; }
 
         string UserContextInfoText(IUserInfo userInfo);

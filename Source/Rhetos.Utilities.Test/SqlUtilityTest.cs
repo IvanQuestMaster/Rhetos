@@ -52,7 +52,7 @@ namespace Rhetos.Utilities.Test
 
         private ISqlUtility GetMsSqlUtility()
         {
-            return new MsSqlUtility2(new NullConfiguration(), new ConnectionStringConfiguration());
+            return new MsSqlUtility2();
         }
 
         [TestMethod]

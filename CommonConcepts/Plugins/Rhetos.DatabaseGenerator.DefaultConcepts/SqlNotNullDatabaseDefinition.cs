@@ -35,10 +35,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class SqlNotNullDatabaseDefinition : IConceptDatabaseDefinitionExtension
     {
         private readonly ConceptMetadata _conceptMetadata;
+        private readonly ISqlUtility _sqlUtility;
 
-        public SqlNotNullDatabaseDefinition(ConceptMetadata conceptMetadata)
+        public SqlNotNullDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
         {
             _conceptMetadata = conceptMetadata;
+            _sqlUtility = sqlUtility;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
@@ -64,12 +66,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
 
                 foreach (var column in columns)
                     sql.AppendLine(Sql.Format("SqlNotNull_Create",
-                        SqlUtility.Identifier(info.Property.DataStructure.Module.Name),
-                        SqlUtility.Identifier(info.Property.DataStructure.Name),
+                        _sqlUtility.Identifier(info.Property.DataStructure.Module.Name),
+                        _sqlUtility.Identifier(info.Property.DataStructure.Name),
                         column.name,
                         column.type,
                         info.InitialValueSqlExpression,
-                        SqlUtility.ScriptSplitterTag).Trim());
+                        SqlScriptUtility.ScriptSplitterTag).Trim());
             }
 
             var sqlSnippet = sql.ToString().Trim() + "\r\n";

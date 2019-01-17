@@ -36,17 +36,19 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class ShortStringPropertyDatabaseDefinition : IConceptDatabaseDefinition
     {
         ConceptMetadata _conceptMetadata;
+        ISqlUtility _sqlUtility;
 
-        public ShortStringPropertyDatabaseDefinition(ConceptMetadata conceptMetadata)
+        public ShortStringPropertyDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
         {
             _conceptMetadata = conceptMetadata;
+            _sqlUtility = sqlUtility;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (ShortStringPropertyInfo)conceptInfo;
 
-            PropertyDatabaseDefinition.RegisterColumnMetadata(_conceptMetadata, info, SqlUtility.Identifier(info.Name),
+            PropertyDatabaseDefinition.RegisterColumnMetadata(_conceptMetadata, info, _sqlUtility.Identifier(info.Name),
                     Sql.Format("ShortStringPropertyDatabaseDefinition_DataType", ShortStringPropertyInfo.MaxLength));
             if (info.DataStructure is EntityInfo)
                 return PropertyDatabaseDefinition.AddColumn(_conceptMetadata, info);
@@ -58,7 +60,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         {
             var info = (ShortStringPropertyInfo)conceptInfo;
             if (info.DataStructure is EntityInfo)
-                return PropertyDatabaseDefinition.RemoveColumn(info, SqlUtility.Identifier(info.Name));
+                return PropertyDatabaseDefinition.RemoveColumn(info, _sqlUtility.Identifier(info.Name));
 
             return "";
         }

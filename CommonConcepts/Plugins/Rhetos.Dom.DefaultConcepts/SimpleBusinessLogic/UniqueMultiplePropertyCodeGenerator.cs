@@ -35,6 +35,14 @@ namespace Rhetos.Dom.DefaultConcepts.SimpleBusinessLogic
     [ExportMetadata(MefProvider.Implements, typeof(UniqueMultiplePropertyInfo))]
     public class UniqueMultiplePropertyCodeGenerator : IConceptCodeGenerator
     {
+        ISqlUtility _sqlUtility;
+
+        public UniqueMultiplePropertyCodeGenerator(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
+
         public void GenerateCode(IConceptInfo conceptInfo, ICodeBuilder codeBuilder)
         {
             var info = (UniqueMultiplePropertyInfo)conceptInfo;
@@ -56,11 +64,11 @@ namespace Rhetos.Dom.DefaultConcepts.SimpleBusinessLogic
             }
         }
         
-        private static string GetColumnName(PropertyInfo property)
+        private string GetColumnName(PropertyInfo property)
         {
             if (property is ReferencePropertyInfo)
-                return SqlUtility.Identifier(property.Name + "ID");
-            return SqlUtility.Identifier(property.Name);
+                return _sqlUtility.Identifier(property.Name + "ID");
+            return _sqlUtility.Identifier(property.Name);
         }
     }
 }

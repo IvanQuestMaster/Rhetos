@@ -129,8 +129,10 @@ namespace Rhetos.Deployment.Test
             string oldColumns, string oldTables, string oldSchemas,
             string expectedDeletedColumns, string expectedDeletedTables, string expectedDeletedSchemas)
         {
+            var connectionStringConfig = new ConnectionStringConfiguration();
             var mockSqlExecuter = new MockSqlExecuter(oldColumns, oldTables, oldSchemas);
-            var databaseCleaner = new DatabaseCleaner(new ConsoleLogProvider(), mockSqlExecuter);
+            var databaseCleaner = new DatabaseCleaner(new ConsoleLogProvider(), mockSqlExecuter,
+                new MsSqlUtility2(), connectionStringConfig);
             databaseCleaner.RemoveRedundantMigrationColumns();
 
             Assert.AreEqual(expectedDeletedColumns, TestUtility.DumpSorted(mockSqlExecuter.DroppedColumns), description + ": Deleted columns.");
@@ -174,8 +176,10 @@ namespace Rhetos.Deployment.Test
             string oldTables, string oldSchemas,
             string expectedDeletedTables, string expectedDeletedSchemas)
         {
+            var connectionStringConfiguration = new ConnectionStringConfiguration();
             var mockSqlExecuter = new MockSqlExecuter("", oldTables, oldSchemas);
-            var databaseCleaner = new DatabaseCleaner(new ConsoleLogProvider(), mockSqlExecuter);
+            var databaseCleaner = new DatabaseCleaner(new ConsoleLogProvider(), mockSqlExecuter,
+                new MsSqlUtility2(), connectionStringConfiguration);
             Console.WriteLine("Report: " + databaseCleaner.DeleteAllMigrationData());
 
             Assert.AreEqual("", TestUtility.DumpSorted(mockSqlExecuter.DroppedColumns), description + ": Deleted columns.");

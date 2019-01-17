@@ -201,7 +201,7 @@ namespace Rhetos.DatabaseGenerator.Test
                 new MockSqlExecuter(conceptApplications),
                 new ConsoleLogProvider(),
                 new XmlUtility(new DomainObjectModelMock()),
-                new MsSqlUtility2(new MockConfiguration(), new ConnectionStringConfiguration()));
+                new MsSqlUtility2());
         }
 
         [TestMethod]
@@ -245,11 +245,12 @@ namespace Rhetos.DatabaseGenerator.Test
             }
             catch (Exception ex)
             {
+                var sqlUtility = new MsSqlUtility2();
                 Console.WriteLine(ex.Message);
                 TestUtility.AssertContains(ex.Message, MockSqlExecuter.ConceptApplication.GetConceptApplicationKey());
                 TestUtility.AssertContains(ex.Message, new[] {
-                    SqlUtility.GuidToString(MockSqlExecuter.ConceptApplication.Id),
-                    SqlUtility.GuidToString(MockSqlExecuter.ConceptApplicationCopy.Id) });
+                    sqlUtility.GuidToString(MockSqlExecuter.ConceptApplication.Id),
+                    sqlUtility.GuidToString(MockSqlExecuter.ConceptApplicationCopy.Id) });
                 
                 throw;
             }

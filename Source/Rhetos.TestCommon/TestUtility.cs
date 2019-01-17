@@ -189,10 +189,11 @@ namespace Rhetos.TestCommon
         /// </summary>
         public static void CheckDatabaseAvailability(string expectedLanguage = null)
         {
+            var connectionStringConfiguration = new ConnectionStringConfiguration();
             const string connectionStringLocation = @"Enter the database connection in Rhetos\bin\ConnectionStrings.config, then rebuild this project.";
             try
             {
-                Assert.IsNotNull(SqlUtility.ConnectionString);
+                Assert.IsNotNull(connectionStringConfiguration.ConnectionString);
             }
             catch (Exception ex)
             {
@@ -200,8 +201,8 @@ namespace Rhetos.TestCommon
                     + Environment.NewLine + ex.GetType().Name + ": " + ex.Message);
             }
 
-            if (expectedLanguage != null && SqlUtility.DatabaseLanguage != expectedLanguage)
-                Assert.Inconclusive("This test will run only on '" + expectedLanguage + "' database language, not '" + SqlUtility.DatabaseLanguage + "'. " + connectionStringLocation);
+            if (expectedLanguage != null && connectionStringConfiguration.DatabaseLanguage != expectedLanguage)
+                Assert.Inconclusive("This test will run only on '" + expectedLanguage + "' database language, not '" + connectionStringConfiguration.DatabaseLanguage + "'. " + connectionStringLocation);
         }
 
         /// <summary>

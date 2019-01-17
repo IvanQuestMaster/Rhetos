@@ -149,6 +149,7 @@
     <Compile Include="ListOfTuples.cs" />
     <Compile Include="ManifestTokenProvider.cs" />
     <Compile Include="MsSqlUtility2.cs" />
+    <Compile Include="SqlCommandConfig.cs" />
     <Compile Include="SqlScriptUtility.cs" />
     <Compile Include="SqlTransactionBatches.cs" />
     <Compile Include="NoLocalizer.cs" />

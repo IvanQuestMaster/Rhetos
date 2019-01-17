@@ -93,10 +93,12 @@ FROM
     public class ExtensibleSubtypeSqlViewMacro : IConceptMacro<ExtensibleSubtypeSqlViewInfo>
     {
         IConfiguration _configuration;
+        ISqlUtility _sqlUtility;
 
-        public ExtensibleSubtypeSqlViewMacro(IConfiguration configuration)
+        public ExtensibleSubtypeSqlViewMacro(IConfiguration configuration, ISqlUtility sqlUtility)
         {
             _configuration = configuration;
+            _sqlUtility = sqlUtility;
         }
 
         public IEnumerable<IConceptInfo> CreateNewConcepts(ExtensibleSubtypeSqlViewInfo conceptInfo, IDslModel existingConcepts)
@@ -138,11 +140,11 @@ FROM
             return newConcepts;
         }
 
-        private static string GetColumnName(PropertyInfo property)
+        private string GetColumnName(PropertyInfo property)
         {
             if (property is ReferencePropertyInfo)
-                return SqlUtility.Identifier(property.Name + "ID");
-            return SqlUtility.Identifier(property.Name);
+                return _sqlUtility.Identifier(property.Name + "ID");
+            return _sqlUtility.Identifier(property.Name);
         }
     }
 }

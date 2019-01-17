@@ -50,6 +50,13 @@ namespace Rhetos.Dom.DefaultConcepts
     {
         public static readonly CsTag<EntityHistoryInfo> ClonePropertiesTag = "CloneProperties";
 
+        ISqlUtility _sqlUtility;
+
+        public EntityHistoryCodeGenerator(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
         public void GenerateCode(IConceptInfo conceptInfo, ICodeBuilder codeBuilder)
         {
             var info = (EntityHistoryInfo)conceptInfo;
@@ -61,7 +68,7 @@ namespace Rhetos.Dom.DefaultConcepts
         /// Creates a DateTime filter that returns the "Entity"_Changes records that were active at the time (including the current records in the base entity).
         /// AllProperties concept (EntityHistoryAllPropertiesInfo) creates a similar filter on the base Entity class.
         /// </summary>
-        private static string FilterImplementationSnippet(EntityHistoryInfo info)
+        private string FilterImplementationSnippet(EntityHistoryInfo info)
         {
             return string.Format(
         @"public global::{0}.{1}[] Filter(System.DateTime parameter)
@@ -74,8 +81,8 @@ namespace Rhetos.Dom.DefaultConcepts
         ",
             info.Dependency_ChangesEntity.Module.Name,
             info.Dependency_ChangesEntity.Name,
-            SqlUtility.Identifier(info.Entity.Module.Name),
-            SqlUtility.Identifier(info.Entity.Name + "_AtTime"));
+            _sqlUtility.Identifier(info.Entity.Module.Name),
+            _sqlUtility.Identifier(info.Entity.Name + "_AtTime"));
         }
 
         private static string CreateHistoryOnUpdateSnippet(EntityHistoryInfo info)

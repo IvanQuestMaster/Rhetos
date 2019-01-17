@@ -43,14 +43,19 @@ namespace Rhetos.Utilities
         private readonly int _maxJoinedScriptCount;
         private readonly int _maxJoinedScriptSize;
         private readonly ILogger _logger;
+        private readonly ISqlUtility _sqlUtility;
 
-        public SqlTransactionBatches(ISqlExecuter sqlExecuter, IConfiguration configuration, ILogProvider logProvider)
+        public SqlTransactionBatches(ISqlExecuter sqlExecuter,
+            IConfiguration configuration,
+            ILogProvider logProvider,
+            ISqlUtility sqlUtility)
         {
             _sqlExecuter = sqlExecuter;
             _reportDelayMs = configuration.GetInt(ReportProgressMsConfigKey, 1000 * 60).Value; // Report progress each minute by default
             _maxJoinedScriptCount = configuration.GetInt(MaxJoinedScriptCountConfigKey, 100).Value;
             _maxJoinedScriptSize = configuration.GetInt(MaxJoinedScriptSizeConfigKey, 100000).Value;
             _logger = logProvider.GetLogger(nameof(SqlTransactionBatches));
+            _sqlUtility = sqlUtility;
         }
 
         public class SqlScript
@@ -64,8 +69,8 @@ namespace Rhetos.Utilities
         };
 
         /// <summary>
-        /// 1. Splits the scripts by the SQL batch delimiter ("GO", for Microsoft SQL Server). See <see cref="SqlUtility.SplitBatches(string)"/>.
-        /// 2. Detects and applies the transaction usage tag. See <see cref="SqlUtility.NoTransactionTag"/> and <see cref="SqlUtility.ScriptSupportsTransaction(string)"/>.
+        /// 1. Splits the scripts by the SQL batch delimiter ("GO", for Microsoft SQL Server). See <see cref="ISqlUtility.SplitBatches(string)"/>.
+        /// 2. Detects and applies the transaction usage tag. See <see cref="SqlScriptUtility.NoTransactionTag"/> and <see cref="SqlScriptUtility.ScriptSupportsTransaction(string)"/>.
         /// 3. Reports progress (Info level) after each minute.
         /// 4. Prefixes each SQL script with a comment containing the script's name.
         /// </summary>
@@ -73,17 +78,17 @@ namespace Rhetos.Utilities
         {
             var scriptParts = sqlScripts
                 .SelectMany(script => script.IsBatch
-                    ? SqlUtility.SplitBatches(script.Sql).Select(scriptPart => new SqlScript { Name = script.Name, Sql = scriptPart, IsBatch = false })
+                    ? _sqlUtility.SplitBatches(script.Sql).Select(scriptPart => new SqlScript { Name = script.Name, Sql = scriptPart, IsBatch = false })
                     : new[] { script })
                 .Where(script => !string.IsNullOrWhiteSpace(script.Sql));
 
-            var sqlBatches = CsUtility.GroupItemsKeepOrdering(scriptParts, script => SqlUtility.ScriptSupportsTransaction(script.Sql))
+            var sqlBatches = CsUtility.GroupItemsKeepOrdering(scriptParts, script => SqlScriptUtility.ScriptSupportsTransaction(script.Sql))
                 .Select(group => new
                 {
                     UseTransaction = group.Key,
                     // The empty NoTransactionTag script is used by the DatabaseGenerator to split transactions.
                     // This is why there scrips are removed *after* grouping 
-                    Scripts = group.Items.Where(s => !string.Equals(s.Sql, SqlUtility.NoTransactionTag, StringComparison.Ordinal)).ToList()
+                    Scripts = group.Items.Where(s => !string.Equals(s.Sql, SqlScriptUtility.NoTransactionTag, StringComparison.Ordinal)).ToList()
                 })
                 .Where(group => group.Scripts.Count() > 0) // Cleanup after removing the empty NoTransactionTag scripts.
                 .ToList();

@@ -42,6 +42,14 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     {
         public static readonly SqlTag<ReferencePropertyInfo> ForeignKeyConstraintOptions = "FK options";
 
+        ISqlUtility _sqlUtility;
+
+        public ReferencePropertyConstraintDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
+
         public static string GetConstraintName(ReferencePropertyInfo info)
         {
             return SqlUtility.Identifier(Sql.Format("ReferencePropertyConstraintDatabaseDefinition_ConstraintName",
@@ -62,7 +70,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
 
             if (IsSupported(info))
                 return Sql.Format("ReferencePropertyConstraintDatabaseDefinition_Create",
-                    SqlUtility.Identifier(info.DataStructure.Module.Name) + "." + SqlUtility.Identifier(info.DataStructure.Name),
+                    _sqlUtility.Identifier(info.DataStructure.Module.Name) + "." + _sqlUtility.Identifier(info.DataStructure.Name),
                     GetConstraintName(info),
                     info.GetColumnName(),
                     ForeignKeyUtility.GetSchemaTableForForeignKey(info.Referenced),
@@ -76,7 +84,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
 
             if (IsSupported(info))
                 return Sql.Format("ReferencePropertyConstraintDatabaseDefinition_Remove",
-                    SqlUtility.Identifier(info.DataStructure.Module.Name) + "." + SqlUtility.Identifier(info.DataStructure.Name),
+                    _sqlUtility.Identifier(info.DataStructure.Module.Name) + "." + _sqlUtility.Identifier(info.DataStructure.Name),
                     GetConstraintName(info));
             return "";
         }

@@ -38,9 +38,24 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     {
         public static readonly SqlTag<UniqueReferenceInfo> ForeignKeyConstraintOptionsTag = "FK options";
 
+        private readonly ISqlUtility _sqlUtility;
+
+        public UniqueReferenceDatabaseDefinition(ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
+        [Obsolete]
         public static string GetConstraintName(UniqueReferenceInfo info)
         {
             return SqlUtility.Identifier(Sql.Format("UniqueReferenceDatabaseDefinition_ConstraintName",
+                info.Extension.Name,
+                info.Base.Name));
+        }
+
+        public static string GetConstraintName(UniqueReferenceInfo info, ISqlUtility sqlUtility)
+        {
+            return sqlUtility.Identifier(Sql.Format("UniqueReferenceDatabaseDefinition_ConstraintName",
                 info.Extension.Name,
                 info.Base.Name));
         }
@@ -57,8 +72,8 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             if (ShouldCreateConstraint(info))
             {
                 return Sql.Format("UniqueReferenceDatabaseDefinition_Create",
-                    SqlUtility.Identifier(info.Extension.Module.Name) + "." + SqlUtility.Identifier(info.Extension.Name),
-                    GetConstraintName(info),
+                    _sqlUtility.Identifier(info.Extension.Module.Name) + "." + _sqlUtility.Identifier(info.Extension.Name),
+                    GetConstraintName(info, _sqlUtility),
                     ForeignKeyUtility.GetSchemaTableForForeignKey(info.Base),
                     ForeignKeyConstraintOptionsTag.Evaluate(info));
             }
@@ -87,8 +102,8 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             if (ShouldCreateConstraint(info))
             {
                 return Sql.Format("UniqueReferenceDatabaseDefinition_Remove",
-                    SqlUtility.Identifier(info.Extension.Module.Name) + "." + SqlUtility.Identifier(info.Extension.Name),
-                    GetConstraintName(info));
+                    _sqlUtility.Identifier(info.Extension.Module.Name) + "." + _sqlUtility.Identifier(info.Extension.Name),
+                    GetConstraintName(info, _sqlUtility));
             }
             return "";
         }

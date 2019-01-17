@@ -45,6 +45,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -54,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DomGeneratorOptions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\Rhetos\Properties\GlobalAssemblyInfo.cs">
@@ -73,6 +77,10 @@
       <Project>{bb7e5668-1b43-4fce-a832-444cc57fee80}</Project>
       <Name>Rhetos.Logging.Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DeployPackages\DeployPackages.csproj">
+      <Project>{DB291A1A-BD71-4EEA-898A-7B353C7D1EF5}</Project>
+      <Name>DeployPackages</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Rhetos.Deployment\Rhetos.Deployment.csproj">
       <Project>{A7328BFA-A009-4F1E-B9A1-B51B2020F45C}</Project>
       <Name>Rhetos.Deployment</Name>
@@ -88,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

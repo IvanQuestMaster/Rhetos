@@ -35,6 +35,15 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     [ExportMetadata(MefProvider.Implements, typeof(SqlIndexMultiplePropertyInfo))]
     public class SqlIndexMultiplePropertyDatabaseDefinition : IConceptDatabaseDefinitionExtension
     {
+        ISqlUtility _sqlUtility;
+        IConnectionStringConfiguration _connectionStringConfiguration;
+
+        public SqlIndexMultiplePropertyDatabaseDefinition(ISqlUtility sqlUtility, IConnectionStringConfiguration connectionStringConfiguration)
+        {
+            _sqlUtility = sqlUtility;
+            _connectionStringConfiguration = connectionStringConfiguration;
+        }
+
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             return null;
@@ -53,11 +62,11 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             if (info.SqlIndex.SqlImplementation())
             {
                 string nationalProperty = null;
-                if (!string.IsNullOrEmpty(SqlUtility.NationalLanguage))
+                if (!string.IsNullOrEmpty(_connectionStringConfiguration.NationalLanguage))
                 {
                     var nationalPropertyFormat = Sql.TryGet("SqlIndexMultiplePropertyDatabaseDefinition_National_" + info.Property.GetType().Name);
                     if (!string.IsNullOrEmpty(nationalPropertyFormat))
-                        nationalProperty = string.Format(nationalPropertyFormat, info.Property.Name, SqlUtility.NationalLanguage);
+                        nationalProperty = string.Format(nationalPropertyFormat, info.Property.Name, _connectionStringConfiguration.NationalLanguage);
                 }
 
                 codeBuilder.InsertCode(
@@ -69,11 +78,11 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             }
         }
 
-        private static string GetColumnName(PropertyInfo property)
+        private string GetColumnName(PropertyInfo property)
         {
             if (property is ReferencePropertyInfo)
-                return SqlUtility.Identifier(property.Name + "ID");
-            return SqlUtility.Identifier(property.Name);
+                return _sqlUtility.Identifier(property.Name + "ID");
+            return _sqlUtility.Identifier(property.Name);
         }
     }
 }

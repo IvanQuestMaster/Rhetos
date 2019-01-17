@@ -34,16 +34,24 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     [ExportMetadata(MefProvider.Implements, typeof(EntityInfo))]
     public class EntityDatabaseDefinition : IConceptDatabaseDefinition
     {
+        ISqlUtility _sqlUtility;
+
+        public EntityDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
+
         private string PrimaryKeyConstraintName(EntityInfo info)
         {
-            return SqlUtility.Identifier(Sql.Format("EntityDatabaseDefinition_PrimaryKeyConstraintName",
+            return _sqlUtility.Identifier(Sql.Format("EntityDatabaseDefinition_PrimaryKeyConstraintName",
                 info.Module.Name,
                 info.Name));
         }
 
         private string DefaultConstraintName(EntityInfo info)
         {
-            return SqlUtility.Identifier(Sql.Format("EntityDatabaseDefinition_DefaultConstraintName",
+            return _sqlUtility.Identifier(Sql.Format("EntityDatabaseDefinition_DefaultConstraintName",
                 info.Module.Name,
                 info.Name));
         }
@@ -53,8 +61,8 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (EntityInfo)conceptInfo;
 
             return Sql.Format("EntityDatabaseDefinition_Create",
-                SqlUtility.Identifier(info.Module.Name),
-                SqlUtility.Identifier(info.Name),
+                _sqlUtility.Identifier(info.Module.Name),
+                _sqlUtility.Identifier(info.Name),
                 PrimaryKeyConstraintName(info),
                 DefaultConstraintName(info));
         }
@@ -64,8 +72,8 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (EntityInfo)conceptInfo;
 
             return Sql.Format("EntityDatabaseDefinition_Remove",
-                SqlUtility.Identifier(info.Module.Name),
-                SqlUtility.Identifier(info.Name),
+                _sqlUtility.Identifier(info.Module.Name),
+                _sqlUtility.Identifier(info.Name),
                 PrimaryKeyConstraintName(info),
                 DefaultConstraintName(info));
         }

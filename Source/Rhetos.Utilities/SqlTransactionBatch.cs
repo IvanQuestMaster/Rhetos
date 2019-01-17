@@ -36,8 +36,8 @@ namespace Rhetos.Utilities
 
         public static List<SqlTransactionBatch> GroupByTransaction(IEnumerable<string> sqlScripts)
         {
-            sqlScripts = sqlScripts.Where(s => !string.IsNullOrWhiteSpace(s.Replace(SqlUtility.NoTransactionTag, "")));
-            var batches = CsUtility.GroupItemsKeepOrdering(sqlScripts, SqlUtility.ScriptSupportsTransaction);
+            sqlScripts = sqlScripts.Where(s => !string.IsNullOrWhiteSpace(s.Replace(SqlScriptUtility.NoTransactionTag, "")));
+            var batches = CsUtility.GroupItemsKeepOrdering(sqlScripts, SqlScriptUtility.ScriptSupportsTransaction);
             return batches.Select(batch => new SqlTransactionBatch(batch.Items) { UseTransacion = batch.Key }).ToList();
         }
     }

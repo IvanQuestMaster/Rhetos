@@ -38,18 +38,20 @@ namespace Rhetos.Deployment
         public string error = null;
         public Exception exceptionRaised = null;
 
-        private ISqlExecuter sqlExecuter;
+        private ISqlExecuter _sqlExecuter;
+        private IConnectionStringConfiguration _connectionStringConfiguration;
 
-        public ConnectionStringReport(ISqlExecuter sqlExecuter)
+        public ConnectionStringReport(ISqlExecuter sqlExecuter, IConnectionStringConfiguration connectionStringConfiguration)
         {
-            this.sqlExecuter = sqlExecuter;
+            _sqlExecuter = sqlExecuter;
+            _connectionStringConfiguration = connectionStringConfiguration;
             CheckConnectivity();
         }
 
         void CheckConnectivity()
         {
             // temporary fix to support non MsSql databases
-            if (SqlUtility.DatabaseLanguage != "MsSql")
+            if (_connectionStringConfiguration.DatabaseLanguage != "MsSql")
             {
                 connectivity = true;
                 isDbo = true;
@@ -58,7 +60,7 @@ namespace Rhetos.Deployment
             {
                 try
                 {
-                    sqlExecuter.ExecuteReader(_checkDboMembershipCmd, reader =>
+                    _sqlExecuter.ExecuteReader(_checkDboMembershipCmd, reader =>
                         {
                             if (!reader.IsDBNull(0) && ((int)reader[0] == 1)) isDbo = true;
                         });

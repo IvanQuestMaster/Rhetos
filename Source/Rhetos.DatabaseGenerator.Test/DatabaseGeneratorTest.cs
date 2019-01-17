@@ -54,8 +54,8 @@ namespace Rhetos.DatabaseGenerator.Test
 
         public class NoTransactionConceptImplementation : IConceptDatabaseDefinition
         {
-            public string CreateDatabaseStructure(IConceptInfo conceptInfo) { return SqlUtility.NoTransactionTag + "create " + ((BaseCi)conceptInfo).Name; }
-            public string RemoveDatabaseStructure(IConceptInfo conceptInfo) { return SqlUtility.NoTransactionTag + "remove " + ((BaseCi)conceptInfo).Name; }
+            public string CreateDatabaseStructure(IConceptInfo conceptInfo) { return SqlScriptUtility.NoTransactionTag + "create " + ((BaseCi)conceptInfo).Name; }
+            public string RemoveDatabaseStructure(IConceptInfo conceptInfo) { return SqlScriptUtility.NoTransactionTag + "remove " + ((BaseCi)conceptInfo).Name; }
         }
 
         public class BaseCi : IConceptInfo
@@ -685,7 +685,7 @@ namespace Rhetos.DatabaseGenerator.Test
                 BaseCi.CreateApplication("F", new SimpleConceptImplementation()) };
 
             var sqlExecuter = new MockSqlExecuter();
-            var sqlTransactionBatches = new SqlTransactionBatches(sqlExecuter, new NullConfiguration(), new ConsoleLogProvider());
+            var sqlTransactionBatches = new SqlTransactionBatches(sqlExecuter, new NullConfiguration(), new ConsoleLogProvider(), new MsSqlUtility2());
             var databaseGenerator = new DatabaseGenerator_Accessor(sqlTransactionBatches);
             databaseGenerator.ApplyChangesToDatabase(oldApplications, newApplications, oldApplications, newApplications);
 
@@ -703,7 +703,7 @@ namespace Rhetos.DatabaseGenerator.Test
         {
             Console.WriteLine("ClearSqlForReport: " + sql);
             return sql
-                .Replace(SqlUtility.NoTransactionTag, "");
+                .Replace(SqlScriptUtility.NoTransactionTag, "");
         }
 
         class MockSqlExecuter : ISqlExecuter

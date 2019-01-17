@@ -35,6 +35,14 @@ namespace Rhetos.Dsl.DefaultConcepts
     [Export(typeof(IConceptMacro))]
     public class EntityLoggingMacro : IConceptMacro<EntityLoggingInfo>
     {
+        ISqlUtility _sqlUtility;
+
+        public EntityLoggingMacro(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        {
+            _sqlUtility = sqlUtility;
+        }
+
+
         public IEnumerable<IConceptInfo> CreateNewConcepts(EntityLoggingInfo conceptInfo, IDslModel existingConcepts)
         {
             var newConcepts = new List<IConceptInfo>();
@@ -47,7 +55,7 @@ namespace Rhetos.Dsl.DefaultConcepts
                 newConcepts.Add(new LoggingRelatedItemInfo
                 {
                     Logging = conceptInfo,
-                    Table = SqlUtility.Identifier(extension.Base.Module.Name) + "." + SqlUtility.Identifier(extension.Base.Name),
+                    Table = _sqlUtility.Identifier(extension.Base.Module.Name) + "." + _sqlUtility.Identifier(extension.Base.Name),
                     Column = "ID",
                     Relation = "Extension"
                 });

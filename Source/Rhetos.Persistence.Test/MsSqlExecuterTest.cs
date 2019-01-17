@@ -31,11 +31,16 @@ namespace Rhetos.Persistence.Test
     [DeploymentItem("ConnectionStrings.config")]
     public class MsSqlExecuterTest
     {
+        private static string GetConnectionString()
+        {
+            return new ConnectionStringConfiguration().ConnectionString;
+        }
+
         private static MsSqlExecuter NewSqlExecuter(string connectionString = null, IUserInfo testUser = null)
         {
-            connectionString = connectionString ?? SqlUtility.ConnectionString;
+            connectionString = connectionString ?? GetConnectionString();
             testUser = testUser ?? new NullUserInfo();
-            return new MsSqlExecuter(connectionString, new ConsoleLogProvider(), testUser, null);
+            return new MsSqlExecuter(connectionString, new ConsoleLogProvider(), testUser, null, new SqlCommandConfig(new MockConfiguration()));
         }
 
         private static MsSqlExecuter NewSqlExecuter(IUserInfo testUser)
@@ -130,7 +135,7 @@ raiserror('fff', 18, 118)"
         {
             string nonexistentDatabase = "db" + Guid.NewGuid().ToString().Replace("-", "");
 
-            var connectionStringBuilder = new SqlConnectionStringBuilder(SqlUtility.ConnectionString);
+            var connectionStringBuilder = new SqlConnectionStringBuilder(GetConnectionString());
             connectionStringBuilder.InitialCatalog = nonexistentDatabase;
             connectionStringBuilder.IntegratedSecurity = true;
             connectionStringBuilder.ConnectTimeout = 1;
@@ -214,7 +219,7 @@ raiserror('fff', 18, 118)"
         public void SendUserInfoInSqlContext_NoUser()
         {
             var testUser = new TestUserInfo(null, null, false);
-            var sqlExecuter = NewSqlExecuter(SqlUtility.ConnectionString, testUser);
+            var sqlExecuter = NewSqlExecuter(GetConnectionString(), testUser);
             var result = new List<object>();
             sqlExecuter.ExecuteReader("SELECT context_info()", reader => result.Add(reader[0]));
             Console.WriteLine(result.Single());

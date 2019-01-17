@@ -36,16 +36,18 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     {
         ConceptMetadata _conceptMetadata;
         ISqlUtility _sqlUtility;
+        ISqlResourceProvider _sql;
 
-        public MoneyPropertyDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        public MoneyPropertyDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _conceptMetadata = conceptMetadata;
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         private string ConstraintName(MoneyPropertyInfo info)
         {
-            return _sqlUtility.Identifier(Sql.Format("MoneyPropertyDatabaseDefinition_CheckConstraintName",
+            return _sqlUtility.Identifier(_sql.Format("MoneyPropertyDatabaseDefinition_CheckConstraintName",
                 info.DataStructure.Name,
                 info.Name));
         }
@@ -55,10 +57,10 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (MoneyPropertyInfo)conceptInfo;
             _sqlUtility.Identifier(info.Name);
 
-            PropertyDatabaseDefinition.RegisterColumnMetadata(_conceptMetadata, info, _sqlUtility.Identifier(info.Name), Sql.Get("MoneyPropertyDatabaseDefinition_DataType"));
+            PropertyDatabaseDefinition.RegisterColumnMetadata(_conceptMetadata, info, _sqlUtility.Identifier(info.Name), _sql.Get("MoneyPropertyDatabaseDefinition_DataType"));
             if (info.DataStructure is EntityInfo)
                 return PropertyDatabaseDefinition.AddColumn(_conceptMetadata, info,
-                    Sql.Format("MoneyPropertyDatabaseDefinition_CreateCheckConstraint", ConstraintName(info), _sqlUtility.Identifier(info.Name)));
+                    _sql.Format("MoneyPropertyDatabaseDefinition_CreateCheckConstraint", ConstraintName(info), _sqlUtility.Identifier(info.Name)));
             return "";
         }
 
@@ -67,7 +69,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (MoneyPropertyInfo)conceptInfo;
             if (info.DataStructure is EntityInfo)
                 return
-                    Sql.Format("MoneyPropertyDatabaseDefinition_RemoveCheckConstraint",
+                    _sql.Format("MoneyPropertyDatabaseDefinition_RemoveCheckConstraint",
                         _sqlUtility.Identifier(info.DataStructure.Module.Name),
                         _sqlUtility.Identifier(info.DataStructure.Name),
                         ConstraintName(info))

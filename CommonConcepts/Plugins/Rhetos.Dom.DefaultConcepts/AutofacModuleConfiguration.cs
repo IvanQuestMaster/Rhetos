@@ -18,6 +18,7 @@
 */
 
 using Autofac;
+using Rhetos.DatabaseGenerator.DefaultConcepts;
 using Rhetos.Dom.DefaultConcepts.Persistence;
 using Rhetos.Security;
 using System.ComponentModel.Composition;

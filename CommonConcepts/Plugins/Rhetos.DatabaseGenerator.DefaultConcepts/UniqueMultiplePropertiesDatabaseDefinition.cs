@@ -35,6 +35,13 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     [ExportMetadata(MefProvider.Implements, typeof(UniqueMultiplePropertiesInfo))]
     public class UniqueMultiplePropertiesDatabaseDefinition : IConceptDatabaseDefinitionExtension
     {
+        ISqlResourceProvider _sql;
+
+        public UniqueMultiplePropertiesDatabaseDefinition(ISqlResourceProvider sql)
+        {
+            _sql = sql;
+        }
+
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             return null;
@@ -51,7 +58,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             createdDependencies = null;
 
             if (info.SqlImplementation())
-                codeBuilder.InsertCode(Sql.Get("SqlUniqueMultipleDatabaseDefinition_ExtendOption1"), SqlIndexMultipleDatabaseDefinition.Options1Tag, info);
+                codeBuilder.InsertCode(_sql.Get("SqlUniqueMultipleDatabaseDefinition_ExtendOption1"), SqlIndexMultipleDatabaseDefinition.Options1Tag, info);
         }
     }
 }

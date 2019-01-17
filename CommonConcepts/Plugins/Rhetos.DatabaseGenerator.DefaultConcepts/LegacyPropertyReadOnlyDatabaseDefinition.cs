@@ -35,10 +35,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class LegacyPropertyReadOnlyDatabaseDefinition : IConceptDatabaseDefinitionExtension
     {
         ISqlUtility _sqlUtility;
+        ISqlResourceProvider _sql;
 
-        public LegacyPropertyReadOnlyDatabaseDefinition(ISqlUtility sqlUtility)
+        public LegacyPropertyReadOnlyDatabaseDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
@@ -57,7 +59,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             createdDependencies = null;
 
             codeBuilder.InsertCode(
-                Sql.Format("LegacyPropertyReadOnlyDatabaseDefinition_ViewSelect", _sqlUtility.Identifier(info.Property.Name), _sqlUtility.Identifier(info.Column)),
+                _sql.Format("LegacyPropertyReadOnlyDatabaseDefinition_ViewSelect", _sqlUtility.Identifier(info.Property.Name), _sqlUtility.Identifier(info.Column)),
                 LegacyEntityWithAutoCreatedViewDatabaseDefinition.ViewSelectPartTag, info.Dependency_LegacyEntityWithAutoCreatedView);
         }
     }

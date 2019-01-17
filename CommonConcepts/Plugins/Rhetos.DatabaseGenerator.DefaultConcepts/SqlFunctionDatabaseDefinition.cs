@@ -33,10 +33,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class SqlFunctionDatabaseDefinition : IConceptDatabaseDefinition
     {
         ISqlUtility _sqlUtility;
+        ISqlResourceProvider _sql;
 
-        public SqlFunctionDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        public SqlFunctionDatabaseDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
 
@@ -44,7 +46,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         {
             var info = (SqlFunctionInfo)conceptInfo;
 
-            return Sql.Format("SqlFunctionDatabaseDefinition_Create",
+            return _sql.Format("SqlFunctionDatabaseDefinition_Create",
                     _sqlUtility.Identifier(info.Module.Name),
                     _sqlUtility.Identifier(info.Name),
                     info.Arguments,
@@ -56,7 +58,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         {
             var info = (SqlFunctionInfo)conceptInfo;
 
-            return Sql.Format("SqlFunctionDatabaseDefinition_Remove", _sqlUtility.Identifier(info.Module.Name), _sqlUtility.Identifier(info.Name));
+            return _sql.Format("SqlFunctionDatabaseDefinition_Remove", _sqlUtility.Identifier(info.Module.Name), _sqlUtility.Identifier(info.Name));
         }
     }
 }

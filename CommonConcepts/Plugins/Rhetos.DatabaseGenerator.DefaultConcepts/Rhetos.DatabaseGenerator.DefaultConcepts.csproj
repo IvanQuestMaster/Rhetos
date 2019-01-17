@@ -108,6 +108,9 @@
     <DelaySign>false</DelaySign>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -127,6 +130,7 @@
     <Compile Include="ColumnTypes\DecimalPropertyDatabaseDefinition.cs" />
     <Compile Include="ColumnTypes\DatePropertyDatabaseDefinition.cs" />
     <Compile Include="ColumnTypes\PropertyDatabaseDefinition.cs" />
+    <Compile Include="CommonConceptsConfiguration.cs" />
     <Compile Include="ISqlResourceProvider.cs" />
     <Compile Include="LoggingRelatedItemDatabaseDefinition.cs" />
     <Compile Include="LogReaderAdditionalSourceDatabaseDefinition.cs" />
@@ -211,6 +215,9 @@
       <Project>{24bc6b74-703a-4aaf-99c3-b5cd760f3d22}</Project>
       <Name>Rhetos.Dsl.DefaultConcepts</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

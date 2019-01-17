@@ -33,16 +33,18 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class SqlProcedureDatabaseDefinition : IConceptDatabaseDefinition
     {
         ISqlUtility _sqlUtility;
+        ISqlResourceProvider _sql;
 
-        public SqlProcedureDatabaseDefinition(ISqlUtility sqlUtility)
+        public SqlProcedureDatabaseDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (SqlProcedureInfo)conceptInfo;
-            return Sql.Format("SqlProcedureDatabaseDefinition_Create",
+            return _sql.Format("SqlProcedureDatabaseDefinition_Create",
                 _sqlUtility.Identifier(info.Module.Name),
                 _sqlUtility.Identifier(info.Name),
                 info.ProcedureArguments,
@@ -53,7 +55,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         public string RemoveDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (SqlProcedureInfo)conceptInfo;
-            return Sql.Format("SqlProcedureDatabaseDefinition_Remove",
+            return _sql.Format("SqlProcedureDatabaseDefinition_Remove",
                 _sqlUtility.Identifier(info.Module.Name),
                 _sqlUtility.Identifier(info.Name));
         }

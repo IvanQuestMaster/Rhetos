@@ -35,10 +35,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class LegacyPropertyReferenceDatabaseDefinition : IConceptDatabaseDefinitionExtension
     {
         private readonly ISqlUtility _sqlUtility;
+        private readonly ISqlResourceProvider _sql;
 
-        public LegacyPropertyReferenceDatabaseDefinition(ISqlUtility sqlUtility)
+        public LegacyPropertyReferenceDatabaseDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
@@ -68,22 +70,22 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
 
             // Add column to view:
 
-            codeBuilder.InsertCode(Sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendViewSelect", _sqlUtility.Identifier(info.Property.Name), refAlias),
+            codeBuilder.InsertCode(_sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendViewSelect", _sqlUtility.Identifier(info.Property.Name), refAlias),
                 LegacyEntityWithAutoCreatedViewDatabaseDefinition.ViewSelectPartTag, info.Dependency_LegacyEntityWithAutoCreatedView);
 
             var allColumnsEqual = string.Join(" AND ", sourceColumns.Zip(refColumns,
-                (sCol, rCol) => Sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendFromJoin", refAlias, rCol, sCol)));
-            codeBuilder.InsertCode(Sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendViewFrom", _sqlUtility.GetFullName(info.ReferencedTable), refAlias, allColumnsEqual),
+                (sCol, rCol) => _sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendFromJoin", refAlias, rCol, sCol)));
+            codeBuilder.InsertCode(_sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendViewFrom", _sqlUtility.GetFullName(info.ReferencedTable), refAlias, allColumnsEqual),
                 LegacyEntityWithAutoCreatedViewDatabaseDefinition.ViewFromPartTag, info.Dependency_LegacyEntityWithAutoCreatedView);
 
             // Add columns to instead-of trigger:
 
             foreach (var fkColumn in sourceColumns.Zip(refColumns, Tuple.Create))
             {
-                codeBuilder.InsertCode(Sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendTriggerInsert", fkColumn.Item1),
+                codeBuilder.InsertCode(_sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendTriggerInsert", fkColumn.Item1),
                     LegacyEntityWithAutoCreatedViewDatabaseDefinition.TriggerInsertPartTag, info.Dependency_LegacyEntityWithAutoCreatedView);
 
-                codeBuilder.InsertCode(Sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendTriggerSelectForInsert",
+                codeBuilder.InsertCode(_sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendTriggerSelectForInsert",
                         fkColumn.Item1,
                         refAlias,
                         fkColumn.Item2,
@@ -91,7 +93,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
                         _sqlUtility.Identifier(info.Property.Name)),
                     LegacyEntityWithAutoCreatedViewDatabaseDefinition.TriggerSelectForInsertPartTag, info.Dependency_LegacyEntityWithAutoCreatedView);
 
-                codeBuilder.InsertCode(Sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendTriggerSelectForUpdate",
+                codeBuilder.InsertCode(_sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendTriggerSelectForUpdate",
                         fkColumn.Item1,
                         refAlias,
                         fkColumn.Item2,
@@ -101,7 +103,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             }
 
             codeBuilder.InsertCode(
-                Sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendTriggerFrom", _sqlUtility.GetFullName(info.ReferencedTable), refAlias, _sqlUtility.Identifier(info.Property.Name)),
+                _sql.Format("LegacyPropertyReferenceDatabaseDefinition_ExtendTriggerFrom", _sqlUtility.GetFullName(info.ReferencedTable), refAlias, _sqlUtility.Identifier(info.Property.Name)),
                 LegacyEntityWithAutoCreatedViewDatabaseDefinition.TriggerFromPartTag, info.Dependency_LegacyEntityWithAutoCreatedView);
         }
     }

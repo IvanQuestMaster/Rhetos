@@ -35,23 +35,25 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class EntityDatabaseDefinition : IConceptDatabaseDefinition
     {
         ISqlUtility _sqlUtility;
+        ISqlResourceProvider _sql;
 
-        public EntityDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        public EntityDatabaseDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
 
         private string PrimaryKeyConstraintName(EntityInfo info)
         {
-            return _sqlUtility.Identifier(Sql.Format("EntityDatabaseDefinition_PrimaryKeyConstraintName",
+            return _sqlUtility.Identifier(_sql.Format("EntityDatabaseDefinition_PrimaryKeyConstraintName",
                 info.Module.Name,
                 info.Name));
         }
 
         private string DefaultConstraintName(EntityInfo info)
         {
-            return _sqlUtility.Identifier(Sql.Format("EntityDatabaseDefinition_DefaultConstraintName",
+            return _sqlUtility.Identifier(_sql.Format("EntityDatabaseDefinition_DefaultConstraintName",
                 info.Module.Name,
                 info.Name));
         }
@@ -60,7 +62,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         {
             var info = (EntityInfo)conceptInfo;
 
-            return Sql.Format("EntityDatabaseDefinition_Create",
+            return _sql.Format("EntityDatabaseDefinition_Create",
                 _sqlUtility.Identifier(info.Module.Name),
                 _sqlUtility.Identifier(info.Name),
                 PrimaryKeyConstraintName(info),
@@ -71,7 +73,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         {
             var info = (EntityInfo)conceptInfo;
 
-            return Sql.Format("EntityDatabaseDefinition_Remove",
+            return _sql.Format("EntityDatabaseDefinition_Remove",
                 _sqlUtility.Identifier(info.Module.Name),
                 _sqlUtility.Identifier(info.Name),
                 PrimaryKeyConstraintName(info),

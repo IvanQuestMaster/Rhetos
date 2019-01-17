@@ -35,16 +35,18 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class SqlQueryableDatabaseDefinition : IConceptDatabaseDefinition
     {
         private readonly ISqlUtility _sqlUtility;
+        private readonly ISqlResourceProvider _sql;
 
-        public SqlQueryableDatabaseDefinition(ISqlUtility sqlUtility)
+        public SqlQueryableDatabaseDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (SqlQueryableInfo)conceptInfo;
-            return Sql.Format("SqlQueryableDatabaseDefinition_Create",
+            return _sql.Format("SqlQueryableDatabaseDefinition_Create",
                     _sqlUtility.Identifier(info.Module.Name),
                     _sqlUtility.Identifier(info.Name),
                     info.SqlSource);
@@ -53,7 +55,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         public string RemoveDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (SqlQueryableInfo)conceptInfo;
-            return Sql.Format("SqlQueryableDatabaseDefinition_Remove",
+            return _sql.Format("SqlQueryableDatabaseDefinition_Remove",
                     _sqlUtility.Identifier(info.Module.Name),
                     _sqlUtility.Identifier(info.Name));
         }

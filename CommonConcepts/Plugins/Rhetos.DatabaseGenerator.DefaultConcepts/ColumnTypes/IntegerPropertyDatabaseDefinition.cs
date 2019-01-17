@@ -34,20 +34,21 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class IntegerPropertyDatabaseDefinition : IConceptDatabaseDefinition
     {
         ConceptMetadata _conceptMetadata;
-
         ISqlUtility _sqlUtility;
+        ISqlResourceProvider _sql;
 
-        public IntegerPropertyDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        public IntegerPropertyDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _conceptMetadata = conceptMetadata;
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (IntegerPropertyInfo)conceptInfo;
 
-            PropertyDatabaseDefinition.RegisterColumnMetadata(_conceptMetadata, info, _sqlUtility.Identifier(info.Name), Sql.Get("IntegerPropertyDatabaseDefinition_DataType"));
+            PropertyDatabaseDefinition.RegisterColumnMetadata(_conceptMetadata, info, _sqlUtility.Identifier(info.Name), _sql.Get("IntegerPropertyDatabaseDefinition_DataType"));
             if (info.DataStructure is EntityInfo)
                 return PropertyDatabaseDefinition.AddColumn(_conceptMetadata, info);
 

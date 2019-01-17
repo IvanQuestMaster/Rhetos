@@ -50,10 +50,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         public static readonly SqlTag<SqlIndexMultipleInfo> ColumnsTag = new SqlTag<SqlIndexMultipleInfo>("Columns", TagType.Appendable, "{0}", ", {0}");
 
         private readonly ISqlUtility _sqlUtility;
+        private readonly ISqlResourceProvider _sql;
 
-        public SqlIndexMultipleDatabaseDefinition(ISqlUtility sqlUtility)
+        public SqlIndexMultipleDatabaseDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         [Obsolete]
@@ -65,11 +67,11 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             return SqlUtility.Identifier(basicConstraintName);
         }
 
-        public static string ConstraintName(SqlIndexMultipleInfo info, ISqlUtility sqlUtility)
+        public static string ConstraintName(SqlIndexMultipleInfo info, ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             var cleanColumnNames = info.PropertyNames.Split(' ').Select(name => name.Trim()).ToArray();
             var joinedColumnNames = string.Join("_", cleanColumnNames.Select(CsUtility.TextToIdentifier));
-            var basicConstraintName = Sql.Format("SqlIndexMultipleDatabaseDefinition_ConstraintName", info.DataStructure.Name, joinedColumnNames);
+            var basicConstraintName = sql.Format("SqlIndexMultipleDatabaseDefinition_ConstraintName", info.DataStructure.Name, joinedColumnNames);
             return sqlUtility.Identifier(basicConstraintName);
         }
 
@@ -78,8 +80,8 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (SqlIndexMultipleInfo)conceptInfo;
 
             if (info.SqlImplementation())
-                return Sql.Format("SqlIndexMultipleDatabaseDefinition_Create",
-                    ConstraintName(info, _sqlUtility),
+                return _sql.Format("SqlIndexMultipleDatabaseDefinition_Create",
+                    ConstraintName(info, _sqlUtility, _sql),
                     _sqlUtility.Identifier(info.DataStructure.Module.Name),
                     _sqlUtility.Identifier(info.DataStructure.Name),
                     ColumnsTag.Evaluate(info),
@@ -93,10 +95,10 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (SqlIndexMultipleInfo)conceptInfo;
 
             if (info.SqlImplementation())
-                return Sql.Format("SqlIndexMultipleDatabaseDefinition_Remove",
+                return _sql.Format("SqlIndexMultipleDatabaseDefinition_Remove",
                     _sqlUtility.Identifier(info.DataStructure.Module.Name),
                     _sqlUtility.Identifier(info.DataStructure.Name),
-                    ConstraintName(info, _sqlUtility));
+                    ConstraintName(info, _sqlUtility, _sql));
 
             return null;
         }

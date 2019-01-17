@@ -35,18 +35,20 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     {
         ConceptMetadata _conceptMetadata;
         ISqlUtility _sqlUtility;
+        ISqlResourceProvider _sql;
 
-        public DateTimePropertyDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlutility)
+        public DateTimePropertyDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlutility, ISqlResourceProvider sql)
         {
             _conceptMetadata = conceptMetadata;
             _sqlUtility = sqlutility;
+            _sql = sql;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
         {
             var info = (DateTimePropertyInfo)conceptInfo;
 
-            PropertyDatabaseDefinition.RegisterColumnMetadata(_conceptMetadata, info, _sqlUtility.Identifier(info.Name), Sql.Get("DateTimePropertyDatabaseDefinition_DataType"));
+            PropertyDatabaseDefinition.RegisterColumnMetadata(_conceptMetadata, info, _sqlUtility.Identifier(info.Name), _sql.Get("DateTimePropertyDatabaseDefinition_DataType"));
             if (info.DataStructure is EntityInfo)
                 return PropertyDatabaseDefinition.AddColumn(_conceptMetadata, info);
 

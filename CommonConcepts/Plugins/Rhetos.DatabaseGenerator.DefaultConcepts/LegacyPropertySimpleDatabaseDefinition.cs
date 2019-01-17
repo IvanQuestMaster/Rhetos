@@ -35,10 +35,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class LegacyPropertySimpleDatabaseDefinition : IConceptDatabaseDefinitionExtension
     {
         private readonly ISqlUtility _sqlUtility;
+        private readonly ISqlResourceProvider _sql;
 
-        public LegacyPropertySimpleDatabaseDefinition(ISqlUtility sqlUtility)
+        public LegacyPropertySimpleDatabaseDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
@@ -56,16 +58,16 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (LegacyPropertySimpleInfo) conceptInfo;
             createdDependencies = null;
 
-            codeBuilder.InsertCode(Sql.Format("LegacyPropertySimpleDatabaseDefinition_ExtendViewSelect", _sqlUtility.Identifier(info.Property.Name), _sqlUtility.Identifier(info.Column)),
+            codeBuilder.InsertCode(_sql.Format("LegacyPropertySimpleDatabaseDefinition_ExtendViewSelect", _sqlUtility.Identifier(info.Property.Name), _sqlUtility.Identifier(info.Column)),
                 LegacyEntityWithAutoCreatedViewDatabaseDefinition.ViewSelectPartTag, info.Dependency_LegacyEntityWithAutoCreatedView);
 
-            codeBuilder.InsertCode(Sql.Format("LegacyPropertySimpleDatabaseDefinition_ExtendTriggerInsert", _sqlUtility.Identifier(info.Column)),
+            codeBuilder.InsertCode(_sql.Format("LegacyPropertySimpleDatabaseDefinition_ExtendTriggerInsert", _sqlUtility.Identifier(info.Column)),
                 LegacyEntityWithAutoCreatedViewDatabaseDefinition.TriggerInsertPartTag, info.Dependency_LegacyEntityWithAutoCreatedView);
 
-            codeBuilder.InsertCode(Sql.Format("LegacyPropertySimpleDatabaseDefinition_ExtendTriggerSelectForInsert", _sqlUtility.Identifier(info.Column), _sqlUtility.Identifier(info.Property.Name)),
+            codeBuilder.InsertCode(_sql.Format("LegacyPropertySimpleDatabaseDefinition_ExtendTriggerSelectForInsert", _sqlUtility.Identifier(info.Column), _sqlUtility.Identifier(info.Property.Name)),
                 LegacyEntityWithAutoCreatedViewDatabaseDefinition.TriggerSelectForInsertPartTag, info.Dependency_LegacyEntityWithAutoCreatedView);
 
-            codeBuilder.InsertCode(Sql.Format("LegacyPropertySimpleDatabaseDefinition_ExtendTriggerSelectForUpdate", _sqlUtility.Identifier(info.Column), _sqlUtility.Identifier(info.Property.Name)),
+            codeBuilder.InsertCode(_sql.Format("LegacyPropertySimpleDatabaseDefinition_ExtendTriggerSelectForUpdate", _sqlUtility.Identifier(info.Column), _sqlUtility.Identifier(info.Property.Name)),
                 LegacyEntityWithAutoCreatedViewDatabaseDefinition.TriggerSelectForUpdatePartTag, info.Dependency_LegacyEntityWithAutoCreatedView);
 
         }

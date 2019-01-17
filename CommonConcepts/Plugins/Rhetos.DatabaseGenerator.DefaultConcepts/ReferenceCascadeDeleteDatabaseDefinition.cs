@@ -35,6 +35,13 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     [ExportMetadata(MefProvider.Implements, typeof(ReferenceCascadeDeleteInfo))]
     public class ReferenceCascadeDeleteDatabaseDefinition : IConceptDatabaseDefinitionExtension
     {
+        ISqlResourceProvider _sql;
+
+        public ReferenceCascadeDeleteDatabaseDefinition(ISqlResourceProvider sql)
+        {
+            _sql = sql;
+        }
+
         public void ExtendDatabaseStructure(
             IConceptInfo conceptInfo, ICodeBuilder codeBuilder, 
             out IEnumerable<Tuple<IConceptInfo, IConceptInfo>> createdDependencies)
@@ -46,7 +53,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
 
             if (ReferencePropertyConstraintDatabaseDefinition.IsSupported(info.Reference))
             {
-                codeBuilder.InsertCode(Sql.Get("ReferenceCascadeDeleteDatabaseDefinition_ExtendForeignKey"),
+                codeBuilder.InsertCode(_sql.Get("ReferenceCascadeDeleteDatabaseDefinition_ExtendForeignKey"),
                     ReferencePropertyConstraintDatabaseDefinition.ForeignKeyConstraintOptions, info.Reference);
             }
         }

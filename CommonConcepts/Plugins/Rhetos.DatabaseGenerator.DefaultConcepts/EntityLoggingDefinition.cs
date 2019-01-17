@@ -42,10 +42,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         public static readonly SqlTag<EntityLoggingInfo> AfterInsertLogTag = "AfterInsertLog";
 
         ISqlUtility _sqlUtility;
+        ISqlResourceProvider _sql;
 
-        public EntityLoggingDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        public EntityLoggingDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         public static string GetTriggerNameInsert(EntityLoggingInfo conceptInfo)
@@ -76,7 +78,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         {
             var info = (EntityLoggingInfo)conceptInfo;
 
-            return Sql.Format("EntityLoggingDefinition_Create",
+            return _sql.Format("EntityLoggingDefinition_Create",
                 _sqlUtility.Identifier(info.Entity.Module.Name),
                 _sqlUtility.Identifier(info.Entity.Name),
                 GetTriggerNameInsert(info),
@@ -95,7 +97,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         {
             var info = (EntityLoggingInfo)conceptInfo;
 
-            return Sql.Format("EntityLoggingDefinition_Remove",
+            return _sql.Format("EntityLoggingDefinition_Remove",
                 _sqlUtility.Identifier(info.Entity.Module.Name),
                 GetTriggerNameInsert(info),
                 GetTriggerNameUpdate(info),

@@ -34,10 +34,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class SqlDefaultPropertyDatabaseDefinition : IConceptDatabaseDefinition
     {
         ISqlUtility _sqlUtility;
+        ISqlResourceProvider _sql;
 
-        public SqlDefaultPropertyDatabaseDefinition(ISqlUtility sqlUtility)
+        public SqlDefaultPropertyDatabaseDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
         
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
@@ -45,7 +47,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (SqlDefaultPropertyInfo)conceptInfo;
 
             if (info.Property.DataStructure is EntityInfo)
-                return Sql.Format("SqlDefaultPropertyDatabaseDefinition_Create",
+                return _sql.Format("SqlDefaultPropertyDatabaseDefinition_Create",
                     _sqlUtility.Identifier(info.Property.DataStructure.Module.Name),
                     _sqlUtility.Identifier(info.Property.DataStructure.Name),
                     _sqlUtility.Identifier(info.Property.Name),
@@ -58,7 +60,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         {
             var info = (SqlDefaultPropertyInfo)conceptInfo;
             if (info.Property.DataStructure is EntityInfo)
-                return Sql.Format("SqlDefaultPropertyDatabaseDefinition_Remove",
+                return _sql.Format("SqlDefaultPropertyDatabaseDefinition_Remove",
                     _sqlUtility.Identifier(info.Property.DataStructure.Module.Name),
                     _sqlUtility.Identifier(info.Property.DataStructure.Name),
                     _sqlUtility.Identifier(info.Property.Name),

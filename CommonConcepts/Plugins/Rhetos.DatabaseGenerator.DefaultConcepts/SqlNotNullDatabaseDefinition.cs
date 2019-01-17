@@ -36,11 +36,13 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     {
         private readonly ConceptMetadata _conceptMetadata;
         private readonly ISqlUtility _sqlUtility;
+        private readonly ISqlResourceProvider _sql;
 
-        public SqlNotNullDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        public SqlNotNullDatabaseDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _conceptMetadata = conceptMetadata;
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
@@ -65,7 +67,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
                 var columns = columnNames.Zip(columnTypes, (name, type) => new { name, type });
 
                 foreach (var column in columns)
-                    sql.AppendLine(Sql.Format("SqlNotNull_Create",
+                    sql.AppendLine(_sql.Format("SqlNotNull_Create",
                         _sqlUtility.Identifier(info.Property.DataStructure.Module.Name),
                         _sqlUtility.Identifier(info.Property.DataStructure.Name),
                         column.name,

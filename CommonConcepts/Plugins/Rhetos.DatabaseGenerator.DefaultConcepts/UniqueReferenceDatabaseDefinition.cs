@@ -39,10 +39,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
         public static readonly SqlTag<UniqueReferenceInfo> ForeignKeyConstraintOptionsTag = "FK options";
 
         private readonly ISqlUtility _sqlUtility;
+        private readonly ISqlResourceProvider _sql;
 
-        public UniqueReferenceDatabaseDefinition(ISqlUtility sqlUtility)
+        public UniqueReferenceDatabaseDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         [Obsolete]
@@ -53,9 +55,9 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
                 info.Base.Name));
         }
 
-        public static string GetConstraintName(UniqueReferenceInfo info, ISqlUtility sqlUtility)
+        public static string GetConstraintName(UniqueReferenceInfo info, ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
-            return sqlUtility.Identifier(Sql.Format("UniqueReferenceDatabaseDefinition_ConstraintName",
+            return sqlUtility.Identifier(sql.Format("UniqueReferenceDatabaseDefinition_ConstraintName",
                 info.Extension.Name,
                 info.Base.Name));
         }
@@ -71,9 +73,9 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (UniqueReferenceInfo)conceptInfo;
             if (ShouldCreateConstraint(info))
             {
-                return Sql.Format("UniqueReferenceDatabaseDefinition_Create",
+                return _sql.Format("UniqueReferenceDatabaseDefinition_Create",
                     _sqlUtility.Identifier(info.Extension.Module.Name) + "." + _sqlUtility.Identifier(info.Extension.Name),
-                    GetConstraintName(info, _sqlUtility),
+                    GetConstraintName(info, _sqlUtility, _sql),
                     ForeignKeyUtility.GetSchemaTableForForeignKey(info.Base),
                     ForeignKeyConstraintOptionsTag.Evaluate(info));
             }
@@ -101,9 +103,9 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var info = (UniqueReferenceInfo)conceptInfo;
             if (ShouldCreateConstraint(info))
             {
-                return Sql.Format("UniqueReferenceDatabaseDefinition_Remove",
+                return _sql.Format("UniqueReferenceDatabaseDefinition_Remove",
                     _sqlUtility.Identifier(info.Extension.Module.Name) + "." + _sqlUtility.Identifier(info.Extension.Name),
-                    GetConstraintName(info, _sqlUtility));
+                    GetConstraintName(info, _sqlUtility, _sql));
             }
             return "";
         }

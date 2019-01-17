@@ -34,10 +34,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class PropertyLoggingDefinition : IConceptDatabaseDefinitionExtension
     {
         ISqlUtility _sqlUtility;
+        ISqlResourceProvider _sql;
 
-        public PropertyLoggingDefinition(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        public PropertyLoggingDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
 
@@ -55,13 +57,13 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             var column = GetColumnName(info.Property);
 
             string propertyTypeKeyword = info.Property.GetKeywordOrTypeName();
-            string propertyToStringSnippet = Sql.TryGet("PropertyLoggingDefinition_TextValue_" + propertyTypeKeyword);
+            string propertyToStringSnippet = _sql.TryGet("PropertyLoggingDefinition_TextValue_" + propertyTypeKeyword);
             if (string.IsNullOrEmpty(propertyToStringSnippet))
-                propertyToStringSnippet = Sql.Get("PropertyLoggingDefinition_TextValue");
+                propertyToStringSnippet = _sql.Get("PropertyLoggingDefinition_TextValue");
             var propertyToString = string.Format(propertyToStringSnippet, column);
 
             codeBuilder.InsertCode(
-                Sql.Format("PropertyLoggingDefinition_GenericPropertyLogging",
+                _sql.Format("PropertyLoggingDefinition_GenericPropertyLogging",
                     column,
                     propertyToString),
                 EntityLoggingDefinition.LogPropertyTag, info.EntityLogging);

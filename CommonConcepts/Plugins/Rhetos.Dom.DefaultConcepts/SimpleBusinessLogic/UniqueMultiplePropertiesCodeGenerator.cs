@@ -48,10 +48,12 @@ namespace Rhetos.Dom.DefaultConcepts.SimpleBusinessLogic
         }
 
         private readonly ISqlUtility _sqlUtility;
+        private readonly ISqlResourceProvider _sql;
 
-        public UniqueMultiplePropertiesCodeGenerator(ISqlUtility sqlUtility)
+        public UniqueMultiplePropertiesCodeGenerator(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         public void GenerateCode(IConceptInfo conceptInfo, ICodeBuilder codeBuilder)
@@ -70,7 +72,7 @@ namespace Rhetos.Dom.DefaultConcepts.SimpleBusinessLogic
                 string systemMessage = "DataStructure:" + info.DataStructure + ",Property:" + info.PropertyNames;
                 string interpretSqlError = @"if (interpretedException is Rhetos.UserException && _sqlUtility.IsUniqueError(interpretedException, "
                     + CsUtility.QuotedString(ormDataStructure.GetOrmSchema() + "." + ormDataStructure.GetOrmDatabaseObject()) + @", "
-                    + CsUtility.QuotedString(SqlIndexMultipleDatabaseDefinition.ConstraintName(info, _sqlUtility)) + @"))
+                    + CsUtility.QuotedString(SqlIndexMultipleDatabaseDefinition.ConstraintName(info, _sqlUtility, _sql)) + @"))
                     ((Rhetos.UserException)interpretedException).SystemMessage = " + CsUtility.QuotedString(systemMessage) + @";
                 ";
                 codeBuilder.InsertCode(interpretSqlError, WritableOrmDataStructureCodeGenerator.OnDatabaseErrorTag, info.DataStructure);

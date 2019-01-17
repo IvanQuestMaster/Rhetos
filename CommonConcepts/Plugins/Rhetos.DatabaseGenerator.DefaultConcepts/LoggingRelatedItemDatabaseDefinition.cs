@@ -35,10 +35,12 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class LoggingRelatedItemDatabaseDefinition : IConceptDatabaseDefinitionExtension
     {
         ISqlUtility _sqlUtility;
+        ISqlResourceProvider _sql;
 
-        public LoggingRelatedItemDatabaseDefinition(ISqlUtility sqlUtility)
+        public LoggingRelatedItemDatabaseDefinition(ISqlUtility sqlUtility, ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
+            _sql = sql;
         }
 
         public string CreateDatabaseStructure(IConceptInfo conceptInfo)
@@ -53,7 +55,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
 
         public void ExtendDatabaseStructure(IConceptInfo conceptInfo, ICodeBuilder codeBuilder, out IEnumerable<Tuple<IConceptInfo, IConceptInfo>> createdDependencies)
         {
-            if (Sql.TryGet("LoggingRelatedItemDatabaseDefinition_TempColumnDefinition") == null)
+            if (_sql.TryGet("LoggingRelatedItemDatabaseDefinition_TempColumnDefinition") == null)
             {
                 createdDependencies = null;
                 return;
@@ -72,7 +74,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
 
         private void InsertCode(ICodeBuilder codeBuilder, LoggingRelatedItemInfo info, string sqlResource, SqlTag<EntityLoggingInfo> tag)
         {
-            string codeSnippet = Sql.Format(sqlResource,
+            string codeSnippet = _sql.Format(sqlResource,
                 GetTempColumnNameOld(info),
                 GetTempColumnNameNew(info),
                 info.Table,

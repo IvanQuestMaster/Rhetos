@@ -37,7 +37,7 @@ namespace Rhetos.Dom.DefaultConcepts.SimpleBusinessLogic
     {
         ISqlUtility _sqlUtility;
 
-        public UniqueMultiplePropertyCodeGenerator(ConceptMetadata conceptMetadata, ISqlUtility sqlUtility)
+        public UniqueMultiplePropertyCodeGenerator(ISqlUtility sqlUtility)
         {
             _sqlUtility = sqlUtility;
         }

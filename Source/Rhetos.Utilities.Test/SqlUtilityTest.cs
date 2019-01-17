@@ -32,24 +32,6 @@ namespace Rhetos.Utilities.Test
     [DeploymentItem("ConnectionStrings.config")]
     public class SqlUtilityTest
     {
-        internal class NullConfiguration : IConfiguration
-        {
-            public Lazy<bool> GetBool(string key, bool defaultValue)
-            {
-                return new Lazy<bool>(() => defaultValue);
-            }
-
-            public Lazy<int> GetInt(string key, int defaultValue)
-            {
-                return new Lazy<int>(() => defaultValue);
-            }
-
-            public Lazy<string> GetString(string key, string defaultValue)
-            {
-                return new Lazy<string>(() => defaultValue);
-            }
-        }
-
         private ISqlUtility GetMsSqlUtility()
         {
             return new MsSqlUtility2();

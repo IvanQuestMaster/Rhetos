@@ -36,6 +36,7 @@ namespace Rhetos.Configuration.Autofac
         {
             builder.RegisterType<ConceptApplicationRepository>().As<IConceptApplicationRepository>();
             builder.RegisterType<DatabaseGenerator.DatabaseGenerator>().As<IDatabaseGenerator>();
+            builder.RegisterType<DatabaseGenerator.SqlResourceProvider>().As<DatabaseGenerator.ISqlResourceProvider>().SingleInstance();
             builder.RegisterInstance(new DatabaseGeneratorOptions { ShortTransactions = _shortTransactions });
             Plugins.FindAndRegisterPlugins<IConceptDatabaseDefinition>(builder);
             builder.RegisterType<NullImplementation>().As<IConceptDatabaseDefinition>();

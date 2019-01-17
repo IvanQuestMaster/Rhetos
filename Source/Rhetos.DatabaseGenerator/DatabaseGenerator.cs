@@ -44,6 +44,7 @@ namespace Rhetos.DatabaseGenerator
         protected readonly ILogger _performanceLogger;
         protected readonly DatabaseGeneratorOptions _options;
         protected readonly ISqlUtility _sqlUtility;
+        protected readonly ISqlResourceProvider _sqlResourceProvider;
 
         protected bool DatabaseUpdated = false;
 
@@ -56,7 +57,8 @@ namespace Rhetos.DatabaseGenerator
             IConceptApplicationRepository conceptApplicationRepository,
             ILogProvider logProvider,
             DatabaseGeneratorOptions options,
-            ISqlUtility sqlUtility)
+            ISqlUtility sqlUtility,
+            ISqlResourceProvider sqlResourceProvider)
         {
             _sqlTransactionBatches = sqlTransactionBatches;
             _dslModel = dslModel;
@@ -68,6 +70,7 @@ namespace Rhetos.DatabaseGenerator
             _performanceLogger = logProvider.GetLogger("Performance");
             _options = options;
             _sqlUtility = sqlUtility;
+            _sqlResourceProvider = sqlResourceProvider;
         }
 
         public void UpdateDatabaseStructure()
@@ -602,7 +605,7 @@ namespace Rhetos.DatabaseGenerator
 
             // Oracle must commit metadata changes before modifying next database object, to ensure metadata consistency if next DDL command fails
             // (Oracle db automatically commits changes on DDL commands, so the previous DDL command has already been committed).
-            yield return Sql.Get("DatabaseGenerator_CommitAfterDDL");
+            yield return _sqlResourceProvider.Get("DatabaseGenerator_CommitAfterDDL");
         }
 
         protected List<string> ApplyChangesToDatabase_Unchanged(List<NewConceptApplication> toBeInserted, List<NewConceptApplication> newApplications, List<ConceptApplication> oldApplications)

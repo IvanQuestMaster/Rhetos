@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Rhetos.Utilities;
 
-namespace Rhetos.DatabaseGenerator.DefaultConcepts
+namespace Rhetos.DatabaseGenerator
 {
     //TODO Neznam da li je to najbolje rjesenje
     public class SqlResourceProvider : ISqlResourceProvider

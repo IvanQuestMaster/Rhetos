@@ -52,6 +52,7 @@ namespace DeployPackages
                 builder.RegisterModule(new DatabaseGeneratorModuleConfiguration(shortTransaction));
                 builder.RegisterType<DataMigration>();
                 builder.RegisterType<DatabaseCleaner>();
+                builder.RegisterType<SqlResourceProvider>().As<ISqlResourceProvider>().SingleInstance();
                 builder.RegisterType<ApplicationGenerator>();
                 Plugins.FindAndRegisterPlugins<IGenerator>(builder);
             }

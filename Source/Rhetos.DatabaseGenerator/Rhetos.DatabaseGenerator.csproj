@@ -118,6 +118,7 @@
     <Compile Include="ConceptApplicationDependency.cs" />
     <Compile Include="ConceptApplication.cs" />
     <Compile Include="IConceptApplicationRepository.cs" />
+    <Compile Include="ISqlResourceProvider.cs" />
     <Compile Include="NewConceptApplication.cs" />
     <Compile Include="DatabaseGenerator.cs" />
     <Compile Include="ConceptApplicationRepository.cs" />
@@ -127,6 +128,7 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Sql.cs" />
+    <Compile Include="SqlResourceProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rhetos.Utilities\Rhetos.Utilities.csproj">

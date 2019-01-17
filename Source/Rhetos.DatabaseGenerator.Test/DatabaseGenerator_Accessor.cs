@@ -35,13 +35,13 @@ namespace Rhetos.DatabaseGenerator.Test
     {
         public DatabaseGenerator_Accessor()
             : base(null, null, new NullPluginsContainer<IConceptDatabaseDefinition>(), null, new ConsoleLogProvider(), new DatabaseGeneratorOptions { ShortTransactions = false },
-                new MsSqlUtility2())
+                new MsSqlUtility2(), new SqlResourceProvider())
         {
         }
 
         public DatabaseGenerator_Accessor(IDslModel dslModel, PluginsContainer<IConceptDatabaseDefinition> plugins)
             : base(null, dslModel, plugins, null, new ConsoleLogProvider(), new DatabaseGeneratorOptions { ShortTransactions = false },
-            new MsSqlUtility2())
+            new MsSqlUtility2(), new SqlResourceProvider())
         {
         }
 
@@ -49,7 +49,7 @@ namespace Rhetos.DatabaseGenerator.Test
             : base(sqlTransactionBatches, null, new NullPluginsContainer<IConceptDatabaseDefinition>(),
             new MockConceptApplicationRepository(),
             new ConsoleLogProvider(), new DatabaseGeneratorOptions { ShortTransactions = false },
-            new MsSqlUtility2())
+            new MsSqlUtility2(), new SqlResourceProvider())
         {
         }
 

@@ -147,7 +147,6 @@
     <Compile Include="ISqlUtility.cs" />
     <Compile Include="IUserInfoAdmin.cs" />
     <Compile Include="ListOfTuples.cs" />
-    <Compile Include="ManifestTokenProvider.cs" />
     <Compile Include="MsSqlUtility2.cs" />
     <Compile Include="SqlCommandConfig.cs" />
     <Compile Include="SqlScriptUtility.cs" />

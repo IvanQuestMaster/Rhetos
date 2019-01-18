@@ -19,7 +19,6 @@
 
 namespace Rhetos.Utilities
 {
-    //TODO Postoji klasa connection string pa neznam sta sa njom napraviti
     public interface IConnectionStringSettings
     {
         string DatabaseLanguage { get; }

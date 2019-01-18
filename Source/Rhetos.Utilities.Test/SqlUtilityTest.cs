@@ -38,24 +38,6 @@ namespace Rhetos.Utilities.Test
         }
 
         [TestMethod]
-        public void OracleLimitIdentifierLength()
-        {
-            var names = new[] {
-                "123456789012345678901234567890",
-                "123456789012345678901234567890a",
-                "123456789012345678901234567890b" };
-            Assert.AreEqual("30, 31, 31", TestUtility.Dump(names, name => name.Length));
-
-            var limited = names.Select(name => OracleSqlUtility.LimitIdentifierLength(name)).ToArray();
-            TestUtility.Dump(limited);
-
-            Assert.AreEqual(names[0], limited[0]);
-            Assert.AreEqual(30, limited[1].Length);
-            Assert.AreEqual(30, limited[2].Length);
-            Assert.IsFalse(limited[1].Equals(limited[2], StringComparison.OrdinalIgnoreCase));
-        }
-
-        [TestMethod]
         public void SingleQuote_SimpleTest()
         {
             Assert.AreEqual("'abc'", GetMsSqlUtility().QuoteText("abc"));

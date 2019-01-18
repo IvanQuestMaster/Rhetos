@@ -76,7 +76,7 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
                 return _sql.Format("UniqueReferenceDatabaseDefinition_Create",
                     _sqlUtility.Identifier(info.Extension.Module.Name) + "." + _sqlUtility.Identifier(info.Extension.Name),
                     GetConstraintName(info, _sqlUtility, _sql),
-                    ForeignKeyUtility.GetSchemaTableForForeignKey(info.Base, _sqlUtility),
+                    ForeignKeyUtility.GetSchemaTableForForeignKey(info.Base),
                     ForeignKeyConstraintOptionsTag.Evaluate(info));
             }
             // TODO: else - Generate a Filter+InvalidData validation in the server application that checks for invalid items.

@@ -76,7 +76,6 @@ namespace Rhetos.Utilities
             }
         }
 
-        //TODO Ovo bi vjeratno trebalo biti static
         public string SqlConnectionInfo(string connectionString)
         {
             SqlConnectionStringBuilder cs;

@@ -28,7 +28,6 @@ using Rhetos.Utilities;
 
 namespace Rhetos.DatabaseGenerator
 {
-    //TODO Neznam da li je to najbolje rjesenje
     public class SqlResourceProvider : ISqlResourceProvider
     {
         private readonly ResourceManager _resourceManager;

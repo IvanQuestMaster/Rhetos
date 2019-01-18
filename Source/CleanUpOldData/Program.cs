@@ -40,7 +40,6 @@ namespace CleanupOldData
         {
             try
             {
-                //TODO:
                 Paths.InitializeRhetosServerRootPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".."));
 
                 GenerateApplication(new ConsoleLogger(), new DeployArguments(args));

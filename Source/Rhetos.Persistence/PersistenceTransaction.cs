@@ -32,6 +32,7 @@ namespace Rhetos.Persistence
         private readonly ILogger _logger;
         private readonly string _connectionString;
         private readonly IUserInfo _userInfo;
+        private readonly ISqlUtility _sqlUtility;
 
         private DbConnection _connection;
         private DbTransaction _transaction;
@@ -40,11 +41,12 @@ namespace Rhetos.Persistence
         private int _persistenceTransactionId;
         static int _counter = 0;
 
-        public PersistenceTransaction(ILogProvider logProvider, ConnectionString connectionString, IUserInfo userInfo)
+        public PersistenceTransaction(ILogProvider logProvider, ConnectionString connectionString, IUserInfo userInfo, ISqlUtility sqlUtility)
         {
             _logger = logProvider.GetLogger(GetType().Name);
             _connectionString = connectionString;
             _userInfo = userInfo;
+            _sqlUtility = sqlUtility;
             _persistenceTransactionId = Interlocked.Increment(ref _counter);
         }
 
@@ -177,7 +179,7 @@ namespace Rhetos.Persistence
                     if (_userInfo.IsUserRecognized)
                         using (var sqlCommand = _connection.CreateCommand())
                         {
-                            sqlCommand.CommandText = MsSqlUtility.SetUserContextInfoQuery(_userInfo);
+                            sqlCommand.CommandText = _sqlUtility.SetUserContextInfoQuery(_userInfo);
                             sqlCommand.ExecuteNonQuery();
                         }
 

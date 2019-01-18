@@ -140,11 +140,7 @@
     <EmbeddedResource Include="..\..\Source\Database\RhetosDatabase.MsSql.sql">
       <Link>RhetosDatabase.MsSql.sql</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\..\Source\Database\RhetosDatabase.Oracle.sql">
-      <Link>RhetosDatabase.Oracle.sql</Link>
-    </EmbeddedResource>
     <EmbeddedResource Include="Sql.MsSql.resx" />
-    <EmbeddedResource Include="Sql.Oracle.resx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

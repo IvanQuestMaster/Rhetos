@@ -64,7 +64,6 @@
     <Compile Include="MsSqlUtilityTest.cs" />
     <Compile Include="NoLocalizerTest.cs" />
     <Compile Include="CsUtilityTest.cs" />
-    <Compile Include="OracleSqlExecuterTest.cs" />
     <Compile Include="GraphTest.cs" />
     <Compile Include="FastReplacerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

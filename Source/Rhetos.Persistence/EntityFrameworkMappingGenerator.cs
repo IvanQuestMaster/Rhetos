@@ -39,18 +39,37 @@ namespace Rhetos.Persistence
         private readonly ICodeGenerator _codeGenerator;
         private readonly IPluginsContainer<IConceptMapping> _plugins;
         private readonly ILogger _performanceLogger;
+        private readonly ConnectionString _connectionString;
+        private readonly ISqlUtility _sqlUtility;
 
         public EntityFrameworkMappingGenerator(
             ICodeGenerator codeGenerator,
             IPluginsContainer<IConceptMapping> plugins,
-            ILogProvider logProvider)
+            ILogProvider logProvider,
+            ConnectionString connectionString,
+            ISqlUtility sqlUtility)
         {
             _plugins = plugins;
             _codeGenerator = codeGenerator;
             _performanceLogger = logProvider.GetLogger("Performance");
+            _connectionString = connectionString;
+            _sqlUtility = sqlUtility;
         }
 
-        private Lazy<string> GetProviderManifestToken = new Lazy<string>(() => MsSqlUtility.GetProviderManifestToken());
+        private Lazy<string> GetProviderManifestToken()
+        {
+            return new Lazy<string>(() =>
+            {
+                string providerManifestToken = null;
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    providerManifestToken = _sqlUtility.QueryForManifestToken(connection);
+                    connection.Close();
+                }
+                return providerManifestToken;
+            });
+        }
         
         public void Generate()
         {
@@ -86,7 +105,7 @@ namespace Rhetos.Persistence
 @"<Mapping Space=""C-S"" xmlns=""http://schemas.microsoft.com/ado/2009/11/mapping/cs"">
 {0}
 </Mapping>",
-@"<Schema Namespace=""Rhetos"" Provider=""System.Data.SqlClient"" ProviderManifestToken=""" + GetProviderManifestToken.Value + "\"" + @" Alias=""Self"" xmlns:customannotation=""http://schemas.microsoft.com/ado/2013/11/edm/customannotation"" xmlns=""http://schemas.microsoft.com/ado/2009/11/edm/ssdl"">
+@"<Schema Namespace=""Rhetos"" Provider=""System.Data.SqlClient"" ProviderManifestToken=""" + GetProviderManifestToken().Value + "\"" + @" Alias=""Self"" xmlns:customannotation=""http://schemas.microsoft.com/ado/2013/11/edm/customannotation"" xmlns=""http://schemas.microsoft.com/ado/2009/11/edm/ssdl"">
 {0}
 </Schema>"
             };

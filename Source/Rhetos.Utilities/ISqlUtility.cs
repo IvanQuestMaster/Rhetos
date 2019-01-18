@@ -115,5 +115,12 @@ namespace Rhetos.Utilities
         void ThrowIfPrimaryKeyErrorOnInsert(RhetosException interpretedException, string tableName);
 
         string[] SplitBatches(string sql);
+
+        /// <summary>
+        /// Used to generate Entity framework metadata files
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <returns></returns>
+        string QueryForManifestToken(DbConnection conn);
     }
 }

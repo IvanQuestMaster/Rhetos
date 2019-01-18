@@ -40,7 +40,7 @@ namespace Rhetos.Persistence.Test
         {
             connectionString = connectionString ?? GetConnectionString();
             testUser = testUser ?? new NullUserInfo();
-            return new MsSqlExecuter(connectionString, new ConsoleLogProvider(), testUser, null, new SqlCommandConfig(new MockConfiguration()));
+            return new MsSqlExecuter(connectionString, new ConsoleLogProvider(), testUser, null, new SqlCommandConfig(new MockConfiguration()), new MsSqlUtility2());
         }
 
         private static MsSqlExecuter NewSqlExecuter(IUserInfo testUser)

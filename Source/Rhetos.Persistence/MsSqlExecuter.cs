@@ -39,12 +39,13 @@ namespace Rhetos.Persistence
         private readonly ILogger _performanceLogger;
         private readonly IPersistenceTransaction _persistenceTransaction;
         private readonly SqlCommandConfig _sqlCommandConfig;
+        private readonly ISqlUtility _sqlUtility;
 
         /// <summary>
         /// This constructor is typically used in deployment time, when persistence transaction does not exist.
         /// </summary>
-        public MsSqlExecuter(ConnectionString connectionString, ILogProvider logProvider, IUserInfo userInfo, SqlCommandConfig sqlCommandConfig)
-            : this(connectionString, logProvider, userInfo, null, sqlCommandConfig)
+        public MsSqlExecuter(ConnectionString connectionString, ILogProvider logProvider, IUserInfo userInfo, SqlCommandConfig sqlCommandConfig, ISqlUtility sqlUtility)
+            : this(connectionString, logProvider, userInfo, null, sqlCommandConfig, sqlUtility)
         {
         }
 
@@ -56,7 +57,8 @@ namespace Rhetos.Persistence
             ILogProvider logProvider,
             IUserInfo userInfo,
             IPersistenceTransaction persistenceTransaction,
-            SqlCommandConfig sqlCommandConfig)
+            SqlCommandConfig sqlCommandConfig,
+            ISqlUtility sqlUtility)
         {
             _connectionString = connectionString;
             _userInfo = userInfo;
@@ -64,6 +66,7 @@ namespace Rhetos.Persistence
             _performanceLogger = logProvider.GetLogger("Performance");
             _persistenceTransaction = persistenceTransaction;
             _sqlCommandConfig = sqlCommandConfig;
+            _sqlUtility = sqlUtility;
         }
 
         public void ExecuteSql(IEnumerable<string> commands, bool useTransaction)
@@ -264,7 +267,7 @@ namespace Rhetos.Persistence
         {
             if (_userInfo.IsUserRecognized)
             {
-                sqlCommand.CommandText = MsSqlUtility.SetUserContextInfoQuery(_userInfo);
+                sqlCommand.CommandText = _sqlUtility.SetUserContextInfoQuery(_userInfo);
                 sqlCommand.ExecuteNonQuery();
             }
         }

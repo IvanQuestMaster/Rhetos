@@ -48,19 +48,22 @@ namespace Rhetos.Dom.DefaultConcepts.Persistence
         private readonly ConnectionString _connectionString;
         private readonly GeneratedFilesCache _cache;
         private readonly IConfiguration _configuration;
+        private readonly ISqlUtility _sqlUtility;
 
         public EntityFrameworkGenerateMetadataFiles(
             ILogProvider logProvider, 
             IDomainObjectModel dom, 
             ConnectionString connectionString, 
             GeneratedFilesCache cache,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ISqlUtility sqlUtility)
         {
             _performanceLogger = logProvider.GetLogger("Performance");
             _dom = dom;
             _connectionString = connectionString;
             _cache = cache;
             _configuration = configuration;
+            _sqlUtility = sqlUtility;
         }
 
         public IEnumerable<string> Dependencies
@@ -127,12 +130,19 @@ namespace Rhetos.Dom.DefaultConcepts.Persistence
 
         private byte[] GetOrmHash()
         {
+            string providerManifestToken = null;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                providerManifestToken = _sqlUtility.QueryForManifestToken(connection);
+                connection.Close();
+            }
             var hashes = new[]
             {
-                _cache.LoadHash(Paths.GetDomAssemblyFile(DomAssemblies.Model)),
-                _cache.LoadHash(Paths.GetDomAssemblyFile(DomAssemblies.Orm)),
-                // TODO: Add DatabaseGenerator hash for new created ConceptApplications.
-                _cache.GetHash(MsSqlUtility.GetProviderManifestToken())
+            _cache.LoadHash(Paths.GetDomAssemblyFile(DomAssemblies.Model)),
+            _cache.LoadHash(Paths.GetDomAssemblyFile(DomAssemblies.Orm)),
+            // TODO: Add DatabaseGenerator hash for new created ConceptApplications.
+            _cache.GetHash(providerManifestToken)
             };
             return _cache.JoinHashes(hashes);
         }

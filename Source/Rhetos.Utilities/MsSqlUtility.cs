@@ -28,6 +28,7 @@ using System.Text.RegularExpressions;
 
 namespace Rhetos.Utilities
 {
+    [Obsolete]
     public class MsSqlUtility
     {
         /// <summary>

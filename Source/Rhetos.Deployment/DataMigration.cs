@@ -41,7 +41,7 @@ namespace Rhetos.Deployment
         protected readonly IConfiguration _configuration;
         protected readonly SqlTransactionBatches _sqlTransactionBatches;
         protected readonly ISqlUtility _sqlUtility;
-        private readonly IConnectionStringConfiguration _connectionStringConfiguration;
+        private readonly IConnectionStringSettings _connectionStringSettings;
 
         public DataMigration(ISqlExecuter sqlExecuter,
             ILogProvider logProvider,
@@ -49,7 +49,7 @@ namespace Rhetos.Deployment
             IConfiguration configuration,
             SqlTransactionBatches sqlTransactionBatches,
             ISqlUtility sqlUtility,
-            IConnectionStringConfiguration connectionStringConfiguration)
+            IConnectionStringSettings connectionStringSettings)
         {
             _sqlExecuter = sqlExecuter;
             _logger = logProvider.GetLogger("DataMigration");
@@ -58,14 +58,14 @@ namespace Rhetos.Deployment
             _configuration = configuration;
             _sqlTransactionBatches = sqlTransactionBatches;
             _sqlUtility = sqlUtility;
-            _connectionStringConfiguration = connectionStringConfiguration;
+            _connectionStringSettings = connectionStringSettings;
         }
 
         public DataMigrationReport ExecuteDataMigrationScripts()
         {
             var newScripts = _scriptsProvider.Load();
 
-            var scriptsInOtherLanguages = FindScriptsInOtherLanguages(newScripts, _connectionStringConfiguration.DatabaseLanguage);
+            var scriptsInOtherLanguages = FindScriptsInOtherLanguages(newScripts, _connectionStringSettings.DatabaseLanguage);
             LogScripts("Ignoring scripts in other database languages", scriptsInOtherLanguages);
             newScripts = newScripts.Except(scriptsInOtherLanguages).ToList();
             LogScripts("Script on disk", newScripts);

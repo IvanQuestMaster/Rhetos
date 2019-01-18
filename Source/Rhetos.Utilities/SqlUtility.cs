@@ -34,18 +34,18 @@ namespace Rhetos.Utilities
     {
         private static ISqlUtility _sqlUtility;
         private static SqlCommandConfig _sqlCommandConfig;
-        private static IConnectionStringConfiguration _connectionStringConfiguration;
+        private static IConnectionStringSettings _connectionStringSettings;
 
         public static void Initialize(ISqlUtility sqlUtility,
             SqlCommandConfig sqlCommandConfig,
-            IConnectionStringConfiguration connectionStringConfiguration)
+            IConnectionStringSettings connectionStringSettings)
         {
-            if (_sqlUtility != null || _sqlCommandConfig != null || _connectionStringConfiguration != null)
+            if (_sqlUtility != null || _sqlCommandConfig != null || _connectionStringSettings != null)
                 throw new FrameworkException("SqlUtility is already initialized.");
 
             _sqlUtility = sqlUtility;
             _sqlCommandConfig = sqlCommandConfig;
-            _connectionStringConfiguration = connectionStringConfiguration;
+            _connectionStringSettings = connectionStringSettings;
         }
 
         private static ISqlUtility GetISqlUtility()
@@ -64,12 +64,12 @@ namespace Rhetos.Utilities
             return _sqlCommandConfig;
         }
 
-        private static IConnectionStringConfiguration GetConnectionStringConfiguration()
+        private static IConnectionStringSettings GetConnectionStringSettings()
         {
-            if (_connectionStringConfiguration == null)
+            if (_connectionStringSettings == null)
                 throw new FrameworkException("SqlUtility is not initlaized.");
 
-            return _connectionStringConfiguration;
+            return _connectionStringSettings;
         }
 
         /// <summary>
@@ -82,18 +82,18 @@ namespace Rhetos.Utilities
 
         public static string DatabaseLanguage
         {
-            get { return GetConnectionStringConfiguration().DatabaseLanguage; }
+            get { return GetConnectionStringSettings().DatabaseLanguage; }
         }
 
         public static string NationalLanguage
         {
-            get { return GetConnectionStringConfiguration().NationalLanguage; }
+            get { return GetConnectionStringSettings().NationalLanguage; }
         }
 
 
         public static string ConnectionString
         {
-            get { return GetConnectionStringConfiguration().ConnectionString; }
+            get { return GetConnectionStringSettings().ConnectionString; }
         }
 
         public static string ProviderName
@@ -273,7 +273,7 @@ namespace Rhetos.Utilities
 
         public static string SqlConnectionInfo(string connectionString)
         {
-            return GetConnectionStringConfiguration().SqlConnectionInfo(connectionString);
+            return GetConnectionStringSettings().SqlConnectionInfo(connectionString);
         }
 
         /// <summary>

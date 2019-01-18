@@ -33,7 +33,7 @@ namespace Rhetos.Persistence.Test
     {
         private static string GetConnectionString()
         {
-            return new ConnectionStringConfiguration().ConnectionString;
+            return new ConnectionStringSettings().ConnectionString;
         }
 
         private static MsSqlExecuter NewSqlExecuter(string connectionString = null, IUserInfo testUser = null)

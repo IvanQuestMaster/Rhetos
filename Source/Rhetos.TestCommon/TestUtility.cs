@@ -189,7 +189,7 @@ namespace Rhetos.TestCommon
         /// </summary>
         public static void CheckDatabaseAvailability(string expectedLanguage = null)
         {
-            var connectionStringConfiguration = new ConnectionStringConfiguration();
+            var connectionStringConfiguration = new ConnectionStringSettings();
             const string connectionStringLocation = @"Enter the database connection in Rhetos\bin\ConnectionStrings.config, then rebuild this project.";
             try
             {

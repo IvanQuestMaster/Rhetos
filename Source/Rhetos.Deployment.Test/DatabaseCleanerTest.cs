@@ -129,7 +129,7 @@ namespace Rhetos.Deployment.Test
             string oldColumns, string oldTables, string oldSchemas,
             string expectedDeletedColumns, string expectedDeletedTables, string expectedDeletedSchemas)
         {
-            var connectionStringConfig = new ConnectionStringConfiguration();
+            var connectionStringConfig = new ConnectionStringSettings();
             var mockSqlExecuter = new MockSqlExecuter(oldColumns, oldTables, oldSchemas);
             var databaseCleaner = new DatabaseCleaner(new ConsoleLogProvider(), mockSqlExecuter,
                 new MsSqlUtility2(), connectionStringConfig);
@@ -176,7 +176,7 @@ namespace Rhetos.Deployment.Test
             string oldTables, string oldSchemas,
             string expectedDeletedTables, string expectedDeletedSchemas)
         {
-            var connectionStringConfiguration = new ConnectionStringConfiguration();
+            var connectionStringConfiguration = new ConnectionStringSettings();
             var mockSqlExecuter = new MockSqlExecuter("", oldTables, oldSchemas);
             var databaseCleaner = new DatabaseCleaner(new ConsoleLogProvider(), mockSqlExecuter,
                 new MsSqlUtility2(), connectionStringConfiguration);

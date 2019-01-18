@@ -43,9 +43,9 @@ namespace Rhetos.Configuration.Autofac
             builder.RegisterModule(new DomModuleConfiguration(_deploymentTime));
             builder.RegisterModule(new PersistenceModuleConfiguration(_deploymentTime));
 
-            var connectionStringConfiguration = new ConnectionStringConfiguration();
-            builder.RegisterInstance<IConnectionStringConfiguration>(connectionStringConfiguration);
-            builder.RegisterInstance(new ConnectionString(connectionStringConfiguration.ConnectionString));
+            var connectionStringSettings = new ConnectionStringSettings();
+            builder.RegisterInstance<IConnectionStringSettings>(connectionStringSettings);
+            builder.RegisterInstance(new ConnectionString(connectionStringSettings.ConnectionString));
 
             builder.RegisterModule(new SecurityModuleConfiguration());
             builder.RegisterModule(new UtilitiesModuleConfiguration());

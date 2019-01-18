@@ -11,13 +11,13 @@ namespace Rhetos.Deployment
 {
     public class SqlResourceProvider : ISqlResourceProvider
     {
-        private readonly IConnectionStringConfiguration _connectionStringConfiguration;
+        private readonly IConnectionStringSettings _connectionStringSettings;
 
         private readonly ResourceManager _resourceManager;
 
-        public SqlResourceProvider(IConnectionStringConfiguration connectionStringConfiguration)
+        public SqlResourceProvider(IConnectionStringSettings connectionStringSettings)
         {
-            _connectionStringConfiguration = connectionStringConfiguration;
+            _connectionStringSettings = connectionStringSettings;
 
             string resourceName = typeof(SqlResourceProvider).Namespace + ".Sql." + "MsSql";
             var resourceAssembly = typeof(SqlResourceProvider).Assembly;
@@ -33,7 +33,7 @@ namespace Rhetos.Deployment
         {
             var value = TryGet(resourceName);
             if (value == null)
-                throw new FrameworkException("Missing SQL resource '" + resourceName + "' for database language '" + _connectionStringConfiguration.DatabaseLanguage + "'.");
+                throw new FrameworkException("Missing SQL resource '" + resourceName + "' for database language '" + _connectionStringSettings.DatabaseLanguage + "'.");
             return value;
         }
 

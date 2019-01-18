@@ -73,7 +73,7 @@ namespace CleanupOldData
             {
                 logger.Write(stopwatch, "CleanupOldData.Program: Modules and plugins registered.");
                 
-                var connnectionStringConfiguration = container.Resolve<IConnectionStringConfiguration>();
+                var connnectionStringConfiguration = container.Resolve<IConnectionStringSettings>();
                 Console.WriteLine("SQL connection: " + connnectionStringConfiguration.SqlConnectionInfo(connnectionStringConfiguration.ConnectionString));
 
                 container.Resolve<DatabaseCleaner>().DeleteAllMigrationData();

@@ -39,19 +39,19 @@ namespace Rhetos.Deployment
         public Exception exceptionRaised = null;
 
         private ISqlExecuter _sqlExecuter;
-        private IConnectionStringConfiguration _connectionStringConfiguration;
+        private IConnectionStringSettings _connectionStringSettings;
 
-        public ConnectionStringReport(ISqlExecuter sqlExecuter, IConnectionStringConfiguration connectionStringConfiguration)
+        public ConnectionStringReport(ISqlExecuter sqlExecuter, IConnectionStringSettings connectionStringSettings)
         {
             _sqlExecuter = sqlExecuter;
-            _connectionStringConfiguration = connectionStringConfiguration;
+            _connectionStringSettings = connectionStringSettings;
             CheckConnectivity();
         }
 
         void CheckConnectivity()
         {
             // temporary fix to support non MsSql databases
-            if (_connectionStringConfiguration.DatabaseLanguage != "MsSql")
+            if (_connectionStringSettings.DatabaseLanguage != "MsSql")
             {
                 connectivity = true;
                 isDbo = true;

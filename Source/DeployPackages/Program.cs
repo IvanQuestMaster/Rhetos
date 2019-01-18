@@ -178,7 +178,7 @@ namespace DeployPackages
                 performanceLogger.Write(stopwatch, "DeployPackages.Program: Modules and plugins registered.");
                 Plugins.LogRegistrationStatistics("Generating application", container);
                 SqlUtility.Initialize(container.Resolve<ISqlUtility>(), container.Resolve<SqlCommandConfig>(),
-                    container.Resolve<IConnectionStringConfiguration>());
+                    container.Resolve<IConnectionStringSettings>());
 
                 if (arguments.Debug)
                     container.Resolve<DomGeneratorOptions>().Debug = true;

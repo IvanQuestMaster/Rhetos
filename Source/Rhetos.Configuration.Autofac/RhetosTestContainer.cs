@@ -101,7 +101,7 @@ namespace Rhetos.Configuration.Autofac
                             Paths.InitializeRhetosServerRootPath(SearchForRhetosServerRootFolder());
                             _iocContainer = InitializeIocContainer();
                             SqlUtility.Initialize(_iocContainer.Resolve<ISqlUtility>(), _iocContainer.Resolve<SqlCommandConfig>(),
-                                _iocContainer.Resolve<IConnectionStringConfiguration>());
+                                _iocContainer.Resolve<IConnectionStringSettings>());
                         }
                 }
 

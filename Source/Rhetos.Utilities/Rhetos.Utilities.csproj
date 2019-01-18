@@ -142,8 +142,8 @@
     <Compile Include="FileSyncer.cs" />
     <Compile Include="GeneratedFilesCache.cs" />
     <Compile Include="IConfiguration.cs" />
-    <Compile Include="ConnectionStringConfiguration.cs" />
-    <Compile Include="IConnectionStringConfiguration.cs" />
+    <Compile Include="ConnectionStringSettings.cs" />
+    <Compile Include="IConnectionStringSettings.cs" />
     <Compile Include="ISqlUtility.cs" />
     <Compile Include="IUserInfoAdmin.cs" />
     <Compile Include="ListOfTuples.cs" />

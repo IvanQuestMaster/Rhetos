@@ -44,7 +44,7 @@ namespace Rhetos.Deployment
         private readonly IDatabaseGenerator _databaseGenerator;
         private readonly IDslScriptsProvider _dslScriptsLoader;
         private readonly ISqlUtility _sqlUtility;
-        private readonly IConnectionStringConfiguration _connectionStringConfiguration;
+        private readonly IConnectionStringSettings _connectionStringSettings;
         private readonly ISqlResourceProvider _sqlResourceProvider;
 
         public ApplicationGenerator(
@@ -58,7 +58,7 @@ namespace Rhetos.Deployment
             IDatabaseGenerator databaseGenerator,
             IDslScriptsProvider dslScriptsLoader,
             ISqlUtility sqlUtility,
-            IConnectionStringConfiguration connectionStringConfiguration,
+            IConnectionStringSettings connectionStringSettings,
             ISqlResourceProvider sqlResourceProvider)
         {
             _deployPackagesLogger = logProvider.GetLogger("DeployPackages");
@@ -72,13 +72,13 @@ namespace Rhetos.Deployment
             _databaseGenerator = databaseGenerator;
             _dslScriptsLoader = dslScriptsLoader;
             _sqlUtility = sqlUtility;
-            _connectionStringConfiguration = connectionStringConfiguration;
+            _connectionStringSettings = connectionStringSettings;
             _sqlResourceProvider = sqlResourceProvider;
         }
 
         public void ExecuteGenerators(bool deployDatabaseOnly)
         {
-            _deployPackagesLogger.Trace("SQL connection: " + _connectionStringConfiguration.SqlConnectionInfo(_connectionStringConfiguration.ConnectionString));
+            _deployPackagesLogger.Trace("SQL connection: " + _connectionStringSettings.SqlConnectionInfo(_connectionStringSettings.ConnectionString));
             ValidateDbConnection();
 
             _deployPackagesLogger.Trace("Preparing Rhetos database.");
@@ -146,7 +146,7 @@ namespace Rhetos.Deployment
 
         private void ValidateDbConnection()
         {
-            var connectionReport = new ConnectionStringReport(_sqlExecuter, _connectionStringConfiguration);
+            var connectionReport = new ConnectionStringReport(_sqlExecuter, _connectionStringSettings);
             if (!connectionReport.connectivity)
                 throw (connectionReport.exceptionRaised);
             else if (!connectionReport.isDbo)
@@ -155,7 +155,7 @@ namespace Rhetos.Deployment
 
         private void PrepareRhetosDatabase()
         {
-            string rhetosDatabaseScriptResourceName = "Rhetos.Deployment.RhetosDatabase." + _connectionStringConfiguration.DatabaseLanguage + ".sql";
+            string rhetosDatabaseScriptResourceName = "Rhetos.Deployment.RhetosDatabase." + _connectionStringSettings.DatabaseLanguage + ".sql";
             var resourceStream = GetType().Assembly.GetManifestResourceStream(rhetosDatabaseScriptResourceName);
             if (resourceStream == null)
                 throw new FrameworkException("Cannot find resource '" + rhetosDatabaseScriptResourceName + "'.");

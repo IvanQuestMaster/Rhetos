@@ -31,7 +31,7 @@ namespace Rhetos.Deployment.Test
     {
         public DataMigration_Accessor()
             : base(null, new ConsoleLogProvider(), null, null, null,
-                new MsSqlUtility2(), new ConnectionStringConfiguration())
+                new MsSqlUtility2(), new ConnectionStringSettings())
         {
         }
 

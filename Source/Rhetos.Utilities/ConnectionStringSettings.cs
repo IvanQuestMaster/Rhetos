@@ -25,7 +25,7 @@ using System.Web.Configuration;
 
 namespace Rhetos.Utilities
 {
-    public class ConnectionStringConfiguration : IConnectionStringConfiguration
+    public class ConnectionStringSettings : IConnectionStringSettings
     {
         private static string _databaseLanguage;
         private static string _nationalLanguage;

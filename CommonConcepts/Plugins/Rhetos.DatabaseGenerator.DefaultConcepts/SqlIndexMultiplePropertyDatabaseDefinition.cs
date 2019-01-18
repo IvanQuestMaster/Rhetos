@@ -36,15 +36,15 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
     public class SqlIndexMultiplePropertyDatabaseDefinition : IConceptDatabaseDefinitionExtension
     {
         ISqlUtility _sqlUtility;
-        IConnectionStringConfiguration _connectionStringConfiguration;
+        IConnectionStringSettings _connectionStringSettings;
         ISqlResourceProvider _sql;
 
         public SqlIndexMultiplePropertyDatabaseDefinition(ISqlUtility sqlUtility,
-            IConnectionStringConfiguration connectionStringConfiguration,
+            IConnectionStringSettings connectionStringSettings,
             ISqlResourceProvider sql)
         {
             _sqlUtility = sqlUtility;
-            _connectionStringConfiguration = connectionStringConfiguration;
+            _connectionStringSettings = connectionStringSettings;
             _sql = sql;
         }
 
@@ -66,11 +66,11 @@ namespace Rhetos.DatabaseGenerator.DefaultConcepts
             if (info.SqlIndex.SqlImplementation())
             {
                 string nationalProperty = null;
-                if (!string.IsNullOrEmpty(_connectionStringConfiguration.NationalLanguage))
+                if (!string.IsNullOrEmpty(_connectionStringSettings.NationalLanguage))
                 {
                     var nationalPropertyFormat = _sql.TryGet("SqlIndexMultiplePropertyDatabaseDefinition_National_" + info.Property.GetType().Name);
                     if (!string.IsNullOrEmpty(nationalPropertyFormat))
-                        nationalProperty = string.Format(nationalPropertyFormat, info.Property.Name, _connectionStringConfiguration.NationalLanguage);
+                        nationalProperty = string.Format(nationalPropertyFormat, info.Property.Name, _connectionStringSettings.NationalLanguage);
                 }
 
                 codeBuilder.InsertCode(

@@ -102,7 +102,7 @@ namespace Rhetos.Utilities.Test
             foreach (var test in tests)
             {
                 Console.WriteLine(test.Item1);
-                string report = new ConnectionStringConfiguration().SqlConnectionInfo(test.Item1);
+                string report = new ConnectionStringSettings().SqlConnectionInfo(test.Item1);
                 Console.WriteLine("=> " + report);
 
                 TestUtility.AssertNotContains(report, "j", "Username or password leaked.");

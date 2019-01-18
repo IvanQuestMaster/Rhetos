@@ -164,6 +164,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhetosCLI.Implementation", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhetosCLI.Interfaces", "Source\RhetosCLI.Interfaces\RhetosCLI.Interfaces.csproj", "{C45B738F-7A50-42B2-A3AE-6728CC494D24}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhetosCLI", "Source\RhetosCLI\RhetosCLI.csproj", "{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CodeAnalysis|Any CPU = CodeAnalysis|Any CPU
@@ -863,6 +865,24 @@ Global
 		{C45B738F-7A50-42B2-A3AE-6728CC494D24}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{C45B738F-7A50-42B2-A3AE-6728CC494D24}.Release|x86.ActiveCfg = Release|Any CPU
 		{C45B738F-7A50-42B2-A3AE-6728CC494D24}.Release|x86.Build.0 = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.CodeAnalysis|Any CPU.ActiveCfg = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.CodeAnalysis|Any CPU.Build.0 = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.CodeAnalysis|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.CodeAnalysis|Mixed Platforms.Build.0 = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.CodeAnalysis|x86.ActiveCfg = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.CodeAnalysis|x86.Build.0 = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Debug|x86.Build.0 = Debug|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Release|x86.ActiveCfg = Release|Any CPU
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -914,6 +934,7 @@ Global
 		{EABE44F4-8ED3-475A-A3E9-E8FD5A187233} = {0124322E-2731-48E8-910C-957E37181628}
 		{00965611-C2D5-49D9-9F3F-8620D8E5430F} = {08698F03-25F5-4DC5-8205-03FA74382D8F}
 		{C45B738F-7A50-42B2-A3AE-6728CC494D24} = {08698F03-25F5-4DC5-8205-03FA74382D8F}
+		{D7C24D91-4FF1-46B1-BAA4-83FF531F65DA} = {08698F03-25F5-4DC5-8205-03FA74382D8F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4B8D1BEA-EAAA-484D-B00D-1D23226A5A90}

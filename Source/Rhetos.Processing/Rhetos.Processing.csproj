@@ -128,6 +128,10 @@
       <Project>{4D2FCD7F-D9BB-4E55-B9C6-FDF352F6DCF3}</Project>
       <Name>Rhetos.Processing.Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RhetosCLI.Interfaces\RhetosCLI.Interfaces.csproj">
+      <Project>{C45B738F-7A50-42B2-A3AE-6728CC494D24}</Project>
+      <Name>RhetosCLI.Interfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

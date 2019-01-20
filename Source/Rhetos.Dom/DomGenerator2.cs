@@ -26,15 +26,19 @@ using Rhetos.Logging;
 using ICodeGenerator = Rhetos.Compiler.ICodeGenerator;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
+using Rhetos.Dsl;
+using System;
 
 namespace Rhetos.Dom
 {
     [Export(typeof(IGenerator))]
     public class DomGenerator2 : IGenerator
     {
-        private readonly IPluginsContainer<IConceptCodeGenerator> _pluginRepository;
-        private readonly ICodeGenerator _codeGenerator;
+        private readonly IPlugins<IConceptCodeGenerator> _pluginRepository;
         private readonly ILogProvider _log;
+        private readonly ILogger _logger;
+        private readonly IDslModel _dslModel;
 
         private List<Assembly> _assemblies;
 
@@ -43,13 +47,14 @@ namespace Rhetos.Dom
         /// If assemblyName is null, the assembly will be generated in memory.
         /// </summary>
         public DomGenerator2(
-            IPluginsContainer<IConceptCodeGenerator> plugins,
-            ICodeGenerator codeGenerator,
-            ILogProvider logProvider)
+            IPlugins<IConceptCodeGenerator> plugins,
+            ILogProvider logProvider,
+            IDslModel dslModel)
         {
             _pluginRepository = plugins;
-            _codeGenerator = codeGenerator;
             _log = logProvider;
+            _logger = logProvider.GetLogger("CodeGenerator");
+            _dslModel = dslModel;
         }
 
 
@@ -59,8 +64,39 @@ namespace Rhetos.Dom
 
         public void Generate(string folderPath)
         {
-            IAssemblySource assemblySource = _codeGenerator.ExecutePlugins(_pluginRepository, "/*", "*/", null);
+            IAssemblySource assemblySource = ExecutePlugins(_pluginRepository, "/*", "*/", null);
             File.WriteAllText(Path.Combine(folderPath, "ServerDom.cs"), assemblySource.GeneratedCode);
+        }
+
+        public IAssemblySource ExecutePlugins<TPlugin>(IPlugins<TPlugin> plugins, string tagOpen, string tagClose, IConceptCodeGenerator initialCodeGenerator)
+            where TPlugin : IConceptCodeGenerator
+        {
+            var stopwatch = Stopwatch.StartNew();
+
+            var codeBuilder = new CodeBuilder(tagOpen, tagClose);
+
+            if (initialCodeGenerator != null)
+                initialCodeGenerator.GenerateCode(null, codeBuilder);
+
+            foreach (var conceptInfo in _dslModel.Concepts)
+                foreach (var plugin in plugins.GetImplementations(conceptInfo.GetType()))
+                {
+                    try
+                    {
+                        plugin.GenerateCode(conceptInfo, codeBuilder);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex.ToString());
+                        _logger.Error("Part of the source code that was generated before the exception was thrown is written in the trace log.");
+                        _logger.Trace(codeBuilder.GeneratedCode);
+                        throw;
+                    }
+                }
+
+            _logger.Write(stopwatch, "CodeGenerator: Code generated.");
+
+            return codeBuilder;
         }
     }
 }

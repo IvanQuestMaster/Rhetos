@@ -17,7 +17,7 @@ namespace RhetosCLI
         static void Main(string[] args)
         {
             var projectFolder = args[0];
-            var pluginsFolder = projectFolder + @"\bin\Debug\netcoreapp2.1";
+            var pluginsFolder = projectFolder + @"\bin\Debug";
 
             var projectDirectory = Directory.GetDirectories(projectFolder, "Rhetos").Single();
 

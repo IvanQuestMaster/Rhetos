@@ -18,6 +18,7 @@
 */
 
 using Rhetos.Extensibility;
+using Rhetos.Implementations;
 
 namespace Rhetos.Compiler
 {

@@ -71,7 +71,6 @@ namespace RhetosCLI
             containerBuilder.RegisterType<NLogProvider>().As<ILogProvider2>().SingleInstance();
             containerBuilder.RegisterGeneric(typeof(PluginsMetadataCache<>)).SingleInstance();
             containerBuilder.RegisterGeneric(typeof(Plugins<>)).As(typeof(IPlugins<>)).InstancePerLifetimeScope();
-            containerBuilder.RegisterGeneric(typeof(NamedPlugins<>)).As(typeof(INamedPlugins<>)).InstancePerLifetimeScope();
 
             containerBuilder.RegisterGeneric(typeof(Index<,>)).As(typeof(IIndex<,>));
         }

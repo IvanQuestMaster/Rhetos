@@ -38,7 +38,7 @@ namespace Rhetos.Deployment
         private readonly ISqlExecuter _sqlExecuter;
         private readonly IDslModel _dslModel;
         private readonly IDomainObjectModel _domGenerator;
-        private readonly IPluginsContainer<IGenerator> _generatorsContainer;
+        private readonly IPluginsContainer<Rhetos.Extensibility.IGenerator> _generatorsContainer;
         private readonly DatabaseCleaner _databaseCleaner;
         private readonly DataMigration _dataMigration;
         private readonly IDatabaseGenerator _databaseGenerator;
@@ -52,7 +52,7 @@ namespace Rhetos.Deployment
             ISqlExecuter sqlExecuter,
             IDslModel dslModel,
             IDomainObjectModel domGenerator,
-            IPluginsContainer<IGenerator> generatorsContainer,
+            IPluginsContainer<Rhetos.Extensibility.IGenerator> generatorsContainer,
             DatabaseCleaner databaseCleaner,
             DataMigration dataMigration,
             IDatabaseGenerator databaseGenerator,
@@ -165,7 +165,7 @@ namespace Rhetos.Deployment
             _sqlExecuter.ExecuteSql(sqlScripts);
         }
 
-        private IList<IGenerator> GetSortedGenerators()
+        private IList<Rhetos.Extensibility.IGenerator> GetSortedGenerators()
         {
             // The plugins in the container are sorted by their dependencies defined in ExportMetadata attribute (static typed):
             var generators = _generatorsContainer.GetPlugins().ToArray();
@@ -184,7 +184,7 @@ namespace Rhetos.Deployment
             return generators;
         }
 
-        private static string GetGeneratorName(IGenerator gen)
+        private static string GetGeneratorName(Rhetos.Extensibility.IGenerator gen)
         {
             return gen.GetType().FullName;
         }

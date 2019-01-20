@@ -140,6 +140,10 @@
       <Project>{71e63722-57bc-41df-9ff5-57ecc67e4bc1}</Project>
       <Name>Rhetos.Utilities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\Source\RhetosCLI.Interfaces\RhetosCLI.Interfaces.csproj">
+      <Project>{C45B738F-7A50-42B2-A3AE-6728CC494D24}</Project>
+      <Name>RhetosCLI.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Rhetos.Dom.DefaultConcepts.Interfaces\Rhetos.Dom.DefaultConcepts.Interfaces.csproj">
       <Project>{32d57085-6113-43f9-a505-d8b311bd6204}</Project>
       <Name>Rhetos.Dom.DefaultConcepts.Interfaces</Name>

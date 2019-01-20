@@ -135,6 +135,10 @@
       <Project>{5E3BBD83-91CB-4FBA-81B2-79A81EC94D70}</Project>
       <Name>Rhetos.Persistence.Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RhetosCLI.Interfaces\RhetosCLI.Interfaces.csproj">
+      <Project>{C45B738F-7A50-42B2-A3AE-6728CC494D24}</Project>
+      <Name>RhetosCLI.Interfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Source\Database\RhetosDatabase.MsSql.sql">

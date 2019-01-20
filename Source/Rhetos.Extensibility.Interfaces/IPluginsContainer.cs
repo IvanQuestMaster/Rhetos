@@ -22,7 +22,7 @@ using System.Collections.Generic;
 
 namespace Rhetos.Extensibility
 {
-    public interface IPluginsContainer<TPlugin>
+    public interface IPluginsContainer<TPlugin> : IPlugins<TPlugin>
     {
         /// <summary>
         /// The plugins are sorted by their dependencies.

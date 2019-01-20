@@ -41,7 +41,7 @@ namespace Rhetos.Dom.DefaultConcepts.Persistence
     /// but context initialization is faster when loading metadata from the pregenerated files.
     /// </summary>
     [Export(typeof(IGenerator))]
-    public class EntityFrameworkGenerateMetadataFiles : IGenerator
+    public class EntityFrameworkGenerateMetadataFiles : Rhetos.Extensibility.IGenerator
     {
         private readonly ILogger _performanceLogger;
         private readonly IDomainObjectModel _dom;

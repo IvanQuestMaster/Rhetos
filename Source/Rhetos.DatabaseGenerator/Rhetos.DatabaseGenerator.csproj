@@ -159,6 +159,10 @@
       <Project>{BB7E5668-1B43-4FCE-A832-444CC57FEE80}</Project>
       <Name>Rhetos.Logging.Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RhetosCLI.Interfaces\RhetosCLI.Interfaces.csproj">
+      <Project>{C45B738F-7A50-42B2-A3AE-6728CC494D24}</Project>
+      <Name>RhetosCLI.Interfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Sql.MsSql.resx">

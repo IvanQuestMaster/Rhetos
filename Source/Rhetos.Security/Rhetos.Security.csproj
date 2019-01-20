@@ -104,6 +104,10 @@
       <Project>{8E1D4ACD-B1AA-433F-9E52-FA50D4A1C9DC}</Project>
       <Name>Rhetos.Security.Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RhetosCLI.Interfaces\RhetosCLI.Interfaces.csproj">
+      <Project>{C45B738F-7A50-42B2-A3AE-6728CC494D24}</Project>
+      <Name>RhetosCLI.Interfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

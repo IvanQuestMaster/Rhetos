@@ -42,7 +42,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IConfiguration.cs" />
     <Compile Include="IContainerBuilder.cs" />
     <Compile Include="IGenerator.cs" />
     <Compile Include="IIndex.cs" />
@@ -50,7 +49,6 @@
     <Compile Include="ILogger.cs" />
     <Compile Include="ILogProvider.cs" />
     <Compile Include="IModule.cs" />
-    <Compile Include="INamedPlugins.cs" />
     <Compile Include="IInstalledPackage.cs" />
     <Compile Include="IPaths.cs" />
     <Compile Include="IPlugins.cs" />

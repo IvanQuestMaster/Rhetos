@@ -61,7 +61,6 @@
     <Compile Include="InstalledPackages.cs" />
     <Compile Include="MefPluginScanner.cs" />
     <Compile Include="MockInstalledPackages.cs" />
-    <Compile Include="NamedPlugins.cs" />
     <Compile Include="NLogger.cs" />
     <Compile Include="NLogProvider.cs" />
     <Compile Include="Paths.cs" />

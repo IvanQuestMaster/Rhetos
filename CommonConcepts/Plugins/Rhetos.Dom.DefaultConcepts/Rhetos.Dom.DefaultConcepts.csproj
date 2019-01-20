@@ -264,6 +264,10 @@
       <Project>{8e1d4acd-b1aa-433f-9e52-fa50d4a1c9dc}</Project>
       <Name>Rhetos.Security.Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\Source\RhetosCLI.Interfaces\RhetosCLI.Interfaces.csproj">
+      <Project>{C45B738F-7A50-42B2-A3AE-6728CC494D24}</Project>
+      <Name>RhetosCLI.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Rhetos.DatabaseGenerator.DefaultConcepts\Rhetos.DatabaseGenerator.DefaultConcepts.csproj">
       <Project>{507c5738-8738-462a-9bac-c0c98ce88d93}</Project>
       <Name>Rhetos.DatabaseGenerator.DefaultConcepts</Name>

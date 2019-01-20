@@ -115,6 +115,10 @@
       <Project>{43BA178B-7642-473C-A43A-DBF58294635A}</Project>
       <Name>Rhetos.TestCommon</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RhetosCLI.Interfaces\RhetosCLI.Interfaces.csproj">
+      <Project>{C45B738F-7A50-42B2-A3AE-6728CC494D24}</Project>
+      <Name>RhetosCLI.Interfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

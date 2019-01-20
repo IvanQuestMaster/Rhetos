@@ -22,7 +22,7 @@ using NLog;
 
 namespace Rhetos.Implementations
 {
-    public class NLogger : ILogger
+    public class NLogger : ILogger2
     {
         private readonly Logger Logger;
 
@@ -31,11 +31,11 @@ namespace Rhetos.Implementations
             Logger = LogManager.GetLogger(eventName);
         }
 
-        public void Write(EventType eventType, Func<string> logMessage)
+        public void Write(EventType2 eventType, Func<string> logMessage)
         {
-            if (eventType == EventType.Info)
+            if (eventType == EventType2.Info)
                 Logger.Info((LogMessageGenerator)(() => logMessage()));
-            else if (eventType == EventType.Error)
+            else if (eventType == EventType2.Error)
                 Logger.Error((LogMessageGenerator)(() => logMessage()));
             else
                 Logger.Trace((LogMessageGenerator)(() => logMessage()));

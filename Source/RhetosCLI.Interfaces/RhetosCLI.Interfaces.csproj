@@ -53,9 +53,9 @@
     <Compile Include="INamedPlugins.cs" />
     <Compile Include="IInstalledPackage.cs" />
     <Compile Include="IPaths.cs" />
-    <Compile Include="IPluginsContainer.cs" />
+    <Compile Include="IPlugins.cs" />
     <Compile Include="IRegistrationBuilder.cs" />
-    <Compile Include="IServerInitializer.cs" />
+    <Compile Include="IInitializer.cs" />
     <Compile Include="MefProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

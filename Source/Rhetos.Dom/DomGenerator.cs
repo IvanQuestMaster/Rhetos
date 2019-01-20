@@ -72,6 +72,8 @@ namespace Rhetos.Dom
             }
         }
 
+        public IEnumerable<string> Dependencies => throw new NotImplementedException();
+
         private void GenerateObjectModel()
         {
             IAssemblySource assemblySource = _codeGenerator.ExecutePlugins(_pluginRepository, "/*", "*/", null);

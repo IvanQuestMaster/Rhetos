@@ -204,6 +204,14 @@
       <Project>{726ca0fb-70e7-44f3-9fca-e703598bfc7e}</Project>
       <Name>Rhetos.XmlSerialization</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RhetosCLI.Implementation\RhetosCLI.Implementation.csproj">
+      <Project>{00965611-c2d5-49d9-9f3f-8620d8e5430f}</Project>
+      <Name>RhetosCLI.Implementation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RhetosCLI.Interfaces\RhetosCLI.Interfaces.csproj">
+      <Project>{c45b738f-7a50-42b2-a3ae-6728cc494d24}</Project>
+      <Name>RhetosCLI.Interfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

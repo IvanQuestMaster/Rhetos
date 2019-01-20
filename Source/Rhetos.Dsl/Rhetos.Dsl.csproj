@@ -129,6 +129,7 @@
     <Compile Include="DiskDslScriptLoader.cs" />
     <Compile Include="DslContainer.cs" />
     <Compile Include="DslModelFile.cs" />
+    <Compile Include="ModuleConfiguration.cs" />
     <Compile Include="DslParser.cs" />
     <Compile Include="DslModel.cs" />
     <Compile Include="GenericParser.cs" />
@@ -173,6 +174,10 @@
     <ProjectReference Include="..\Rhetos.Logging.Interfaces\Rhetos.Logging.Interfaces.csproj">
       <Project>{BB7E5668-1B43-4FCE-A832-444CC57FEE80}</Project>
       <Name>Rhetos.Logging.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RhetosCLI.Interfaces\RhetosCLI.Interfaces.csproj">
+      <Project>{c45b738f-7a50-42b2-a3ae-6728cc494d24}</Project>
+      <Name>RhetosCLI.Interfaces</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

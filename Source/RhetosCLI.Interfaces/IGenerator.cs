@@ -29,6 +29,6 @@ namespace Rhetos
     {
         IEnumerable<string> Dependencies { get; }
 
-        void Generate();
+        void Generate(string folderPath);
     }
 }

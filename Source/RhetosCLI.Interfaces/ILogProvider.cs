@@ -19,10 +19,10 @@
 
 namespace Rhetos
 {
-    public interface ILogProvider
+    public interface ILogProvider2
     {
         //void Write(EventType eventType, string eventName, string eventData, params object[] eventDataParams);
 
-        ILogger GetLogger(string eventName);
+        ILogger2 GetLogger(string eventName);
     }
 }

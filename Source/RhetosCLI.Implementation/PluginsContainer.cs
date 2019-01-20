@@ -24,13 +24,13 @@ using System.Linq;
 
 namespace Rhetos.Implementations
 {
-    public class PluginsContainer<TPlugin> : IPluginsContainer<TPlugin>
+    public class Plugins<TPlugin> : IPlugins<TPlugin>
     {
         private Lazy<IEnumerable<TPlugin>> _sortedPlugins;
         private Lazy<IIndex<Type, IEnumerable<TPlugin>>> _pluginsByImplementation;
         private PluginsMetadataCache<TPlugin> _cache;
 
-        public PluginsContainer(
+        public Plugins(
             Lazy<IEnumerable<TPlugin>> plugins,
             Lazy<IIndex<Type, IEnumerable<TPlugin>>> pluginsByImplementation,
             PluginsMetadataCache<TPlugin> cache)

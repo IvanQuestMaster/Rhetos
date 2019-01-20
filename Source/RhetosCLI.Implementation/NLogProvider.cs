@@ -26,9 +26,9 @@ using Rhetos;
 
 namespace Rhetos.Implementations
 {
-    public class NLogProvider : ILogProvider
+    public class NLogProvider : ILogProvider2
     {
-        public ILogger GetLogger(string eventName)
+        public ILogger2 GetLogger(string eventName)
         {
             return new NLogger(eventName);
         }

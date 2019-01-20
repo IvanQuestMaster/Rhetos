@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Rhetos
 {
-    public interface IServerInitializer
+    public interface IInitializer
     {
         void Initialize();
     }

@@ -23,12 +23,12 @@ namespace Rhetos.Implementations
 {
     internal static class InitializationLogging
     {
-        public static ILogger Logger = new NullLogger();
-        public static ILogger PerformanceLogger = new NullLogger();
+        public static ILogger2 Logger = new NullLogger();
+        public static ILogger2 PerformanceLogger = new NullLogger();
 
-        private class NullLogger : ILogger
+        private class NullLogger : ILogger2
         {
-            public void Write(EventType eventType, Func<string> logMessage) { }
+            public void Write(EventType2 eventType, Func<string> logMessage) { }
         }
     }
 }

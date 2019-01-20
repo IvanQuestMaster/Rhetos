@@ -27,7 +27,17 @@ namespace RhetosCLI
             });
 
             var containerBuilder = new Autofac.ContainerBuilder();
-            SetupInitalContiner(containerBuilder, pluginsFolder, installedPackages, projectFolder);
+            var paths = new Paths
+            {
+                GeneratedFolder = projectFolder + @"\bin\Generated",
+                GeneratedFilesCacheFolder = projectFolder + @"\bin\GeneratedCache"
+            };
+            if (!Directory.Exists(paths.GeneratedFolder))
+                Directory.CreateDirectory(paths.GeneratedFolder);
+            if (!Directory.Exists(paths.GeneratedFilesCacheFolder))
+                Directory.CreateDirectory(paths.GeneratedFilesCacheFolder);
+
+            SetupInitalContiner(containerBuilder, pluginsFolder, installedPackages, paths);
             var containerBuilderImplementation = new Rhetos.Implementations.ContainerBuilder(containerBuilder, pluginsFolder);
 
             var modules = MefPluginScanner.FindPlugins(typeof(IModule), pluginsFolder).Select(x => x.Type);
@@ -40,37 +50,27 @@ namespace RhetosCLI
             containerBuilderImplementation.RegisterPlugins<IGenerator>();
             var container = containerBuilder.Build();
 
-            var generators = container.Resolve<IPluginsContainer<IGenerator>>();
+            var generators = container.Resolve<IPlugins<IGenerator>>();
             foreach (var generator in generators.GetPlugins())
             {
-                generator.Generate();
+                generator.Generate(paths.GeneratedFolder);
             }
 
-            var initalizers = container.Resolve<IPluginsContainer<IServerInitializer>>();
+            var initalizers = container.Resolve<IPlugins<IInitializer>>();
             foreach (var initializer in initalizers.GetPlugins())
             {
                 initializer.Initialize();
             }
         }
 
-        static void SetupInitalContiner(Autofac.ContainerBuilder containerBuilder, string pluginsFolder, InstalledPackages installedPackages, string projectFolder)
+        static void SetupInitalContiner(Autofac.ContainerBuilder containerBuilder, string pluginsFolder, InstalledPackages installedPackages, Paths paths)
         {
-            var paths = new Paths
-            {
-                GeneratedFolder = projectFolder + @"\bin\Generated",
-                GeneratedFilesCacheFolder = projectFolder + @"\bin\GeneratedCache"
-            };
-            if (!Directory.Exists(paths.GeneratedFolder))
-                Directory.CreateDirectory(paths.GeneratedFolder);
-            if (!Directory.Exists(paths.GeneratedFilesCacheFolder))
-                Directory.CreateDirectory(paths.GeneratedFilesCacheFolder);
-
             containerBuilder.Register(c => paths).As<IPaths>();
             containerBuilder.Register(c => installedPackages).As<IInstalledPackages>();
 
-            containerBuilder.RegisterType<NLogProvider>().As<ILogProvider>().SingleInstance();
+            containerBuilder.RegisterType<NLogProvider>().As<ILogProvider2>().SingleInstance();
             containerBuilder.RegisterGeneric(typeof(PluginsMetadataCache<>)).SingleInstance();
-            containerBuilder.RegisterGeneric(typeof(PluginsContainer<>)).As(typeof(IPluginsContainer<>)).InstancePerLifetimeScope();
+            containerBuilder.RegisterGeneric(typeof(Plugins<>)).As(typeof(IPlugins<>)).InstancePerLifetimeScope();
             containerBuilder.RegisterGeneric(typeof(NamedPlugins<>)).As(typeof(INamedPlugins<>)).InstancePerLifetimeScope();
 
             containerBuilder.RegisterGeneric(typeof(Index<,>)).As(typeof(IIndex<,>));

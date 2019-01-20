@@ -25,7 +25,7 @@ using System.Text;
 
 namespace Rhetos.Dsl.Test
 {
-    public class MockPluginsContainer<T> : IPluginsContainer<T>
+    public class MockPluginsContainer<T> : IPlugins<T>
     {
         IEnumerable<T> _plugins;
 

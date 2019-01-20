@@ -78,7 +78,7 @@ namespace Rhetos.Dsl
             }
         }
 
-        public DslContainer(ILogProvider logProvider, IPluginsContainer<IDslModelIndex> dslModelIndexPlugins)
+        public DslContainer(ILogProvider logProvider, IPlugins<IDslModelIndex> dslModelIndexPlugins)
         {
             _performanceLogger = logProvider.GetLogger("Performance");
             _logger = logProvider.GetLogger("DslContainer");

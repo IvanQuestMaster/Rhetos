@@ -23,7 +23,7 @@ using System.Globalization;
 
 namespace Rhetos
 {
-    public enum EventType
+    public enum EventType2
     {
         /// <summary>
         /// Very detailed logs, which may include high-volume information such as protocol payloads. This log level is typically only enabled during development.
@@ -39,14 +39,14 @@ namespace Rhetos
         Error
     };
 
-    public interface ILogger
+    public interface ILogger2
     {
-        void Write(EventType eventType, Func<string> logMessage);
+        void Write(EventType2 eventType, Func<string> logMessage);
     }
 
     public static class LoggerHelper
     {
-        public static void Write(this ILogger logger, EventType eventType, string eventData, params object[] eventDataParams)
+        public static void Write(this ILogger2 logger, EventType2 eventType, string eventData, params object[] eventDataParams)
         {
             if (eventDataParams.Length == 0)
                 logger.Write(eventType, () => eventData);
@@ -56,7 +56,7 @@ namespace Rhetos
 
         public static readonly TimeSpan SlowEvent = TimeSpan.FromSeconds(10);
 
-        private static void PerformanceWrite(this ILogger performanceLogger, Stopwatch stopwatch, Func<string> fullMessage)
+        private static void PerformanceWrite(this ILogger2 performanceLogger, Stopwatch stopwatch, Func<string> fullMessage)
         {
             if (stopwatch.Elapsed >= SlowEvent)
                 performanceLogger.Info(fullMessage);
@@ -69,7 +69,7 @@ namespace Rhetos
         /// Logs 'Trace' or 'Info' level, depending on the event duration.
         /// Restarts the stopwatch.
         /// </summary>
-        public static void Write(this ILogger performanceLogger, Stopwatch stopwatch, Func<string> message)
+        public static void Write(this ILogger2 performanceLogger, Stopwatch stopwatch, Func<string> message)
         {
             PerformanceWrite(performanceLogger, stopwatch, () => stopwatch.Elapsed + " " + message());
         }
@@ -78,34 +78,34 @@ namespace Rhetos
         /// Logs 'Trace' or 'Info' level, depending on the event duration.
         /// Restarts the stopwatch.
         /// </summary>
-        public static void Write(this ILogger performanceLogger, Stopwatch stopwatch, string message)
+        public static void Write(this ILogger2 performanceLogger, Stopwatch stopwatch, string message)
         {
             PerformanceWrite(performanceLogger, stopwatch, () => stopwatch.Elapsed + " " + message);
         }
 
-        public static void Error(this ILogger log, string eventData, params object[] eventDataParams)
+        public static void Error(this ILogger2 log, string eventData, params object[] eventDataParams)
         {
-            log.Write(EventType.Error, eventData, eventDataParams);
+            log.Write(EventType2.Error, eventData, eventDataParams);
         }
-        public static void Error(this ILogger log, Func<string> logMessage)
+        public static void Error(this ILogger2 log, Func<string> logMessage)
         {
-            log.Write(EventType.Error, logMessage);
+            log.Write(EventType2.Error, logMessage);
         }
-        public static void Info(this ILogger log, string eventData, params object[] eventDataParams)
+        public static void Info(this ILogger2 log, string eventData, params object[] eventDataParams)
         {
-            log.Write(EventType.Info, eventData, eventDataParams);
+            log.Write(EventType2.Info, eventData, eventDataParams);
         }
-        public static void Info(this ILogger log, Func<string> logMessage)
+        public static void Info(this ILogger2 log, Func<string> logMessage)
         {
-            log.Write(EventType.Info, logMessage);
+            log.Write(EventType2.Info, logMessage);
         }
-        public static void Trace(this ILogger log, string eventData, params object[] eventDataParams)
+        public static void Trace(this ILogger2 log, string eventData, params object[] eventDataParams)
         {
-            log.Write(EventType.Trace, eventData, eventDataParams);
+            log.Write(EventType2.Trace, eventData, eventDataParams);
         }
-        public static void Trace(this ILogger log, Func<string> logMessage)
+        public static void Trace(this ILogger2 log, Func<string> logMessage)
         {
-            log.Write(EventType.Trace, logMessage);
+            log.Write(EventType2.Trace, logMessage);
         }
     }
 }

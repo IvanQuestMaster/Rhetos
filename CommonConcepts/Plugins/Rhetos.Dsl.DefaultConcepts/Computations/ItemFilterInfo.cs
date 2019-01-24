@@ -48,14 +48,13 @@ namespace Rhetos.Dsl.DefaultConcepts
             ParameterInfo filterParameter = GetGeneratedFilter(conceptInfo);
 
             // Existing filter parameter does not have to be a ParameterInfo. Any DataStructureInfo is allowed.
-            var existingFilterParameter = existingConcepts.FindByKey(filterParameter.GetKey());
-            if (existingFilterParameter == null)
+            if (existingConcepts.FindByKey(filterParameter.GetKey()) == null)
                     newConcepts.Add(filterParameter);
 
             var composableFilter = new ComposableFilterByInfo
-            {
+            { 
                 Source = conceptInfo.Source,
-                Parameter = filterParameter.GetKeyProperties(),
+                Parameter = filterParameter.GetKeyProperties(), 
                 Expression = "(source, repository, parameter) => source.Where(" + conceptInfo.Expression + ")"
             };
 

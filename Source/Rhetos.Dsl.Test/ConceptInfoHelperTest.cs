@@ -23,6 +23,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Rhetos.TestCommon;
+using System.Diagnostics;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Rhetos.Dsl.Test
 {
@@ -310,6 +313,140 @@ namespace Rhetos.Dsl.Test
             Assert.AreEqual("<null>", ConceptInfoHelper.GetErrorDescription(null));
 
             Assert.AreEqual(typeof(SimpleConceptInfo).FullName + " Name=s Data=<null>", new SimpleConceptInfo { Name = "s", Data = null }.GetErrorDescription());
+        }
+
+
+        private static RefConceptInfo GetSampleConcept()
+        {
+            return new RefConceptInfo
+            {
+                Name = "Test",
+                Reference = new SimpleConceptInfo
+                {
+                    Name = "Test",
+                    Data = "TestData"
+                }
+            };
+        }
+
+        [TestMethod]
+        public void PerformanceTest()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                var cocept = GetSampleConcept();
+                var key = cocept.GetKey();
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                var cocept = GetSampleConcept();
+                var key = cocept.Name + "." + cocept.Reference.Name + "." + cocept.Reference.Data;
+            }
+
+            var sw1 = new Stopwatch();
+            sw1.Start();
+            for (int i = 0; i < 1; i++)
+            {
+                var cocept = GetSampleConcept();
+                var key = cocept.GetKey();
+            }
+            sw1.Stop();
+
+            var sw2 = new Stopwatch();
+            sw2.Start();
+            for (int i = 0; i < 1; i++)
+            {
+                var cocept = GetSampleConcept();
+                var key = ConceptInfoHelper.BaseConceptInfoType(cocept).Name + cocept.Name + "." + cocept.Reference.Name + "." + cocept.Reference.Data;
+            }
+            sw2.Stop();
+        }
+
+        public static void AppendMemeberExpression(Expression memberExpression, Type type, ref Expression currentExpression, ref bool firstMember)
+        {
+            foreach (var conceptMember in ConceptMembers.Get(type).Where(x => x.IsKey))
+            {
+                if (conceptMember.IsConceptInfo)
+                {
+                    var returnType = (conceptMember.MemberInfo as PropertyInfo).PropertyType;
+                    AppendMemeberExpression(
+                        Expression.PropertyOrField(
+                            Expression.Convert(memberExpression, type),
+                            conceptMember.MemberInfo.Name
+                            ),
+                        returnType,
+                        ref currentExpression,
+                        ref firstMember
+                        );
+                }
+                else if (firstMember)
+                {
+                    firstMember = false;
+                    currentExpression = Expression.Add(
+                        Expression.Add(currentExpression, Expression.Constant(" "), typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) })),
+                        Expression.PropertyOrField(
+                            Expression.Convert(memberExpression, type),
+                            conceptMember.MemberInfo.Name
+                            ),
+                        typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
+                }
+                else
+                {
+                    currentExpression = Expression.Add(
+                        Expression.Add(currentExpression, Expression.Constant("."), typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) })),
+                        Expression.PropertyOrField(
+                            Expression.Convert(memberExpression, type),
+                            conceptMember.MemberInfo.Name
+                            ),
+                        typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
+                }
+            }
+        }
+
+        public static Func<IConceptInfo, string> GetCompiledGetKey(Type conceptType)
+        {
+            var parameterExpr = Expression.Parameter(typeof(IConceptInfo), "x");
+            var appendMemeberExpresion = Expression.Constant(ConceptInfoHelper.BaseConceptInfoType(conceptType).Name) as Expression;
+            var firstMemeber = true;
+            AppendMemeberExpression(parameterExpr, conceptType, ref appendMemeberExpresion, ref firstMemeber);
+            var finalExpression = Expression.Lambda<Func<IConceptInfo, string>>(appendMemeberExpresion, parameterExpr);
+            return finalExpression.Compile();
+        }
+
+        [TestMethod]
+        public void CompileAtRuntimeTest()
+        {
+            var parameterExpr = Expression.Parameter(typeof(IConceptInfo), "x");
+            /*BinaryExpression calculationExpresion = null;
+            foreach (var conceptMember in ConceptMembers.Get(typeof(SimpleConceptInfo)))
+            {
+                if (calculationExpresion == null)
+                {
+                    calculationExpresion = Expression.Add(
+                        Expression.Constant(""),
+                        Expression.PropertyOrField(
+                            Expression.Convert(parameterExpr, conceptMember.MemberInfo.DeclaringType),
+                            conceptMember.MemberInfo.Name
+                            ),
+                      typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
+                }
+                else {
+                    calculationExpresion = Expression.Add(
+                        calculationExpresion,
+                        Expression.PropertyOrField(
+                            Expression.Convert(parameterExpr, conceptMember.MemberInfo.DeclaringType),
+                            conceptMember.MemberInfo.Name
+                            ),
+                      typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
+                }
+            }*/
+
+            /*var appendMemeberExpresion = Expression.Constant("") as Expression;
+            AppendMemeberExpression(parameterExpr, typeof(SimpleConceptInfo), ref appendMemeberExpresion);
+            var finalExpression = Expression.Lambda<Func<IConceptInfo, string>>(appendMemeberExpresion, parameterExpr);
+            Func<IConceptInfo, string> getKeyFunc = finalExpression.Compile();*/
+
+            var a = GetCompiledGetKey(typeof(RefConceptInfo))(GetSampleConcept());
         }
     }
 }

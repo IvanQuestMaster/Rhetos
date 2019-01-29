@@ -38,7 +38,7 @@ namespace Rhetos.Dsl
         public bool IsStringType { get; private set; }
         public bool IsParsable { get; private set; }
 
-        private MemberInfo MemberInfo;
+        public MemberInfo MemberInfo;
 
         public ConceptMember(MemberInfo memberInfo, ISet<string> nonParsableMembers)
         {

@@ -123,6 +123,8 @@ namespace Rhetos.Dsl
                         ReportObsoleteConcepts();
                         _dslModelFile.SaveConcepts(_dslContainer.Concepts);
                         _initialized = true;
+                        _performanceLogger.Write(ConceptInfoHelper.GetKeySw, "ConceptInfoHelper.GetKeySw");
+                        _performanceLogger.Write(ConceptInfoHelper.CreateKey2Sw, "ConceptInfoHelper.CreateKey2Sw");
                     }
         }
 

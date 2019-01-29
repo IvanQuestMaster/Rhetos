@@ -19,7 +19,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -28,6 +31,90 @@ namespace Rhetos.Dsl
     public static class ConceptInfoHelper
     {
         private static ConditionalWeakTable<IConceptInfo, string> KeyCache = new ConditionalWeakTable<IConceptInfo, string>();
+
+        public static void AppendMemeberExpression(Expression memberExpression, Type type, ref Expression currentExpression, ref bool firstMember)
+        {
+            foreach (var conceptMember in ConceptMembers.Get(type).Where(x => x.IsKey))
+            {
+                if (conceptMember.IsConceptInfo)
+                {
+                    var returnType = (conceptMember.MemberInfo as PropertyInfo).PropertyType;
+                    AppendMemeberExpression(
+                        Expression.PropertyOrField(
+                            Expression.Convert(memberExpression, type),
+                            conceptMember.MemberInfo.Name
+                            ),
+                        returnType,
+                        ref currentExpression,
+                        ref firstMember
+                        );
+                }
+                else if (firstMember)
+                {
+                    firstMember = false;
+                    currentExpression = Expression.Add(
+                        currentExpression,
+                        Expression.Call(
+                            typeof(ConceptInfoHelper).GetMethod("SafeDelimit"),
+                            Expression.PropertyOrField(
+                                Expression.Convert(memberExpression, type),
+                                conceptMember.MemberInfo.Name
+                                )
+                            ),
+                        typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
+                }
+                else
+                {
+                    currentExpression = Expression.Add(
+                        Expression.Add(currentExpression, Expression.Constant("."), typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) })),
+                        Expression.Call(
+                            typeof(ConceptInfoHelper).GetMethod("SafeDelimit"),
+                            Expression.PropertyOrField(
+                                Expression.Convert(memberExpression, type),
+                                conceptMember.MemberInfo.Name
+                                )
+                            ),
+                        typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
+                }
+            }
+        }
+
+        public static Func<IConceptInfo, string> GetCompiledGetKey(Type conceptType)
+        {
+            var parameterExpr = Expression.Parameter(typeof(IConceptInfo), "x");
+            var appendMemeberExpresion = Expression.Constant(ConceptInfoHelper.BaseConceptInfoType(conceptType).Name + " ") as Expression;
+            var firstMemeber = true;
+            AppendMemeberExpression(parameterExpr, conceptType, ref appendMemeberExpresion, ref firstMemeber);
+            var finalExpression = Expression.Lambda<Func<IConceptInfo, string>>(appendMemeberExpresion, parameterExpr);
+            return finalExpression.Compile();
+        }
+
+        private static Dictionary<Type, Func<IConceptInfo, string>> _compiledGetKeyFunctions = new Dictionary<Type, Func<IConceptInfo, string>>();
+
+        public static Stopwatch CreateKey2Sw = new Stopwatch();
+
+        private static string CreateKey2(IConceptInfo ci)
+        {
+            Func<IConceptInfo, string> func;
+            CreateKey2Sw.Start();
+            if (!_compiledGetKeyFunctions.TryGetValue(ci.GetType(),out func))
+            {
+                try
+                {
+                    func = GetCompiledGetKey(ci.GetType());
+                }
+                catch (Exception e)
+                {
+                    func = CreateKey;
+                    
+                }
+            }
+            _compiledGetKeyFunctions.Add(ci.GetType(), func);
+            CreateKey2Sw.Stop();
+            return func(ci);
+        }
+
+        public static Stopwatch GetKeySw = new Stopwatch();
 
         /// <summary>
         /// Returns a string that <b>uniquely describes the concept instance</b>.
@@ -41,10 +128,13 @@ namespace Rhetos.Dsl
         /// </remarks>
         public static string GetKey(this IConceptInfo ci)
         {
+            GetKeySw.Start();
             if (ci == null)
                 throw new ArgumentNullException();
 
-            return KeyCache.GetValue(ci, CreateKey);
+            var a = KeyCache.GetValue(ci, CreateKey2);
+            GetKeySw.Stop();
+            return a;
         }
 
         private static string CreateKey(IConceptInfo ci)
@@ -262,7 +352,7 @@ namespace Rhetos.Dsl
                     member.Name, member.ValueType.Name, ci.GetType().Name));
         }
 
-        private static string SafeDelimit(string text)
+        public static string SafeDelimit(string text)
         {
             bool clean = text.All(c => c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_');
             if (clean && text.Length > 0)
@@ -274,6 +364,13 @@ namespace Rhetos.Dsl
         public static Type BaseConceptInfoType(this IConceptInfo ci)
         {
             Type t = ci.GetType();
+            while (typeof(IConceptInfo).IsAssignableFrom(t.BaseType) && t.BaseType.IsClass)
+                t = t.BaseType;
+            return t;
+        }
+
+        public static Type BaseConceptInfoType(Type t)
+        {
             while (typeof(IConceptInfo).IsAssignableFrom(t.BaseType) && t.BaseType.IsClass)
                 t = t.BaseType;
             return t;

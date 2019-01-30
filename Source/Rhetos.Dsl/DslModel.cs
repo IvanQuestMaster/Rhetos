@@ -21,10 +21,12 @@ using Autofac.Features.Indexed;
 using Rhetos.Logging;
 using Rhetos.Utilities;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Rhetos.Dsl
 {
@@ -124,7 +126,16 @@ namespace Rhetos.Dsl
                         _dslModelFile.SaveConcepts(_dslContainer.Concepts);
                         _initialized = true;
                         _performanceLogger.Write(ConceptInfoHelper.GetKeySw, "ConceptInfoHelper.GetKeySw");
-                        _performanceLogger.Write(ConceptInfoHelper.CreateKey2Sw, "ConceptInfoHelper.CreateKey2Sw");
+                        _performanceLogger.Info("ConceptInfoHelper.CreateKeyCount " + ConceptInfoHelper.CreateKeyCount);
+                        _performanceLogger.Info("ConceptInfoHelper.CompiledCreateKeyCount " + ConceptInfoHelper.CompiledCreateKeyCount);
+                        var aaa = Path.Combine(Paths.GeneratedFolder, "CreateKeyForConcepts.json");
+                        _performanceLogger.Info("Generating CreateKeyForConcepts.json at " + aaa);
+                        File.WriteAllText(aaa, JsonConvert.SerializeObject(ConceptInfoHelper.CreateKeyForConcepts, new JsonSerializerSettings
+                        {
+                            PreserveReferencesHandling = PreserveReferencesHandling.All,
+                            ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                            TypeNameHandling = TypeNameHandling.All,
+                        }));
                     }
         }
 

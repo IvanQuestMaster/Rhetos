@@ -32,45 +32,57 @@ namespace Rhetos.Dsl
     {
         private static ConditionalWeakTable<IConceptInfo, string> KeyCache = new ConditionalWeakTable<IConceptInfo, string>();
 
-        public static void AppendMemeberExpression(Expression memberExpression, Type type, ref Expression currentExpression, ref bool firstMember)
+        public static void AppendMemeberExpression(Expression memberExpression, Type type, ref Expression currentExpression, ref bool firstMember, bool useGetKeyProperties = false)
         {
+            if (type == typeof(IConceptInfo))
+            {
+                var a = 0;
+            }
             foreach (var conceptMember in ConceptMembers.Get(type).Where(x => x.IsKey))
             {
                 if (conceptMember.IsConceptInfo)
                 {
                     var returnType = (conceptMember.MemberInfo as PropertyInfo).PropertyType;
-                    AppendMemeberExpression(
-                        Expression.PropertyOrField(
-                            Expression.Convert(memberExpression, type),
-                            conceptMember.MemberInfo.Name
-                            ),
-                        returnType,
-                        ref currentExpression,
-                        ref firstMember
-                        );
+                    if (returnType == typeof(IConceptInfo))
+                    {
+                        if (firstMember)
+                            firstMember = false;
+                        else
+                            currentExpression = Expression.Add(currentExpression, Expression.Constant("."), typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
+
+                        firstMember = false;
+                        currentExpression = Expression.Add(
+                            currentExpression,
+                            Expression.Call(
+                                typeof(ConceptInfoHelper).GetMethod("CreateKey3"),
+                                Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name)
+                                ),
+                            typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
+                    }
+                    else
+                    {
+                        AppendMemeberExpression(
+                            Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name),
+                            returnType,
+                            ref currentExpression,
+                            ref firstMember
+                            );
+                    }
                 }
-                else if (firstMember)
+                else
                 {
+                    if (firstMember)
+                        firstMember = false;
+                    else
+                        currentExpression = Expression.Add(currentExpression, Expression.Constant("."), typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
+
                     firstMember = false;
                     currentExpression = Expression.Add(
                         currentExpression,
                         Expression.Call(
                             typeof(ConceptInfoHelper).GetMethod("SafeDelimit"),
                             Expression.PropertyOrField(
-                                Expression.Convert(memberExpression, type),
-                                conceptMember.MemberInfo.Name
-                                )
-                            ),
-                        typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
-                }
-                else
-                {
-                    currentExpression = Expression.Add(
-                        Expression.Add(currentExpression, Expression.Constant("."), typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) })),
-                        Expression.Call(
-                            typeof(ConceptInfoHelper).GetMethod("SafeDelimit"),
-                            Expression.PropertyOrField(
-                                Expression.Convert(memberExpression, type),
+                                memberExpression,
                                 conceptMember.MemberInfo.Name
                                 )
                             ),
@@ -79,39 +91,39 @@ namespace Rhetos.Dsl
             }
         }
 
-        public static Func<IConceptInfo, string> GetCompiledGetKey(Type conceptType)
+        public static Func<IConceptInfo, string> GetCompiledGetKey2(Type conceptType)
         {
             var parameterExpr = Expression.Parameter(typeof(IConceptInfo), "x");
+            var conceptExpression = Expression.Convert(parameterExpr, conceptType);
             var appendMemeberExpresion = Expression.Constant(ConceptInfoHelper.BaseConceptInfoType(conceptType).Name + " ") as Expression;
             var firstMemeber = true;
-            AppendMemeberExpression(parameterExpr, conceptType, ref appendMemeberExpresion, ref firstMemeber);
+            AppendMemeberExpression(conceptExpression, conceptType, ref appendMemeberExpresion, ref firstMemeber, true);
             var finalExpression = Expression.Lambda<Func<IConceptInfo, string>>(appendMemeberExpresion, parameterExpr);
             return finalExpression.Compile();
         }
 
-        private static Dictionary<Type, Func<IConceptInfo, string>> _compiledGetKeyFunctions = new Dictionary<Type, Func<IConceptInfo, string>>();
+        private static Dictionary<Type, Func<IConceptInfo, string>> _compiledGetKeyFunctions3 = new Dictionary<Type, Func<IConceptInfo, string>>();
 
-        public static Stopwatch CreateKey2Sw = new Stopwatch();
+        public static Stopwatch CreateKey3Sw = new Stopwatch();
 
-        private static string CreateKey2(IConceptInfo ci)
+        public static int CreateKeyCount = 0;
+        public static int CompiledCreateKeyCount = 0;
+
+        public static string CreateKey3(IConceptInfo ci)
         {
+            CreateKeyCount++;
             Func<IConceptInfo, string> func;
-            CreateKey2Sw.Start();
-            if (!_compiledGetKeyFunctions.TryGetValue(ci.GetType(),out func))
+            CreateKey3Sw.Start();
+            if (!_compiledGetKeyFunctions3.TryGetValue(ci.GetType(), out func))
             {
-                try
-                {
-                    func = GetCompiledGetKey(ci.GetType());
-                }
-                catch (Exception e)
-                {
-                    func = CreateKey;
-                    
-                }
+                CompiledCreateKeyCount++;
+                func = GetCompiledGetKey2(ci.GetType());
+                _compiledGetKeyFunctions3.Add(ci.GetType(), func);
             }
-            _compiledGetKeyFunctions.Add(ci.GetType(), func);
-            CreateKey2Sw.Stop();
-            return func(ci);
+            CreateKey3Sw.Stop();
+            var key = func(ci);
+            CreateKeyForConcepts.Add(key);
+            return key;
         }
 
         public static Stopwatch GetKeySw = new Stopwatch();
@@ -132,17 +144,21 @@ namespace Rhetos.Dsl
             if (ci == null)
                 throw new ArgumentNullException();
 
-            var a = KeyCache.GetValue(ci, CreateKey2);
+            //var a = KeyCache.GetValue(ci, CreateKey);
+            var a = CreateKey3(ci);
             GetKeySw.Stop();
             return a;
         }
 
-        private static string CreateKey(IConceptInfo ci)
+        public static List<string> CreateKeyForConcepts = new List<string>();
+
+        public static string CreateKey(IConceptInfo ci)
         {
             StringBuilder desc = new StringBuilder(100);
             desc.Append(BaseConceptInfoType(ci).Name);
             desc.Append(" ");
             AppendMembers(desc, ci, SerializationOptions.KeyMembers, exceptionOnNullMember: true);
+            CreateKeyForConcepts.Add(desc.ToString());
             return desc.ToString();
         }
 

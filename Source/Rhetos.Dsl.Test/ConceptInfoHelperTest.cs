@@ -26,6 +26,7 @@ using Rhetos.TestCommon;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 
 namespace Rhetos.Dsl.Test
 {
@@ -332,10 +333,12 @@ namespace Rhetos.Dsl.Test
         [TestMethod]
         public void PerformanceTest()
         {
+            int loopCount = 100000;
+
             for (int i = 0; i < 10; i++)
             {
                 var cocept = GetSampleConcept();
-                var key = cocept.GetKey();
+                var key = ConceptInfoHelper.CreateKey3(cocept);
             }
             for (int i = 0; i < 10; i++)
             {
@@ -345,21 +348,61 @@ namespace Rhetos.Dsl.Test
 
             var sw1 = new Stopwatch();
             sw1.Start();
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 100; i++)
+            {
+                
+                var cocept = GetSampleConcept();
+            }
+            var compiledGetKey = ConceptInfoHelper.GetCompiledGetKey2(typeof(RefConceptInfo));
+            for (int i = 0; i < loopCount; i++)
             {
                 var cocept = GetSampleConcept();
-                var key = cocept.GetKey();
+                var key = compiledGetKey(cocept);
             }
             sw1.Stop();
 
             var sw2 = new Stopwatch();
             sw2.Start();
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < loopCount; i++)
             {
                 var cocept = GetSampleConcept();
                 var key = ConceptInfoHelper.BaseConceptInfoType(cocept).Name + cocept.Name + "." + cocept.Reference.Name + "." + cocept.Reference.Data;
             }
             sw2.Stop();
+
+            var sw3 = new Stopwatch();
+            sw3.Start();
+            for (int i = 0; i < loopCount; i++)
+            {
+                var cocept = GetSampleConcept();
+                var sb = new StringBuilder(100);
+                sb.Append(ConceptInfoHelper.BaseConceptInfoType(cocept).Name);
+                sb.Append(cocept.Name);
+                sb.Append(".");
+                sb.Append(cocept.Reference.Name);
+                sb.Append(".");
+                sb.Append(cocept.Reference.Data);
+                var key = sb.ToString(); ;
+            }
+            sw3.Stop();
+
+            var sw4 = new Stopwatch();
+            sw4.Start();
+            for (int i = 0; i < loopCount; i++)
+            {
+                var cocept = GetSampleConcept();
+                var key = ConceptInfoHelper.CreateKey(cocept);
+            }
+            sw4.Stop();
+
+            var sw5 = new Stopwatch();
+            sw5.Start();
+            for (int i = 0; i < loopCount; i++)
+            {
+                var cocept = GetSampleConcept();
+                var key = cocept.GetKey();
+            }
+            sw5.Stop();
         }
 
         public static void AppendMemeberExpression(Expression memberExpression, Type type, ref Expression currentExpression, ref bool firstMember)

@@ -34,10 +34,6 @@ namespace Rhetos.Dsl
 
         public static void AppendMemeberExpression(Expression memberExpression, Type type, ref Expression currentExpression, ref bool firstMember, bool useGetKeyProperties = false)
         {
-            if (type == typeof(IConceptInfo))
-            {
-                var a = 0;
-            }
             foreach (var conceptMember in ConceptMembers.Get(type).Where(x => x.IsKey))
             {
                 if (conceptMember.IsConceptInfo)
@@ -54,8 +50,9 @@ namespace Rhetos.Dsl
                         currentExpression = Expression.Add(
                             currentExpression,
                             Expression.Call(
-                                typeof(ConceptInfoHelper).GetMethod("CreateKey3"),
-                                Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name)
+                                typeof(ConceptInfoHelper).GetMethod("CreateSubKey"),
+                                Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name),
+                                Expression.Constant(":")
                                 ),
                             typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
                     }
@@ -91,37 +88,36 @@ namespace Rhetos.Dsl
             }
         }
 
-        public static Func<IConceptInfo, string> GetCompiledGetKey2(Type conceptType)
+        public static Func<IConceptInfo, string, string> GetCompiledGetSubKey(Type conceptType)
         {
-            var parameterExpr = Expression.Parameter(typeof(IConceptInfo), "x");
-            var conceptExpression = Expression.Convert(parameterExpr, conceptType);
-            var appendMemeberExpresion = Expression.Constant(ConceptInfoHelper.BaseConceptInfoType(conceptType).Name + " ") as Expression;
+            var conceptParamExpr = Expression.Parameter(typeof(IConceptInfo), "concept");
+            var typeSeparatorParamExpr = Expression.Parameter(typeof(string), "typeSeparator");
+            var conceptExpression = Expression.Convert(conceptParamExpr, conceptType);
+            var appendMemeberExpresion = Expression.Add(Expression.Constant(ConceptInfoHelper.BaseConceptInfoType(conceptType).Name), typeSeparatorParamExpr,
+                typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) })) as Expression;
             var firstMemeber = true;
             AppendMemeberExpression(conceptExpression, conceptType, ref appendMemeberExpresion, ref firstMemeber, true);
-            var finalExpression = Expression.Lambda<Func<IConceptInfo, string>>(appendMemeberExpresion, parameterExpr);
+            var finalExpression = Expression.Lambda<Func<IConceptInfo, string, string>>(appendMemeberExpresion, conceptParamExpr, typeSeparatorParamExpr);
             return finalExpression.Compile();
         }
 
-        private static Dictionary<Type, Func<IConceptInfo, string>> _compiledGetKeyFunctions3 = new Dictionary<Type, Func<IConceptInfo, string>>();
+        private static Dictionary<Type, Func<IConceptInfo, string, string>> _compiledGetSubKey = new Dictionary<Type, Func<IConceptInfo, string, string>>();
 
-        public static Stopwatch CreateKey3Sw = new Stopwatch();
-
-        public static int CreateKeyCount = 0;
-        public static int CompiledCreateKeyCount = 0;
-
-        public static string CreateKey3(IConceptInfo ci)
+        public static string CreateSubKey(IConceptInfo ci, string typeSeparator)
         {
-            CreateKeyCount++;
-            Func<IConceptInfo, string> func;
-            CreateKey3Sw.Start();
-            if (!_compiledGetKeyFunctions3.TryGetValue(ci.GetType(), out func))
+            Func<IConceptInfo, string, string> func;
+            if (!_compiledGetSubKey.TryGetValue(ci.GetType(), out func))
             {
-                CompiledCreateKeyCount++;
-                func = GetCompiledGetKey2(ci.GetType());
-                _compiledGetKeyFunctions3.Add(ci.GetType(), func);
+                func = GetCompiledGetSubKey(ci.GetType());
+                _compiledGetSubKey.Add(ci.GetType(), func);
             }
-            CreateKey3Sw.Stop();
-            var key = func(ci);
+            var key = func(ci, typeSeparator);
+            return key;
+        }
+
+        public static string CreateKey2(IConceptInfo ci)
+        {
+            var key = CreateSubKey(ci, " ");
             CreateKeyForConcepts.Add(key);
             return key;
         }
@@ -144,10 +140,8 @@ namespace Rhetos.Dsl
             if (ci == null)
                 throw new ArgumentNullException();
 
-            //var a = KeyCache.GetValue(ci, CreateKey);
-            var a = CreateKey3(ci);
-            GetKeySw.Stop();
-            return a;
+            //return KeyCache.GetValue(ci, CreateKey);
+            return KeyCache.GetValue(ci, CreateKey2);
         }
 
         public static List<string> CreateKeyForConcepts = new List<string>();

@@ -126,8 +126,6 @@ namespace Rhetos.Dsl
                         _dslModelFile.SaveConcepts(_dslContainer.Concepts);
                         _initialized = true;
                         _performanceLogger.Write(ConceptInfoHelper.GetKeySw, "ConceptInfoHelper.GetKeySw");
-                        _performanceLogger.Info("ConceptInfoHelper.CreateKeyCount " + ConceptInfoHelper.CreateKeyCount);
-                        _performanceLogger.Info("ConceptInfoHelper.CompiledCreateKeyCount " + ConceptInfoHelper.CompiledCreateKeyCount);
                         var aaa = Path.Combine(Paths.GeneratedFolder, "CreateKeyForConcepts.json");
                         _performanceLogger.Info("Generating CreateKeyForConcepts.json at " + aaa);
                         File.WriteAllText(aaa, JsonConvert.SerializeObject(ConceptInfoHelper.CreateKeyForConcepts, new JsonSerializerSettings

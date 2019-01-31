@@ -346,13 +346,13 @@ namespace Rhetos.Dsl.Test
                 var key = cocept.Name + "." + cocept.Reference.Name + "." + cocept.Reference.Data;
             }
 
-            var compiledGetKey = ConceptInfoHelper.GetCompiledGetSubKey(typeof(RefConceptInfo));
+            var compiledGetKey = ConceptInfoHelper.CreateCompiledGetSubKey(typeof(RefConceptInfo));
             var sw1 = new Stopwatch();
             sw1.Start();
             for (int i = 0; i < loopCount; i++)
             {
                 var cocept = GetSampleConcept();
-                var key = compiledGetKey(cocept, " ");
+                var key = compiledGetKey(cocept, true, " ");
             }
             sw1.Stop();
 

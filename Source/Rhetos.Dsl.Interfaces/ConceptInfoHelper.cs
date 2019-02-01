@@ -32,12 +32,17 @@ namespace Rhetos.Dsl
     {
         private static ConditionalWeakTable<IConceptInfo, string> KeyCache = new ConditionalWeakTable<IConceptInfo, string>();
 
-        public static void AppendMemeberExpression(Expression memberExpression, Type type, ref Expression currentExpression, ref bool firstMember, bool useGetKeyProperties = false)
+        public static void AppendMemeberExpression(Expression memberExpression, Type type, List<Expression> validateExpression, ref Expression currentExpression, ref bool firstMember, bool useGetKeyProperties = false)
         {
             foreach (var conceptMember in ConceptMembers.Get(type).Where(x => x.IsKey))
             {
                 if (conceptMember.IsConceptInfo)
                 {
+                    validateExpression.Add(Expression.IfThen(
+                        Expression.Equal(Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name), Expression.Constant(null)),
+                        Expression.Throw(Expression.Constant(new DslSyntaxException()))
+                    ));
+
                     var returnType = (conceptMember.MemberInfo as PropertyInfo).PropertyType;
                     if (returnType == typeof(IConceptInfo))
                     {
@@ -61,6 +66,7 @@ namespace Rhetos.Dsl
                         AppendMemeberExpression(
                             Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name),
                             returnType,
+                            validateExpression,
                             ref currentExpression,
                             ref firstMember
                             );
@@ -68,6 +74,11 @@ namespace Rhetos.Dsl
                 }
                 else
                 {
+                    validateExpression.Add(Expression.IfThen(
+                        Expression.Equal(Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name), Expression.Constant(null)),
+                        Expression.Throw(Expression.Constant(new DslSyntaxException())))
+                        );
+
                     if (firstMember)
                         firstMember = false;
                     else
@@ -78,10 +89,7 @@ namespace Rhetos.Dsl
                         currentExpression,
                         Expression.Call(
                             typeof(ConceptInfoHelper).GetMethod("SafeDelimit"),
-                            Expression.PropertyOrField(
-                                memberExpression,
-                                conceptMember.MemberInfo.Name
-                                )
+                            Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name)
                             ),
                         typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
                 }
@@ -94,6 +102,7 @@ namespace Rhetos.Dsl
             var useTypeParamExpr = Expression.Parameter(typeof(bool), "useType");
             var typeSeparatorParamExpr = Expression.Parameter(typeof(string), "typeSeparator");
             var conceptExpression = Expression.Convert(conceptParamExpr, conceptType);
+            var validateExpression = new List<Expression>();
             var appendMemeberExpresion = Expression.Condition(
                 Expression.Equal(useTypeParamExpr, Expression.Constant(true)),
                     Expression.Add(Expression.Constant(ConceptInfoHelper.BaseConceptInfoType(conceptType).Name), typeSeparatorParamExpr,
@@ -101,8 +110,8 @@ namespace Rhetos.Dsl
                     Expression.Constant("")
                 ) as Expression;
             var firstMemeber = true;
-            AppendMemeberExpression(conceptExpression, conceptType, ref appendMemeberExpresion, ref firstMemeber, true);
-            var finalExpression = Expression.Lambda<Func<IConceptInfo, bool, string, string>>(appendMemeberExpresion, conceptParamExpr, useTypeParamExpr, typeSeparatorParamExpr);
+            AppendMemeberExpression(conceptExpression, conceptType, validateExpression, ref appendMemeberExpresion, ref firstMemeber, true);
+            var finalExpression = Expression.Lambda<Func<IConceptInfo, bool, string, string>>(Expression.Block(validateExpression.Union(new List<Expression> { appendMemeberExpresion })), conceptParamExpr, useTypeParamExpr, typeSeparatorParamExpr);
             return finalExpression.Compile();
         }
 

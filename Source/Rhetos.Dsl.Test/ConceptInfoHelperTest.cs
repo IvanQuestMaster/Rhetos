@@ -325,7 +325,7 @@ namespace Rhetos.Dsl.Test
                 Reference = new SimpleConceptInfo
                 {
                     Name = "Test",
-                    Data = "TestData"
+                    Data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"
                 }
             };
         }
@@ -333,38 +333,73 @@ namespace Rhetos.Dsl.Test
         [TestMethod]
         public void PerformanceTest()
         {
-            int loopCount = 100000;
-
-            for (int i = 0; i < 10; i++)
-            {
-                var cocept = GetSampleConcept();
-                var key = ConceptInfoHelper.CreateSubKey(cocept, " ");
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                var cocept = GetSampleConcept();
-                var key = cocept.Name + "." + cocept.Reference.Name + "." + cocept.Reference.Data;
-            }
-
-            var compiledGetKey = ConceptInfoHelper.CreateCompiledGetSubKey(typeof(RefConceptInfo));
-            var sw1 = new Stopwatch();
-            sw1.Start();
+            int loopCount = 10000;
+            var concepts = new List<RefConceptInfo>();
             for (int i = 0; i < loopCount; i++)
+            {
+                concepts.Add(GetSampleConcept());
+            }
+            //new SimpleConceptInfo { Name = null, Data = "d" }.GetKey();
+
+            /*List<Func<IConceptInfo, bool, string, string>> functions = new List<Func<IConceptInfo, bool, string, string>>();
+            for (var i = 0; i < 100*loopCount; i++)
+            {
+                functions.Add(ConceptInfoHelper.CreateCompiledGetSubKey(typeof(RefConceptInfo)));
+            }*/
+            var compiledGetKey = ConceptInfoHelper.CreateCompiledGetSubKey(typeof(RefConceptInfo));
+            for (int i = 0; i < 10; i++)
             {
                 var cocept = GetSampleConcept();
                 var key = compiledGetKey(cocept, true, " ");
             }
-            sw1.Stop();
-
-            var sw2 = new Stopwatch();
-            sw2.Start();
-            for (int i = 0; i < loopCount; i++)
+            for (int i = 0; i < 10; i++)
             {
                 var cocept = GetSampleConcept();
                 var key = "RefConceptInfo " + ConceptInfoHelper.SafeDelimit(cocept.Name) + "." + ConceptInfoHelper.SafeDelimit(cocept.Reference.Name) + "." + ConceptInfoHelper.SafeDelimit(cocept.Reference.Data);
             }
+            for (int i = 0; i < 10; i++)
+            {
+                var concept = GetSampleConcept();
+                var key = GetKeyFromStringBuilder(concept);
+            }
+
+            var sw1 = new Stopwatch();
+            sw1.Start();
+            for (int i = 0; i < loopCount; i++)
+            {
+                var concept = concepts[i];
+                var key = compiledGetKey(concept, true, " ");
+            }
+            sw1.Stop();
+            
+            var sw2 = new Stopwatch();
+            sw2.Start();
+            for (int i = 0; i < loopCount; i++)
+            {
+                var concept = concepts[i];
+                var key = "RefConceptInfo " + ConceptInfoHelper.SafeDelimit(concept.Name) + "." + ConceptInfoHelper.SafeDelimit(concept.Reference.Name) + "." + ConceptInfoHelper.SafeDelimit(concept.Reference.Data);
+            }
             sw2.Stop();
 
+            var sw3 = new Stopwatch();
+            sw3.Start();
+            for (int i = 0; i < loopCount; i++)
+            {
+                var concept = concepts[i];
+                var key = GetKeyFromStringBuilder(concept);
+            }
+            sw3.Stop();
+        }
+
+        private static string GetKeyFromStringBuilder(RefConceptInfo concept)
+        {
+            var sb = new StringBuilder();
+            sb.Append("RefConceptInfo ");
+            sb.Append(ConceptInfoHelper.SafeDelimit(concept.Name));
+            sb.Append(ConceptInfoHelper.SafeDelimit(concept.Reference.Name));
+            sb.Append(".");
+            sb.Append(ConceptInfoHelper.SafeDelimit(concept.Reference.Data));
+            return sb.ToString();
         }
 
         public static void AppendMemeberExpression(Expression memberExpression, Type type, ref Expression currentExpression, ref bool firstMember)

@@ -333,7 +333,7 @@ namespace Rhetos.Dsl.Test
         [TestMethod]
         public void PerformanceTest()
         {
-            int loopCount = 10000;
+            int loopCount = 100000;
             var concepts = new List<RefConceptInfo>();
             for (int i = 0; i < loopCount; i++)
             {
@@ -346,11 +346,11 @@ namespace Rhetos.Dsl.Test
             {
                 functions.Add(ConceptInfoHelper.CreateCompiledGetSubKey(typeof(RefConceptInfo)));
             }*/
-            var compiledGetKey = ConceptInfoHelper.CreateCompiledGetSubKey(typeof(RefConceptInfo));
+            var compiledGetKey = ConceptInfoHelper.CreateSerializeMembersFunction(typeof(RefConceptInfo));
             for (int i = 0; i < 10; i++)
             {
                 var cocept = GetSampleConcept();
-                var key = compiledGetKey(cocept, true, " ");
+                var key = compiledGetKey(cocept, ConceptInfoHelper.SerializationOptions.KeyMembers, true);
             }
             for (int i = 0; i < 10; i++)
             {
@@ -362,22 +362,45 @@ namespace Rhetos.Dsl.Test
                 var concept = GetSampleConcept();
                 var key = GetKeyFromStringBuilder(concept);
             }
+            for (int i = 0; i < 10; i++)
+            {
+                var concept = GetSampleConcept();
+                var key = GetKeyFromStringJoin(concept);
+            }
+            for (int i = 0; i < loopCount; i++)
+            {
+                var concept = GetSampleConcept();
+                var key = ConceptInfoHelper.CreateKeyOld(concept);
+            }
+
+            var sw5 = new Stopwatch();
+            sw5.Start();
+            for (int i = 0; i < loopCount; i++)
+            {
+                var concept = concepts[i];
+                var key = ConceptInfoHelper.CreateKeyOld(concept);
+            }
+            sw5.Stop();
 
             var sw1 = new Stopwatch();
             sw1.Start();
             for (int i = 0; i < loopCount; i++)
             {
                 var concept = concepts[i];
-                var key = compiledGetKey(concept, true, " ");
+                var key = compiledGetKey(concept, ConceptInfoHelper.SerializationOptions.KeyMembers, true); ;
             }
             sw1.Stop();
-            
+
             var sw2 = new Stopwatch();
             sw2.Start();
             for (int i = 0; i < loopCount; i++)
             {
                 var concept = concepts[i];
-                var key = "RefConceptInfo " + ConceptInfoHelper.SafeDelimit(concept.Name) + "." + ConceptInfoHelper.SafeDelimit(concept.Reference.Name) + "." + ConceptInfoHelper.SafeDelimit(concept.Reference.Data);
+                if (concept.Name == null)
+                    throw new Exception();
+                if (concept.Reference.Name == null)
+                    throw new Exception();
+                var key = "RefConceptInfo " + ConceptInfoHelper.SafeDelimit(concept.Name) + "." + ConceptInfoHelper.SafeDelimit(concept.Reference.Name);
             }
             sw2.Stop();
 
@@ -389,6 +412,15 @@ namespace Rhetos.Dsl.Test
                 var key = GetKeyFromStringBuilder(concept);
             }
             sw3.Stop();
+
+            var sw4 = new Stopwatch();
+            sw4.Start();
+            for (int i = 0; i < loopCount; i++)
+            {
+                var concept = concepts[i];
+                var key = GetKeyFromStringJoin(concept);
+            }
+            sw4.Stop();
         }
 
         private static string GetKeyFromStringBuilder(RefConceptInfo concept)
@@ -396,10 +428,16 @@ namespace Rhetos.Dsl.Test
             var sb = new StringBuilder();
             sb.Append("RefConceptInfo ");
             sb.Append(ConceptInfoHelper.SafeDelimit(concept.Name));
-            sb.Append(ConceptInfoHelper.SafeDelimit(concept.Reference.Name));
             sb.Append(".");
-            sb.Append(ConceptInfoHelper.SafeDelimit(concept.Reference.Data));
+            sb.Append(ConceptInfoHelper.SafeDelimit(concept.Reference.Name));
+            //sb.Append(".");
+            //sb.Append(ConceptInfoHelper.SafeDelimit(concept.Reference.Data));
             return sb.ToString();
+        }
+
+        private static string GetKeyFromStringJoin(RefConceptInfo concept)
+        {
+            return string.Join("RefConceptInfo ", ConceptInfoHelper.SafeDelimit(concept.Name), ".", ConceptInfoHelper.SafeDelimit(concept.Reference.Name));
         }
 
         public static void AppendMemeberExpression(Expression memberExpression, Type type, ref Expression currentExpression, ref bool firstMember)
@@ -443,16 +481,6 @@ namespace Rhetos.Dsl.Test
             }
         }
 
-        public static Func<IConceptInfo, string> GetCompiledGetKey(Type conceptType)
-        {
-            var parameterExpr = Expression.Parameter(typeof(IConceptInfo), "x");
-            var appendMemeberExpresion = Expression.Constant(ConceptInfoHelper.BaseConceptInfoType(conceptType).Name) as Expression;
-            var firstMemeber = true;
-            AppendMemeberExpression(parameterExpr, conceptType, ref appendMemeberExpresion, ref firstMemeber);
-            var finalExpression = Expression.Lambda<Func<IConceptInfo, string>>(appendMemeberExpresion, parameterExpr);
-            return finalExpression.Compile();
-        }
-
         [TestMethod]
         public void CompileAtRuntimeTest()
         {
@@ -485,8 +513,6 @@ namespace Rhetos.Dsl.Test
             AppendMemeberExpression(parameterExpr, typeof(SimpleConceptInfo), ref appendMemeberExpresion);
             var finalExpression = Expression.Lambda<Func<IConceptInfo, string>>(appendMemeberExpresion, parameterExpr);
             Func<IConceptInfo, string> getKeyFunc = finalExpression.Compile();*/
-
-            var a = GetCompiledGetKey(typeof(RefConceptInfo))(GetSampleConcept());
         }
     }
 }

@@ -35,7 +35,6 @@ namespace Rhetos.Dsl
         public static string CreateKey(IConceptInfo ci)
         {
             return BaseConceptInfoType(ci).Name + " " + SerializeMembers(ci, SerializationOptions.KeyMembers, true);
-            //return GetSubKeyFunction(ci.GetType())(ci, true, " ");
         }
 
         /// <summary>
@@ -56,18 +55,6 @@ namespace Rhetos.Dsl
             return KeyCache.GetValue(ci, CreateKey);
         }
 
-        public static List<string> CreateKeyForConcepts = new List<string>();
-
-        public static string CreateKeyOld(IConceptInfo ci)
-        {
-            StringBuilder desc = new StringBuilder(100);
-            desc.Append(BaseConceptInfoType(ci).Name);
-            desc.Append(" ");
-            AppendMembers(desc, ci, SerializationOptions.KeyMembers, exceptionOnNullMember: true);
-            CreateKeyForConcepts.Add(desc.ToString());
-            return desc.ToString();
-        }
-
         public static string GetShortDescription(this IConceptInfo ci)
         {
             return ci.GetType().Name + " " + SerializeMembers(ci, SerializationOptions.KeyMembers);
@@ -85,16 +72,6 @@ namespace Rhetos.Dsl
             return GetKeywordOrTypeName(ci) + " " + SerializeMembers(ci, SerializationOptions.KeyMembers); ;
         }
 
-        public static List<string> GetKeyPropertiesForConcepts = new List<string>();
-
-        public static string GetKeyPropertiesOld(this IConceptInfo ci)
-        {
-            StringBuilder desc = new StringBuilder(100);
-            AppendMembers(desc, ci, SerializationOptions.KeyMembers, exceptionOnNullMember: true);
-            GetKeyPropertiesForConcepts.Add(desc.ToString());
-            return desc.ToString();
-        }
-
         /// <summary>
         /// Returns a string with a dot-separated list of concept's key properties.
         /// </summary>
@@ -110,21 +87,6 @@ namespace Rhetos.Dsl
         public static string GetFullDescription(this IConceptInfo ci)
         {
             return ci.GetType().FullName + " " + SerializeMembers(ci, SerializationOptions.AllMembers);
-        }
-
-        /// <summary>
-        /// Returns a string that describes the concept instance cast as a base concept.
-        /// The string contains base concept's type name and the base concept's properties.
-        /// </summary>
-        public static string GetFullDescriptionAsBaseConcept(this IConceptInfo ci, Type baseConceptType)
-        {
-            if (!baseConceptType.IsAssignableFrom(ci.GetType()))
-                throw new FrameworkException($"{baseConceptType} is not assignable from {ci.GetUserDescription()}.");
-            StringBuilder desc = new StringBuilder(200);
-            desc.Append(baseConceptType.FullName);
-            desc.Append(" ");
-            AppendMembers(desc, ci, SerializationOptions.AllMembers, false, baseConceptType);
-            return desc.ToString();
         }
 
         /// <summary>
@@ -194,7 +156,7 @@ namespace Rhetos.Dsl
                     if (memberValue == null)
                         report.Append("<null>");
                     else if (member.IsConceptInfo)
-                        AppendMembers(report, (IConceptInfo)memberValue, SerializationOptions.KeyMembers, exceptionOnNullMember: false);
+                        report.Append(SerializeMembers((IConceptInfo)memberValue, SerializationOptions.KeyMembers, exceptionOnNullMember: false));
                     else
                         report.Append(memberValue.ToString());
                 }
@@ -221,56 +183,13 @@ namespace Rhetos.Dsl
                 }
         }
 
-        public enum SerializationOptions
+        private enum SerializationOptions
         {
             KeyMembers,
             AllMembers
         };
 
-        private static void AppendMembers(StringBuilder text, IConceptInfo ci, SerializationOptions serializationOptions, bool exceptionOnNullMember = false, Type asBaseConceptType = null)
-        {
-            IEnumerable<ConceptMember> members = asBaseConceptType != null ? ConceptMembers.Get(asBaseConceptType) : ConceptMembers.Get(ci);
-            if (serializationOptions == SerializationOptions.KeyMembers)
-                members = members.Where(member => member.IsKey);
-
-            bool firstMember = true;
-            foreach (ConceptMember member in members)
-            {
-                string separator = member.IsKey ? "." : " ";
-                if (!firstMember)
-                    text.Append(separator);
-                firstMember = false;
-
-                AppendMember(text, ci, member, exceptionOnNullMember);
-            }
-        }
-
-        private static void AppendMember(StringBuilder text, IConceptInfo ci, ConceptMember member, bool exceptionOnNullMember)
-        {
-            object memberValue = member.GetValue(ci);
-            if (memberValue == null)
-                if (exceptionOnNullMember)
-                    throw new DslSyntaxException(ci, string.Format(
-                        "{0}'s property {1} is null. Info: {2}.",
-                        ci.GetType().Name, member.Name, ci.GetErrorDescription()));
-                else
-                    text.Append("<null>");
-            else if (member.IsConceptInfo)
-            {
-                IConceptInfo value = (IConceptInfo)member.GetValue(ci);
-                if (member.ValueType == typeof(IConceptInfo))
-                    text.Append(BaseConceptInfoType(value).Name).Append(":");
-                AppendMembers(text, value, SerializationOptions.KeyMembers, exceptionOnNullMember);
-            }
-            else if (member.ValueType == typeof(string))
-                text.Append(SafeDelimit(member.GetValue(ci).ToString()));
-            else
-                throw new FrameworkException(string.Format(
-                    "IConceptInfo member {0} of type {1} in {2} is not supported.",
-                    member.Name, member.ValueType.Name, ci.GetType().Name));
-        }
-
-        public static string SafeDelimit(string text)
+        private static string SafeDelimit(string text)
         {
             bool clean = text.All(c => c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_');
             if (clean && text.Length > 0)
@@ -287,203 +206,9 @@ namespace Rhetos.Dsl
             return t;
         }
 
-        public static string BaseConceptInfoTypeName(this IConceptInfo ci)
-        {
-            Type t = ci.GetType();
-            while (typeof(IConceptInfo).IsAssignableFrom(t.BaseType) && t.BaseType.IsClass)
-                t = t.BaseType;
-            return t.Name;
-        }
-
-        public static DslSyntaxException ThrowDslSyntaxExceptionForConcept(IConceptInfo ci, string memeberName)
-        {
-            throw new DslSyntaxException(ci, string.Format(
-                            "{0}'s property {1} is null. Info: {2}.",
-                            ci.GetType().Name, memeberName, ci.GetErrorDescription())
-                        );
-        }
-
         private static Dictionary<Type, Func<IConceptInfo, SerializationOptions, bool, string>> _serializeMemebersCompiled = new Dictionary<Type, Func<IConceptInfo, SerializationOptions, bool, string>>();
 
-        public static void GenerateSerializeMembersExpression(
-                Expression memberExpression, Type type,
-                List<Expression> keyMembersValidationExpression,
-                List<Expression> otherMembersValidationExpression,
-                List<Expression> keyMembersEvaluationExpression,
-                List<Expression> otherMembersEvaluationExpression,
-                ParameterExpression serializationOptionsParameExpr,
-                ParameterExpression exceptionOnNullMemberParamExpr,
-                bool onlyKeyMembers,
-                ref bool firstMember)
-        {
-            var memebers = onlyKeyMembers ? ConceptMembers.Get(type).Where(x => x.IsKey) : ConceptMembers.Get(type);
-            foreach (var conceptMember in memebers)
-            {
-                var memeberExpressionList = conceptMember.IsKey ? keyMembersEvaluationExpression : otherMembersEvaluationExpression;
-
-                if(conceptMember.IsKey)
-                    keyMembersValidationExpression.Add(Expression.IfThen(
-                        Expression.Equal(Expression.PropertyOrField(memberExpression, conceptMember.Name), Expression.Constant(null)),
-                        Expression.Call(typeof(ConceptInfoHelper).GetMethod("ThrowDslSyntaxExceptionForConcept"), memberExpression, Expression.Constant(conceptMember.Name))
-                        ));
-                else
-                    otherMembersValidationExpression.Add(Expression.IfThen(
-                        Expression.Equal(Expression.PropertyOrField(memberExpression, conceptMember.Name), Expression.Constant(null)),
-                        Expression.Call(typeof(ConceptInfoHelper).GetMethod("ThrowDslSyntaxExceptionForConcept"), memberExpression, Expression.Constant(conceptMember.Name))
-                        ));
-
-                if (conceptMember.IsConceptInfo)
-                {
-                    //if (conceptMember.ValueType == typeof(IConceptInfo))
-                    //{
-                        if (firstMember)
-                            firstMember = false;
-                        else
-                            memeberExpressionList.Add(Expression.Constant("."));
-
-                    if (conceptMember.ValueType == typeof(IConceptInfo))
-                    {
-                        memeberExpressionList.Add(Expression.Call(
-                            typeof(ConceptInfoHelper).GetMethod("BaseConceptInfoTypeName", new[] { typeof(IConceptInfo) }),
-                            Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name)
-                            ));
-                        memeberExpressionList.Add(Expression.Constant(":"));
-                    }
-
-                        memeberExpressionList.Add(
-                            Expression.Condition(
-                                Expression.Equal(Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name), Expression.Constant(null)),
-                                Expression.Constant("<null>"),
-                                Expression.Call(
-                                    typeof(ConceptInfoHelper).GetMethod("SerializeMembers"),
-                                    Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name),
-                                    Expression.Constant(SerializationOptions.KeyMembers), exceptionOnNullMemberParamExpr
-                                    )
-                                )
-                            );
-                    /*}
-                    else
-                    {
-                        GenerateSerializeMembersExpression(
-                            Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name),
-                            conceptMember.ValueType,
-                            keyMembersValidationExpression,
-                            otherMembersValidationExpression,
-                            keyMembersEvaluationExpression,
-                            otherMembersEvaluationExpression,
-                            serializationOptionsParameExpr,
-                            exceptionOnNullMemberParamExpr,
-                            true,
-                            ref firstMember
-                            );
-                    }*/
-                }
-                else if (conceptMember.ValueType == typeof(string))
-                {
-                    if (firstMember)
-                        firstMember = false;
-                    else
-                        memeberExpressionList.Add(conceptMember.IsKey ? Expression.Constant(".") : Expression.Constant(" "));
-
-                    memeberExpressionList.Add(
-                        Expression.Condition(
-                            Expression.Equal(Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name), Expression.Constant(null)),
-                            Expression.Constant("<null>"),
-                            Expression.Call(
-                                typeof(ConceptInfoHelper).GetMethod("SafeDelimit"),
-                                Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name)
-                                )
-                            )
-                        );
-                }
-                else
-                {
-                    throw new FrameworkException(string.Format(
-                        "IConceptInfo member {0} of type {1} in {2} is not supported.",
-                        conceptMember.Name, conceptMember.ValueType.Name, type.Name));
-                }
-            }
-        }
-
-        public static Expression GenerateConcatenationExpression(List<Expression> stringEValuationExpressions)
-        {
-            Expression returnExpression = null;
-            if (stringEValuationExpressions.Count == 1)
-                returnExpression = Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string) }), stringEValuationExpressions[0]);
-            if (stringEValuationExpressions.Count == 2)
-                returnExpression = Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }), stringEValuationExpressions[0], stringEValuationExpressions[1]);
-            else if (stringEValuationExpressions.Count == 3)
-                returnExpression = Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string) }), stringEValuationExpressions[0], stringEValuationExpressions[1], stringEValuationExpressions[2]);
-            else if (stringEValuationExpressions.Count == 4)
-                returnExpression = Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string), typeof(string) }), stringEValuationExpressions[0], stringEValuationExpressions[1], stringEValuationExpressions[2], stringEValuationExpressions[3]);
-            else
-                returnExpression = Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string[]) }), Expression.NewArrayInit(typeof(string), stringEValuationExpressions));
-            return returnExpression;
-        }
-
-        public static Func<IConceptInfo, SerializationOptions, bool, string> CreateSerializeMembersFunction(Type conceptType)
-        {
-            var conceptParamExpr = Expression.Parameter(typeof(IConceptInfo), "concept");
-            var serializationOptionsParameExpr = Expression.Parameter(typeof(SerializationOptions), "serializationOptions");
-            var exceptionOnNullMemberParamExpr = Expression.Parameter(typeof(bool), "exceptionOnNullMember");
-            var conceptExpression = Expression.Convert(conceptParamExpr, conceptType);
-
-            var keyMembersValidationExpression = new List<Expression>();
-            var otherMembersValidationExpression = new List<Expression>();
-            var keyMembersEvaluationExpression = new List<Expression>();
-            var otherMembersEvaluationExpression = new List<Expression>();
-
-            var firstMemeber = true;
-            GenerateSerializeMembersExpression(
-                conceptExpression, conceptType,
-                keyMembersValidationExpression,
-                otherMembersValidationExpression,
-                keyMembersEvaluationExpression,
-                otherMembersEvaluationExpression,
-                serializationOptionsParameExpr,
-                exceptionOnNullMemberParamExpr,
-                false,
-                ref firstMemeber);
-
-            Expression returnExpression = Expression.Condition(
-                Expression.Equal(serializationOptionsParameExpr, Expression.Constant(SerializationOptions.KeyMembers)),
-                GenerateConcatenationExpression(keyMembersEvaluationExpression),
-                GenerateConcatenationExpression(keyMembersEvaluationExpression.Union(otherMembersEvaluationExpression).ToList())
-                );
-
-            Expression validationExpression = null;
-            if (otherMembersValidationExpression.Count != 0)
-            {
-                validationExpression = Expression.IfThen(
-                        exceptionOnNullMemberParamExpr,
-                        Expression.Block(
-                            Expression.Block(keyMembersValidationExpression),
-                            Expression.IfThen(
-                                Expression.Equal(serializationOptionsParameExpr, Expression.Constant(SerializationOptions.AllMembers)),
-                                Expression.Block(otherMembersValidationExpression)
-                            )
-                        )
-                    );
-            }
-            else
-            {
-                validationExpression = Expression.IfThen(
-                        exceptionOnNullMemberParamExpr,
-                        Expression.Block(keyMembersValidationExpression)
-                        );
-            }
-
-            var finalExpression = Expression.Lambda<Func<IConceptInfo, SerializationOptions, bool, string>>(
-                Expression.Block(
-                    validationExpression,
-                    returnExpression),
-                conceptParamExpr,
-                serializationOptionsParameExpr,
-                exceptionOnNullMemberParamExpr);
-            return finalExpression.Compile();
-        }
-
-        public static string SerializeMembers(IConceptInfo ci, SerializationOptions serializationOptions, bool exceptionOnNullMember = false)
+        private static string SerializeMembers(IConceptInfo ci, SerializationOptions serializationOptions, bool exceptionOnNullMember = false)
         {
             Func<IConceptInfo, SerializationOptions, bool, string> func = null;
             if (!_serializeMemebersCompiled.TryGetValue(ci.GetType(), out func))
@@ -493,5 +218,181 @@ namespace Rhetos.Dsl
             }
             return func(ci, serializationOptions, exceptionOnNullMember);
         }
+
+        #region Serialization expression builder
+
+        private static Func<IConceptInfo, SerializationOptions, bool, string> CreateSerializeMembersFunction(Type conceptType)
+        {
+            var conceptParamExpr = Expression.Parameter(typeof(IConceptInfo), "concept");
+            var serializationOptionsParameExpr = Expression.Parameter(typeof(SerializationOptions), "serializationOptions");
+            var exceptionOnNullMemberParamExpr = Expression.Parameter(typeof(bool), "exceptionOnNullMember");
+            var conceptExpression = Expression.Convert(conceptParamExpr, conceptType);
+
+            var serializeMembersLambdaExpression = Expression.Lambda<Func<IConceptInfo, SerializationOptions, bool, string>>(
+                Expression.Block(
+                    GenerateValidationExpression(conceptExpression, conceptType, serializationOptionsParameExpr, exceptionOnNullMemberParamExpr),
+                    GenerateSerializeMembersExpression(conceptExpression, conceptType, serializationOptionsParameExpr, exceptionOnNullMemberParamExpr)
+                    ),
+                conceptParamExpr,
+                serializationOptionsParameExpr,
+                exceptionOnNullMemberParamExpr);
+            return serializeMembersLambdaExpression.Compile();
+        }
+
+        private static Expression GenerateConcatenationExpression(List<Expression> stringEValuationExpressions)
+        {
+            if (stringEValuationExpressions.Count == 1)
+                return Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string) }), stringEValuationExpressions[0]);
+            if (stringEValuationExpressions.Count == 2)
+                return Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }), stringEValuationExpressions[0], stringEValuationExpressions[1]);
+            else if (stringEValuationExpressions.Count == 3)
+                return Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string) }), stringEValuationExpressions[0], stringEValuationExpressions[1], stringEValuationExpressions[2]);
+            else if (stringEValuationExpressions.Count == 4)
+                return Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string), typeof(string) }), stringEValuationExpressions[0], stringEValuationExpressions[1], stringEValuationExpressions[2], stringEValuationExpressions[3]);
+            else
+                return Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string[]) }), Expression.NewArrayInit(typeof(string), stringEValuationExpressions));
+        }
+
+        private static Expression GenerateValidationExpression(
+            Expression conceptExpression, Type type,
+            ParameterExpression serializationOptionsParameExpr,
+            ParameterExpression exceptionOnNullMemberParamExpr)
+        {
+            var keyMembersValidationExpression = new List<Expression>();
+            var nonKeyMemebersMembersValidationExpression = new List<Expression>();
+
+            foreach (var conceptMember in ConceptMembers.Get(type))
+            {
+                var memberValidationExpression = Expression.IfThen(
+                        Expression.Equal(Expression.PropertyOrField(conceptExpression, conceptMember.Name), Expression.Constant(null)),
+                        Expression.Call(typeof(ConceptInfoHelper).GetMethod("ThrowDslSyntaxExceptionForConcept", BindingFlags.Static | BindingFlags.NonPublic), conceptExpression, Expression.Constant(conceptMember.Name))
+                        );
+
+                if (conceptMember.IsKey)
+                    keyMembersValidationExpression.Add(memberValidationExpression);
+                else
+                    nonKeyMemebersMembersValidationExpression.Add(memberValidationExpression);
+            }
+
+            var conceptValidationExpression = Expression.IfThen(
+                        exceptionOnNullMemberParamExpr,
+                        Expression.Block(keyMembersValidationExpression)
+                        );
+
+            if (nonKeyMemebersMembersValidationExpression.Count != 0)
+            {
+                conceptValidationExpression = Expression.IfThen(
+                        exceptionOnNullMemberParamExpr,
+                        Expression.Block(
+                            Expression.Block(keyMembersValidationExpression),
+                            conceptValidationExpression
+                        )
+                    );
+            }
+
+            return conceptValidationExpression;
+        }
+
+        private static Expression GenerateSerializeMembersExpression(
+            Expression conceptExpression, Type type,
+            ParameterExpression serializationOptionsParameExpr,
+            ParameterExpression exceptionOnNullMemberParamExpr)
+        {
+            var keyMembersEvaluationExpression = new List<Expression>();
+            var otherMembersEvaluationExpression = new List<Expression>();
+            var firstMember = true;
+
+            foreach (var conceptMember in ConceptMembers.Get(type))
+            {
+                if (conceptMember.IsKey)
+                {
+                    if (firstMember)
+                        firstMember = false;
+                    else
+                        keyMembersEvaluationExpression.Add(Expression.Constant("."));
+                    keyMembersEvaluationExpression.AddRange(GenerateSerializeMemberExpression(conceptMember, type, conceptExpression, exceptionOnNullMemberParamExpr));
+                }
+                else
+                {
+                    if (firstMember)
+                        firstMember = false;
+                    else
+                        otherMembersEvaluationExpression.Add(Expression.Constant(" "));
+                    otherMembersEvaluationExpression.AddRange(GenerateSerializeMemberExpression(conceptMember, type, conceptExpression, exceptionOnNullMemberParamExpr));
+                }
+            }
+
+            return Expression.Condition(
+                Expression.Equal(serializationOptionsParameExpr, Expression.Constant(SerializationOptions.KeyMembers)),
+                GenerateConcatenationExpression(keyMembersEvaluationExpression),
+                GenerateConcatenationExpression(keyMembersEvaluationExpression.Union(otherMembersEvaluationExpression).ToList())
+            );
+        }
+
+        private static List<Expression> GenerateSerializeMemberExpression(
+            ConceptMember conceptMember,
+            Type type,
+            Expression conceptExpression,
+            ParameterExpression exceptionOnNullMemberParamExpr)
+        {
+            var memberEvaluationExpressionList = new List<Expression>();
+            if (conceptMember.IsConceptInfo)
+            {
+                if (conceptMember.ValueType == typeof(IConceptInfo))
+                {
+                    memberEvaluationExpressionList.Add(Expression.Call(
+                        typeof(ConceptInfoHelper).GetMethod("BaseConceptInfoTypeName", BindingFlags.Static | BindingFlags.NonPublic),
+                        Expression.PropertyOrField(conceptExpression, conceptMember.Name)
+                        ));
+                    memberEvaluationExpressionList.Add(Expression.Constant(":"));
+                }
+
+                memberEvaluationExpressionList.Add(
+                    Expression.Condition(
+                        Expression.Equal(Expression.PropertyOrField(conceptExpression, conceptMember.Name), Expression.Constant(null)),
+                        Expression.Constant("<null>"),
+                        Expression.Call(
+                            typeof(ConceptInfoHelper).GetMethod("SerializeMembers", BindingFlags.Static | BindingFlags.NonPublic),
+                            Expression.PropertyOrField(conceptExpression, conceptMember.Name),
+                            Expression.Constant(SerializationOptions.KeyMembers), exceptionOnNullMemberParamExpr
+                            )
+                        )
+                    );
+            }
+            else if (conceptMember.ValueType == typeof(string))
+            {
+                memberEvaluationExpressionList.Add(Expression.Condition(
+                        Expression.Equal(Expression.PropertyOrField(conceptExpression, conceptMember.Name), Expression.Constant(null)),
+                        Expression.Constant("<null>"),
+                        Expression.Call(
+                            typeof(ConceptInfoHelper).GetMethod("SafeDelimit", BindingFlags.Static | BindingFlags.NonPublic),
+                            Expression.PropertyOrField(conceptExpression, conceptMember.Name)
+                            )
+                        ));
+            }
+            else
+            {
+                throw new FrameworkException(string.Format(
+                    "IConceptInfo member {0} of type {1} in {2} is not supported.",
+                    conceptMember.Name, conceptMember.ValueType.Name, type.Name));
+            }
+
+            return memberEvaluationExpressionList;
+        }
+
+        private static string BaseConceptInfoTypeName(this IConceptInfo ci)
+        {
+            return BaseConceptInfoType(ci).Name;
+        }
+
+        private static DslSyntaxException ThrowDslSyntaxExceptionForConcept(IConceptInfo ci, string memeberName)
+        {
+            throw new DslSyntaxException(ci, string.Format(
+                            "{0}'s property {1} is null. Info: {2}.",
+                            ci.GetType().Name, memeberName, ci.GetErrorDescription())
+                        );
+        }
+
+        #endregion
     }
 }

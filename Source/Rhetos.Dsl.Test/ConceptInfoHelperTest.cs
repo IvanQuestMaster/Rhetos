@@ -333,112 +333,17 @@ namespace Rhetos.Dsl.Test
         [TestMethod]
         public void PerformanceTest()
         {
-            int loopCount = 1000;
-            var concepts = new List<RefConceptInfo>();
-            for (int i = 0; i < loopCount; i++)
-            {
-                concepts.Add(GetSampleConcept());
-            }
-            //new SimpleConceptInfo { Name = null, Data = "d" }.GetKey();
 
-            /*List<Func<IConceptInfo, bool, string, string>> functions = new List<Func<IConceptInfo, bool, string, string>>();
-            for (var i = 0; i < 100*loopCount; i++)
-            {
-                functions.Add(ConceptInfoHelper.CreateCompiledGetSubKey(typeof(RefConceptInfo)));
-            }*/
-            var compiledGetKey = ConceptInfoHelper.CreateSerializeMembersFunction(typeof(RefConceptInfo));
-            for (int i = 0; i < 10; i++)
-            {
-                var cocept = GetSampleConcept();
-                var key = compiledGetKey(cocept, ConceptInfoHelper.SerializationOptions.KeyMembers, true);
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                var cocept = GetSampleConcept();
-                var key = "RefConceptInfo " + ConceptInfoHelper.SafeDelimit(cocept.Name) + "." + ConceptInfoHelper.SafeDelimit(cocept.Reference.Name) + "." + ConceptInfoHelper.SafeDelimit(cocept.Reference.Data);
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                var concept = GetSampleConcept();
-                var key = GetKeyFromStringBuilder(concept);
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                var concept = GetSampleConcept();
-                var key = GetKeyFromStringJoin(concept);
-            }
-            for (int i = 0; i < loopCount; i++)
-            {
-                var concept = GetSampleConcept();
-                var key = ConceptInfoHelper.CreateKeyOld(concept);
-            }
 
-            var sw5 = new Stopwatch();
-            sw5.Start();
-            for (int i = 0; i < loopCount; i++)
-            {
-                var concept = concepts[i];
-                var key = ConceptInfoHelper.CreateKeyOld(concept);
-            }
-            sw5.Stop();
-
-            var sw1 = new Stopwatch();
-            sw1.Start();
-            for (int i = 0; i < loopCount; i++)
-            {
-                var concept = concepts[i];
-                var key = compiledGetKey(concept, ConceptInfoHelper.SerializationOptions.KeyMembers, true); ;
-            }
-            sw1.Stop();
-
-            var sw2 = new Stopwatch();
-            sw2.Start();
-            for (int i = 0; i < loopCount; i++)
-            {
-                var concept = concepts[i];
-                if (concept.Name == null)
-                    throw new Exception();
-                if (concept.Reference.Name == null)
-                    throw new Exception();
-                var key = "RefConceptInfo " + ConceptInfoHelper.SafeDelimit(concept.Name) + "." + ConceptInfoHelper.SafeDelimit(concept.Reference.Name);
-            }
-            sw2.Stop();
-
-            var sw3 = new Stopwatch();
-            sw3.Start();
-            for (int i = 0; i < loopCount; i++)
-            {
-                var concept = concepts[i];
-                var key = GetKeyFromStringBuilder(concept);
-            }
-            sw3.Stop();
-
-            var sw4 = new Stopwatch();
-            sw4.Start();
-            for (int i = 0; i < loopCount; i++)
-            {
-                var concept = concepts[i];
-                var key = GetKeyFromStringJoin(concept);
-            }
-            sw4.Stop();
-
-            var sw6 = new Stopwatch();
-            sw6.Start();
-            for (int i = 0; i < loopCount; i++)
-            {
-                var concept = concepts[i];
-                var key = JsonConvert.SerializeObject(concept);
-            }
-            sw6.Stop();
         }
 
         private static string GetKeyFromStringBuilder(RefConceptInfo concept)
         {
             var sb = new StringBuilder();
             sb.Append("RefConceptInfo ");
-            sb.Append(ConceptInfoHelper.SafeDelimit(concept.Name));
+            //sb.Append(ConceptInfoHelper.SafeDelimit(concept.Name));
             sb.Append(".");
-            sb.Append(ConceptInfoHelper.SafeDelimit(concept.Reference.Name));
+            //sb.Append(ConceptInfoHelper.SafeDelimit(concept.Reference.Name));
             //sb.Append(".");
             //sb.Append(ConceptInfoHelper.SafeDelimit(concept.Reference.Data));
             return sb.ToString();
@@ -446,82 +351,14 @@ namespace Rhetos.Dsl.Test
 
         private static string GetKeyFromStringJoin(RefConceptInfo concept)
         {
-            return string.Join("RefConceptInfo ", ConceptInfoHelper.SafeDelimit(concept.Name), ".", ConceptInfoHelper.SafeDelimit(concept.Reference.Name));
-        }
-
-        public static void AppendMemeberExpression(Expression memberExpression, Type type, ref Expression currentExpression, ref bool firstMember)
-        {
-            foreach (var conceptMember in ConceptMembers.Get(type).Where(x => x.IsKey))
-            {
-                if (conceptMember.IsConceptInfo)
-                {
-                    var returnType = (conceptMember.MemberInfo as PropertyInfo).PropertyType;
-                    AppendMemeberExpression(
-                        Expression.PropertyOrField(
-                            Expression.Convert(memberExpression, type),
-                            conceptMember.MemberInfo.Name
-                            ),
-                        returnType,
-                        ref currentExpression,
-                        ref firstMember
-                        );
-                }
-                else if (firstMember)
-                {
-                    firstMember = false;
-                    currentExpression = Expression.Add(
-                        Expression.Add(currentExpression, Expression.Constant(" "), typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) })),
-                        Expression.PropertyOrField(
-                            Expression.Convert(memberExpression, type),
-                            conceptMember.MemberInfo.Name
-                            ),
-                        typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
-                }
-                else
-                {
-                    currentExpression = Expression.Add(
-                        Expression.Add(currentExpression, Expression.Constant("."), typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) })),
-                        Expression.PropertyOrField(
-                            Expression.Convert(memberExpression, type),
-                            conceptMember.MemberInfo.Name
-                            ),
-                        typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
-                }
-            }
+            return "";//string.Join("RefConceptInfo ", ConceptInfoHelper.SafeDelimit(concept.Name), ".", ConceptInfoHelper.SafeDelimit(concept.Reference.Name));
         }
 
         [TestMethod]
-        public void CompileAtRuntimeTest()
+        public void Playground()
         {
-            var parameterExpr = Expression.Parameter(typeof(IConceptInfo), "x");
-            /*BinaryExpression calculationExpresion = null;
-            foreach (var conceptMember in ConceptMembers.Get(typeof(SimpleConceptInfo)))
-            {
-                if (calculationExpresion == null)
-                {
-                    calculationExpresion = Expression.Add(
-                        Expression.Constant(""),
-                        Expression.PropertyOrField(
-                            Expression.Convert(parameterExpr, conceptMember.MemberInfo.DeclaringType),
-                            conceptMember.MemberInfo.Name
-                            ),
-                      typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
-                }
-                else {
-                    calculationExpresion = Expression.Add(
-                        calculationExpresion,
-                        Expression.PropertyOrField(
-                            Expression.Convert(parameterExpr, conceptMember.MemberInfo.DeclaringType),
-                            conceptMember.MemberInfo.Name
-                            ),
-                      typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }));
-                }
-            }*/
-
-            /*var appendMemeberExpresion = Expression.Constant("") as Expression;
-            AppendMemeberExpression(parameterExpr, typeof(SimpleConceptInfo), ref appendMemeberExpresion);
-            var finalExpression = Expression.Lambda<Func<IConceptInfo, string>>(appendMemeberExpresion, parameterExpr);
-            Func<IConceptInfo, string> getKeyFunc = finalExpression.Compile();*/
+            var a = typeof(ConceptInfoHelper).GetMethod("BaseConceptInfoTypeName", BindingFlags.Static | BindingFlags.NonPublic, null, new Type[] { typeof(IConceptInfo)}, null);
+            
         }
     }
 }

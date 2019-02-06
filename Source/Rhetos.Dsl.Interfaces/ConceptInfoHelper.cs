@@ -307,7 +307,8 @@ namespace Rhetos.Dsl
 
         public static void GenerateSerializeMembersExpression(
                 Expression memberExpression, Type type,
-                List<Expression> validateMembersExpression,
+                List<Expression> keyMembersValidationExpression,
+                List<Expression> otherMembersValidationExpression,
                 List<Expression> keyMembersEvaluationExpression,
                 List<Expression> otherMembersEvaluationExpression,
                 ParameterExpression serializationOptionsParameExpr,
@@ -320,26 +321,35 @@ namespace Rhetos.Dsl
             {
                 var memeberExpressionList = conceptMember.IsKey ? keyMembersEvaluationExpression : otherMembersEvaluationExpression;
 
-                if (conceptMember.IsKey)
-                    validateMembersExpression.Add(Expression.IfThen(
+                if(conceptMember.IsKey)
+                    keyMembersValidationExpression.Add(Expression.IfThen(
+                        Expression.Equal(Expression.PropertyOrField(memberExpression, conceptMember.Name), Expression.Constant(null)),
+                        Expression.Call(typeof(ConceptInfoHelper).GetMethod("ThrowDslSyntaxExceptionForConcept"), memberExpression, Expression.Constant(conceptMember.Name))
+                        ));
+                else
+                    otherMembersValidationExpression.Add(Expression.IfThen(
                         Expression.Equal(Expression.PropertyOrField(memberExpression, conceptMember.Name), Expression.Constant(null)),
                         Expression.Call(typeof(ConceptInfoHelper).GetMethod("ThrowDslSyntaxExceptionForConcept"), memberExpression, Expression.Constant(conceptMember.Name))
                         ));
 
                 if (conceptMember.IsConceptInfo)
                 {
-                    if (conceptMember.ValueType == typeof(IConceptInfo))
-                    {
+                    //if (conceptMember.ValueType == typeof(IConceptInfo))
+                    //{
                         if (firstMember)
                             firstMember = false;
                         else
                             memeberExpressionList.Add(Expression.Constant("."));
 
+                    if (conceptMember.ValueType == typeof(IConceptInfo))
+                    {
                         memeberExpressionList.Add(Expression.Call(
-                                typeof(ConceptInfoHelper).GetMethod("BaseConceptInfoTypeName", new[] { typeof(IConceptInfo) }),
-                                Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name)
-                                ));
+                            typeof(ConceptInfoHelper).GetMethod("BaseConceptInfoTypeName", new[] { typeof(IConceptInfo) }),
+                            Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name)
+                            ));
                         memeberExpressionList.Add(Expression.Constant(":"));
+                    }
+
                         memeberExpressionList.Add(
                             Expression.Condition(
                                 Expression.Equal(Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name), Expression.Constant(null)),
@@ -347,17 +357,18 @@ namespace Rhetos.Dsl
                                 Expression.Call(
                                     typeof(ConceptInfoHelper).GetMethod("SerializeMembers"),
                                     Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name),
-                                    serializationOptionsParameExpr, exceptionOnNullMemberParamExpr
+                                    Expression.Constant(SerializationOptions.KeyMembers), exceptionOnNullMemberParamExpr
                                     )
                                 )
                             );
-                    }
+                    /*}
                     else
                     {
                         GenerateSerializeMembersExpression(
                             Expression.PropertyOrField(memberExpression, conceptMember.MemberInfo.Name),
                             conceptMember.ValueType,
-                            validateMembersExpression,
+                            keyMembersValidationExpression,
+                            otherMembersValidationExpression,
                             keyMembersEvaluationExpression,
                             otherMembersEvaluationExpression,
                             serializationOptionsParameExpr,
@@ -365,7 +376,7 @@ namespace Rhetos.Dsl
                             true,
                             ref firstMember
                             );
-                    }
+                    }*/
                 }
                 else if (conceptMember.ValueType == typeof(string))
                 {
@@ -397,6 +408,8 @@ namespace Rhetos.Dsl
         public static Expression GenerateConcatenationExpression(List<Expression> stringEValuationExpressions)
         {
             Expression returnExpression = null;
+            if (stringEValuationExpressions.Count == 1)
+                returnExpression = Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string) }), stringEValuationExpressions[0]);
             if (stringEValuationExpressions.Count == 2)
                 returnExpression = Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) }), stringEValuationExpressions[0], stringEValuationExpressions[1]);
             else if (stringEValuationExpressions.Count == 3)
@@ -415,14 +428,17 @@ namespace Rhetos.Dsl
             var exceptionOnNullMemberParamExpr = Expression.Parameter(typeof(bool), "exceptionOnNullMember");
             var conceptExpression = Expression.Convert(conceptParamExpr, conceptType);
 
-            var validateMembersExpression = new List<Expression>();
+            var keyMembersValidationExpression = new List<Expression>();
+            var otherMembersValidationExpression = new List<Expression>();
             var keyMembersEvaluationExpression = new List<Expression>();
             var otherMembersEvaluationExpression = new List<Expression>();
 
             var firstMemeber = true;
             GenerateSerializeMembersExpression(
                 conceptExpression, conceptType,
-                validateMembersExpression, keyMembersEvaluationExpression,
+                keyMembersValidationExpression,
+                otherMembersValidationExpression,
+                keyMembersEvaluationExpression,
                 otherMembersEvaluationExpression,
                 serializationOptionsParameExpr,
                 exceptionOnNullMemberParamExpr,
@@ -435,8 +451,32 @@ namespace Rhetos.Dsl
                 GenerateConcatenationExpression(keyMembersEvaluationExpression.Union(otherMembersEvaluationExpression).ToList())
                 );
 
+            Expression validationExpression = null;
+            if (otherMembersValidationExpression.Count != 0)
+            {
+                validationExpression = Expression.IfThen(
+                        exceptionOnNullMemberParamExpr,
+                        Expression.Block(
+                            Expression.Block(keyMembersValidationExpression),
+                            Expression.IfThen(
+                                Expression.Equal(serializationOptionsParameExpr, Expression.Constant(SerializationOptions.AllMembers)),
+                                Expression.Block(otherMembersValidationExpression)
+                            )
+                        )
+                    );
+            }
+            else
+            {
+                validationExpression = Expression.IfThen(
+                        exceptionOnNullMemberParamExpr,
+                        Expression.Block(keyMembersValidationExpression)
+                        );
+            }
+
             var finalExpression = Expression.Lambda<Func<IConceptInfo, SerializationOptions, bool, string>>(
-                Expression.Block(validateMembersExpression.Union(new List<Expression> { returnExpression })),
+                Expression.Block(
+                    validationExpression,
+                    returnExpression),
                 conceptParamExpr,
                 serializationOptionsParameExpr,
                 exceptionOnNullMemberParamExpr);
@@ -449,6 +489,7 @@ namespace Rhetos.Dsl
             if (!_serializeMemebersCompiled.TryGetValue(ci.GetType(), out func))
             {
                 func = CreateSerializeMembersFunction(ci.GetType());
+                _serializeMemebersCompiled.Add(ci.GetType(), func);
             }
             return func(ci, serializationOptions, exceptionOnNullMember);
         }

@@ -333,7 +333,7 @@ namespace Rhetos.Dsl.Test
         [TestMethod]
         public void PerformanceTest()
         {
-            int loopCount = 100000;
+            int loopCount = 1000;
             var concepts = new List<RefConceptInfo>();
             for (int i = 0; i < loopCount; i++)
             {
@@ -421,6 +421,15 @@ namespace Rhetos.Dsl.Test
                 var key = GetKeyFromStringJoin(concept);
             }
             sw4.Stop();
+
+            var sw6 = new Stopwatch();
+            sw6.Start();
+            for (int i = 0; i < loopCount; i++)
+            {
+                var concept = concepts[i];
+                var key = JsonConvert.SerializeObject(concept);
+            }
+            sw6.Stop();
         }
 
         private static string GetKeyFromStringBuilder(RefConceptInfo concept)

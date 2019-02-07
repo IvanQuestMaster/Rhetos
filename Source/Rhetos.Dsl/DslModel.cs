@@ -18,13 +18,22 @@
 */
 
 using Autofac.Features.Indexed;
+using Newtonsoft.Json;
 using Rhetos.Logging;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+
+using QuickGraph;
+using QuickGraph.Serialization;
+using QuickGraph.Graphviz;
+using QuickGraph.Graphviz.Dot;
+using QuickGraph.Algorithms;
+using QuickGraph.Algorithms.Search;
 
 namespace Rhetos.Dsl
 {
@@ -126,6 +135,21 @@ namespace Rhetos.Dsl
                         ReportObsoleteConcepts();
                         _dslModelFile.SaveConcepts(_dslContainer.Concepts);
                         _initialized = true;
+
+                        string serializedConcepts = JsonConvert.SerializeObject(_macroDepndencies, Formatting.Indented);
+                        string path = Path.Combine(Paths.GeneratedFolder, "MAcroDependencies.json");
+                        File.WriteAllText(path, serializedConcepts, Encoding.UTF8);
+
+                        //string graph = _macroGraph.ToGraphviz();
+                        //_macroGraph.ToGraphviz()
+                        string graphPath = Path.Combine(Paths.GeneratedFolder, "Graph.dot");
+                        //File.WriteAllText(graphPath, graph);
+                        var a = new EdgeListGraph<string, Edge<string>>();
+                        //a.Add
+                        GraphvizAlgorithm<string, Edge<string>> graphviz = new GraphvizAlgorithm<string, Edge<string>>(_macroGraph);
+                        graphviz.FormatVertex += (sender, args) => args.VertexFormatter.Comment = args.Vertex;
+
+                        graphviz.Generate(new FileDotEngine(), graphPath);
                     }
         }
 
@@ -146,6 +170,10 @@ namespace Rhetos.Dsl
             public string Created;
         }
 
+        private Dictionary<string, Tuple<HashSet<string>, HashSet<string>>> _macroDepndencies = new Dictionary<string, Tuple<HashSet<string>, HashSet<string>>>();
+
+        AdjacencyGraph<string, Edge<string>> _macroGraph = new AdjacencyGraph<string, Edge<string>>();
+
         private void ExpandMacroConcepts()
         {
             var swTotal = Stopwatch.StartNew();
@@ -165,6 +193,11 @@ namespace Rhetos.Dsl
                 + _dslContainer.Concepts.Count() + " parsed concepts resolved, "
                 + _dslContainer.UnresolvedConceptsCount() + " unresolved).");
 
+            foreach (var macro in macroEvaluators)
+            {
+                _macroDepndencies.Add(macro.Name, new Tuple<HashSet<string>, HashSet<string>>(new HashSet<string>(), new HashSet<string>()));
+            }
+
             do
             {
                 iteration++;
@@ -180,9 +213,11 @@ namespace Rhetos.Dsl
                 foreach (var macroEvaluator in macroEvaluators)
                 {
                     macroStopwatches[macroEvaluator.Name].Start();
+                    _dslTracker.Reset();
                     foreach (var conceptInfo in _dslContainer.FindByType(macroEvaluator.Implements, macroEvaluator.ImplementsDerivations).ToList())
                     {
                         var macroCreatedConcepts = macroEvaluator.Evaluate(conceptInfo, _dslTracker);
+
                         CsUtility.Materialize(ref macroCreatedConcepts);
 
                         if (macroCreatedConcepts != null && macroCreatedConcepts.Count() > 0)
@@ -203,11 +238,14 @@ namespace Rhetos.Dsl
                                 lastResolvedConceptTimeByMacro[macroEvaluator.Name] = ++lastResolvedConceptTime;
                             createdTypesInIteration.AddRange(newConceptsReport.NewUniqueConcepts.Select(nuc =>
                                 new CreatedTypesInIteration { Macro = macroEvaluator.Name, Created = nuc.BaseConceptInfoType().Name, Iteration = iteration }));
+
+                            _macroDepndencies[macroEvaluator.Name].Item1.UnionWith(_dslTracker.SerachedConcepts.Where(x => x != null).Select(x => x.GetType().ToString()));
+                            _macroDepndencies[macroEvaluator.Name].Item2.UnionWith(newConceptsReport.NewlyResolvedConcepts.Select(x => x.GetType().ToString()));
                         }
                     }
                     macroStopwatches[macroEvaluator.Name].Stop();
                 };
-
+                
                 lastResolvedConceptTimeByIteration.Add(lastResolvedConceptTime);
 
                 _performanceLogger.Write(sw, "DslModel.ExpandMacroConcepts iteration " + iteration + " ("
@@ -226,6 +264,17 @@ namespace Rhetos.Dsl
             _logger.Trace(() => LogCreatedTypesInIteration(createdTypesInIteration));
 
             _performanceLogger.Write(swTotal, "DslModel.ExpandMacroConcepts.");
+
+
+            foreach (var macro in macroEvaluators)
+            {
+                _macroGraph.AddVertex(macro.Name);
+            }
+            foreach (var macroDependency in _macroDepndencies)
+            {
+                foreach (var aa in _macroDepndencies.Where(x => x.Key != macroDependency.Key && x.Value.Item1.Any(y => macroDependency.Value.Item2.Contains(y))))
+                    _macroGraph.AddEdge(new Edge<string>(macroDependency.Key, aa.Key));
+            }
         }
 
         private string LogCreatedConcepts(IEnumerable<IConceptInfo> macroCreatedConcepts, DslContainer.AddNewConceptsReport newConceptsReport)
@@ -443,6 +492,19 @@ namespace Rhetos.Dsl
                     conceptsGroup.Concepts.First().GetUserDescription(),
                     conceptsGroup.Concepts.Count(),
                     conceptsGroup.ObsoleteMessage));
+        }
+    }
+
+    public class FileDotEngine : IDotEngine
+    {
+        public string Run(GraphvizImageType imageType, string dot, string outputFileName)
+        {
+            using (StreamWriter writer = new StreamWriter(outputFileName))
+            {
+                writer.Write(dot);
+            }
+
+            return System.IO.Path.GetFileName(outputFileName);
         }
     }
 }

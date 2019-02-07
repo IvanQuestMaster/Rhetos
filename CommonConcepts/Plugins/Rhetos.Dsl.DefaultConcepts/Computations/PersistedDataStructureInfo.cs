@@ -27,11 +27,11 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("Persisted")]
-    public class PersistedDataStructureInfo : EntityInfo, IMacroConcept
+    public class PersistedDataStructureInfo : EntityInfo, IMacroConcept2
     {
         public DataStructureInfo Source { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new[] { CreateEntityComputedFrom() };
         }

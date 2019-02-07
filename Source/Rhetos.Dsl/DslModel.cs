@@ -273,6 +273,15 @@ namespace Rhetos.Dsl
                     ImplementsDerivations = false
                 });
 
+            foreach (Type macroConceptType in _conceptTypes.Where(type => typeof(IMacroConcept2).IsAssignableFrom(type)))
+                macroEvaluators.Add(new MacroEvaluator
+                {
+                    Name = "IMacroConcept2 " + macroConceptType.FullName,
+                    Evaluate = (conceptInfo, dslContainer) => ((IMacroConcept2)conceptInfo).CreateNewConcepts(dslContainer),
+                    Implements = macroConceptType,
+                    ImplementsDerivations = false
+                });
+
             var detectedConceptMacros = new List<Type>();
             foreach (Type conceptType in _conceptTypes)
                 foreach (IConceptMacro macro in _macros[conceptType])

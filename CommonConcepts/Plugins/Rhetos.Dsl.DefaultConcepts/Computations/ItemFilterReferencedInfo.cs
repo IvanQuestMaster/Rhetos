@@ -28,7 +28,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("ItemFilterReferenced")]
-    public class ItemFilterReferencedInfo : IValidatedConcept, IMacroConcept
+    public class ItemFilterReferencedInfo : IValidatedConcept, IMacroConcept2
     {
         [ConceptKey]
         public DataStructureInfo Source { get; set; }
@@ -67,7 +67,7 @@ namespace Rhetos.Dsl.DefaultConcepts
             return ItemFilterMacro.GetGeneratedFilter(itemFilterPrototype).GetKeyProperties();
         }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new IConceptInfo[]
                 {

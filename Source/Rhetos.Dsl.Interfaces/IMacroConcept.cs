@@ -32,4 +32,12 @@ namespace Rhetos.Dsl
         /// </summary>
         IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts);
     }
+
+    public interface IMacroConcept2 : IConceptInfo
+    {
+        /// <summary>
+        /// If the function creates a concept that already exists, that concept will be ignored.
+        /// </summary>
+        IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts);
+    }
 }

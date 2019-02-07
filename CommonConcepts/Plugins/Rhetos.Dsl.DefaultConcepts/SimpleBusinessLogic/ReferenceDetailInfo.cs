@@ -24,12 +24,12 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("Detail")]
-    public class ReferenceDetailInfo : IMacroConcept
+    public class ReferenceDetailInfo : IMacroConcept2
     {
         [ConceptKey]
         public ReferencePropertyInfo Reference { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var newConcepts = new List<IConceptInfo>();
 

@@ -28,7 +28,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("History")]
-    public class EntityHistoryPropertyInfo : IMacroConcept, IAlternativeInitializationConcept
+    public class EntityHistoryPropertyInfo : IMacroConcept2, IAlternativeInitializationConcept
     {
         [ConceptKey]
         public PropertyInfo Property { get; set; }
@@ -48,7 +48,7 @@ namespace Rhetos.Dsl.DefaultConcepts
             createdConcepts = new IConceptInfo[] { Dependency_EntityHistory };
         }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new [] { new PropertyFromInfo { Destination = Dependency_EntityHistory.Dependency_ChangesEntity, Source = Property } };
         }

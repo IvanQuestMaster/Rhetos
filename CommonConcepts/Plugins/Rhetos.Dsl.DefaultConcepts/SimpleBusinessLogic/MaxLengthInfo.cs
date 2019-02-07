@@ -28,14 +28,14 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("MaxLength")]
-    public class MaxLengthInfo : IMacroConcept, IValidationConcept
+    public class MaxLengthInfo : IMacroConcept2, IValidationConcept
     {
         [ConceptKey]
         public PropertyInfo Property { get; set; }
 
         public string Length { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var itemFilter = new ItemFilterInfo
             {

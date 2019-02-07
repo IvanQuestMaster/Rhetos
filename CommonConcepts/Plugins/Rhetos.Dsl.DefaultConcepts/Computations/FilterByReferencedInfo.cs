@@ -28,7 +28,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("FilterByReferenced")]
-    public class FilterByReferencedInfo : IValidatedConcept, IMacroConcept
+    public class FilterByReferencedInfo : IValidatedConcept, IMacroConcept2
     {
         [ConceptKey]
         public DataStructureInfo Source { get; set; }
@@ -61,7 +61,7 @@ namespace Rhetos.Dsl.DefaultConcepts
                     string.Join(", ", availableFilters.Select(parameter => "'" + parameter + "'"))));
         }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new IConceptInfo[]
                 {

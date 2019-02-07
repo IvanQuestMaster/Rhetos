@@ -28,12 +28,12 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("SingleRoot")]
-    public class HierarchySingleRootInfo : IMacroConcept
+    public class HierarchySingleRootInfo : IMacroConcept2
     {
         [ConceptKey]
         public HierarchyInfo Hierarchy { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new[] {new HierarchySingleRootInternalInfo 
             { 

@@ -27,7 +27,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("ComposableFilterBy")]
-    public class ComposableFilterByInfo : IMacroConcept
+    public class ComposableFilterByInfo : IMacroConcept2
     {
         [ConceptKey]
         public DataStructureInfo Source { get; set; }
@@ -37,7 +37,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 
         public string Expression { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new[]
             {

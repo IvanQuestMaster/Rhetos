@@ -28,7 +28,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("FilterByLinkedItems")]
-    public class FilterByLinkedItemsInfo : IMacroConcept, IValidationConcept
+    public class FilterByLinkedItemsInfo : IMacroConcept2, IValidatedConcept
     {
         [ConceptKey]
         public DataStructureInfo Source { get; set; }
@@ -38,14 +38,14 @@ namespace Rhetos.Dsl.DefaultConcepts
 
         public ReferencePropertyInfo ReferenceToMe { get; set; }
 
-        public void CheckSemantics(IEnumerable<IConceptInfo> concepts)
+        public void CheckSemantics(IDslModel concepts)
         {
             if (ReferenceToMe.Referenced != Source)
                 throw new DslSyntaxException("'" + this.GetUserDescription()
                     + "' must use a reference property that points to it's own data structure. Try using FilterByReferenced instead.");
         }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new IConceptInfo[]
                        {

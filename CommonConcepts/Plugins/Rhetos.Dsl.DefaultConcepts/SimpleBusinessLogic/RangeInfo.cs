@@ -28,7 +28,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("Range")]
-    public class RangeInfo : IMacroConcept, IValidationConcept
+    public class RangeInfo : IMacroConcept2, IValidationConcept
     {
         [ConceptKey]
         public PropertyInfo PropertyFrom { get; set; }
@@ -36,7 +36,7 @@ namespace Rhetos.Dsl.DefaultConcepts
         [ConceptKey]
         public PropertyInfo PropertyTo { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var itemFilter = new ItemFilterInfo
             {

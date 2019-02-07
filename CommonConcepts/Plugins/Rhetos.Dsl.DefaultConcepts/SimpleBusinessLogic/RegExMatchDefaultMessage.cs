@@ -29,7 +29,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("RegExMatch")]
-    public class RegExMatchDefaultMessageInfo : RegExMatchInfo, IAlternativeInitializationConcept, IMacroConcept
+    public class RegExMatchDefaultMessageInfo : RegExMatchInfo, IAlternativeInitializationConcept, IMacroConcept2
     {
         public IEnumerable<string> DeclareNonparsableProperties()
         {
@@ -42,7 +42,7 @@ namespace Rhetos.Dsl.DefaultConcepts
             createdConcepts = null;
         }
 
-        public new IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public new IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var newConcepts = new List<IConceptInfo>();
             newConcepts.AddRange(base.CreateNewConcepts(existingConcepts));

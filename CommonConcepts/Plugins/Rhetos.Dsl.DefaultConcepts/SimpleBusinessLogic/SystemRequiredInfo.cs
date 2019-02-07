@@ -30,12 +30,12 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("SystemRequired")]
-    public class SystemRequiredInfo : IMacroConcept
+    public class SystemRequiredInfo : IMacroConcept2
     {
         [ConceptKey]
         public PropertyInfo Property { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             string filterName = "SystemRequired" + Property.Name;
 

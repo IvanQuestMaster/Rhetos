@@ -27,7 +27,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("InheritFrom")]
-    public class RowPermissionsInheritFromReferenceInfo : IMacroConcept, IValidationConcept
+    public class RowPermissionsInheritFromReferenceInfo : IMacroConcept2, IValidationConcept
     {
         [ConceptKey]
         public RowPermissionsPluginableFiltersInfo RowPermissionsFilters { get; set; }
@@ -35,7 +35,7 @@ namespace Rhetos.Dsl.DefaultConcepts
         [ConceptKey]
         public ReferencePropertyInfo ReferenceProperty { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new IConceptInfo[]
             {

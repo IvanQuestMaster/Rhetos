@@ -32,7 +32,7 @@ namespace Rhetos.Dsl.DefaultConcepts
     /// </summary>
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("RepositoryUses")]
-    public class RepositoryUsesInfo : IConceptInfo, IMacroConcept
+    public class RepositoryUsesInfo : IConceptInfo, IMacroConcept2
     {
         [ConceptKey]
         public DataStructureInfo DataStructure { get; set; }
@@ -50,7 +50,7 @@ namespace Rhetos.Dsl.DefaultConcepts
         /// </summary>
         public string PropertyType { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new[] { new ModuleExternalReferenceInfo { Module = DataStructure.Module, TypeOrAssembly = PropertyType } };
         }

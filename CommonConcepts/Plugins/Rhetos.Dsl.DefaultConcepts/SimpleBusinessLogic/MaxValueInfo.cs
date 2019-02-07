@@ -29,14 +29,14 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("MaxValue")]
-    public class MaxValueInfo : IMacroConcept, IValidationConcept
+    public class MaxValueInfo : IMacroConcept2, IValidationConcept
     {
         [ConceptKey]
         public PropertyInfo Property { get; set; }
 
         public string Value { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             string limitSnippet = MinValueInfo.LimitSnippetByType
                 .Where(snippet => snippet.Key.IsAssignableFrom(Property.GetType()))

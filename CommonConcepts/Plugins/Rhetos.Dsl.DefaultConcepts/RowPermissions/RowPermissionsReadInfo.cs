@@ -27,7 +27,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("RowPermissionsRead")]
-    public class RowPermissionsReadInfo : ComposableFilterByInfo, IMacroConcept, IAlternativeInitializationConcept
+    public class RowPermissionsReadInfo : ComposableFilterByInfo, IMacroConcept2, IAlternativeInitializationConcept
     {
         public static readonly string FilterName = "Common.RowPermissionsReadItems";
         public static readonly string PermissionsExpressionName = "GetRowPermissionsReadExpression";
@@ -46,7 +46,7 @@ namespace Rhetos.Dsl.DefaultConcepts
             createdConcepts = null;
         }
 
-        public new IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public new IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var newConcepts = new List<IConceptInfo>();
             newConcepts.AddRange(base.CreateNewConcepts(existingConcepts));

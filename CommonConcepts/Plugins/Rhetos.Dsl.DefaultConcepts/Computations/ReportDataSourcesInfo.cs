@@ -27,14 +27,14 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("DataSources")]
-    public class ReportDataSourcesInfo : IMacroConcept
+    public class ReportDataSourcesInfo : IMacroConcept2
     {
         [ConceptKey]
         public ReportDataInfo Report { get; set; }
 
         public string DataSources { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var dataSourceNames = DataSources.Split(',').Select(ds => ds.Trim());
 

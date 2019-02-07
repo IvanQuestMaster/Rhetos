@@ -27,9 +27,9 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("UniqueMultiple")]
-    public class UniqueMultiplePropertiesInfo : SqlIndexMultipleInfo, IMacroConcept
+    public class UniqueMultiplePropertiesInfo : SqlIndexMultipleInfo, IMacroConcept2
     {
-        public new IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public new IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var newConcepts = new List<IConceptInfo>();
 

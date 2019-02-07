@@ -29,12 +29,12 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("Materialized")]
-    public class PolymorphicMaterializedInfo : IConceptInfo, IMacroConcept
+    public class PolymorphicMaterializedInfo : IConceptInfo, IMacroConcept2
     {
         [ConceptKey]
         public PolymorphicInfo Polymorphic { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var newConcepts = new List<IConceptInfo>();
 

@@ -37,7 +37,7 @@ namespace Rhetos.Dsl.DefaultConcepts
     /// for each Supertype: only Subtype and ImplementationName need to be unique.
     /// </summary>
     [Export(typeof(IConceptInfo))]
-    public class PersistedSubtypeImplementationIdInfo : IMacroConcept
+    public class PersistedSubtypeImplementationIdInfo : IMacroConcept2
     {
         [ConceptKey]
         public DataStructureInfo Subtype { get; set; }
@@ -45,7 +45,7 @@ namespace Rhetos.Dsl.DefaultConcepts
         [ConceptKey]
         public string ImplementationName { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var sqlObject = GetSqlObjectPrototype();
             sqlObject.CreateSql = CreateComputedColumnSnippet();

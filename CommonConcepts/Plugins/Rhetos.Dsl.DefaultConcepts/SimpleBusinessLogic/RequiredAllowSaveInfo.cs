@@ -31,14 +31,14 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("RequiredAllowSave")]
-    public class RequiredAllowSaveInfo : IMacroConcept
+    public class RequiredAllowSaveInfo : IMacroConcept2
     {
         [ConceptKey]
         public PropertyInfo Property { get; set; }
 
         public static readonly CsTag<RequiredAllowSaveInfo> OrCondition = "OrCondition";
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             string filterName = "RequiredAllowSave_" + Property.Name;
 

@@ -26,12 +26,12 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("AutoCodeCached")]
-    public class AutoCodeCachedInfo : IMacroConcept
+    public class AutoCodeCachedInfo : IMacroConcept2
     {
         [ConceptKey]
         public ShortStringPropertyInfo Property { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new IConceptInfo[]
             {

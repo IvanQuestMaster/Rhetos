@@ -27,14 +27,14 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("KeepSynchronized")]
-    public class PersistedKeepSynchronizedWithFilteredSaveInfo : IMacroConcept
+    public class PersistedKeepSynchronizedWithFilteredSaveInfo : IMacroConcept2
     {
         [ConceptKey]
         public PersistedDataStructureInfo Persisted { get; set; }
 
         public string FilterSaveExpression { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new[] { new KeepSynchronizedInfo
                 {

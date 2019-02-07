@@ -31,12 +31,12 @@ namespace Rhetos.Dsl.DefaultConcepts
     /// </summary>
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("ApplyOnClientRead")]
-    public class ItemFilterApplyOnClientReadInfo : IConceptInfo, IMacroConcept
+    public class ItemFilterApplyOnClientReadInfo : IConceptInfo, IMacroConcept2
     {
         [ConceptKey]
         public ItemFilterInfo Filter { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new IConceptInfo[]
             {

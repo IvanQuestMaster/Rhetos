@@ -28,14 +28,14 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("RowPermissions")]
-    public class RowPermissionsInfo : IMacroConcept
+    public class RowPermissionsInfo : IMacroConcept2
     {
         [ConceptKey]
         public DataStructureInfo Source { get; set; }
 
         public string SimplifiedExpression { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var newConcepts = new List<IConceptInfo>();
 

@@ -28,11 +28,11 @@ namespace Rhetos.Dsl.DefaultConcepts
     [Obsolete("Use \"MarkProperty\" concept instead.")]
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("InvalidData")]
-    public class InvalidDataMarkPropertyInfo : InvalidDataInfo, IMacroConcept
+    public class InvalidDataMarkPropertyInfo : InvalidDataInfo, IMacroConcept2
     {
         public PropertyInfo DependedProperty { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new[] { new InvalidDataMarkProperty2Info { InvalidData = this, MarkProperty = DependedProperty } };
         }

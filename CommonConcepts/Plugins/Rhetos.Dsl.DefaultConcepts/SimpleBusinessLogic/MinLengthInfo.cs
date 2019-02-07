@@ -28,14 +28,14 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("MinLength")]
-    public class MinLengthInfo : IMacroConcept, IValidationConcept
+    public class MinLengthInfo : IMacroConcept2, IValidationConcept
     {
         [ConceptKey]
         public PropertyInfo Property { get; set; }
 
         public string Length { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var itemFilter = new ItemFilterInfo
             {

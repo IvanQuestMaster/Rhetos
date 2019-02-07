@@ -28,7 +28,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("Browse")]
-    public class BrowseDataStructureInfo : DataStructureInfo, IValidatedConcept, IMacroConcept
+    public class BrowseDataStructureInfo : DataStructureInfo, IValidatedConcept, IMacroConcept2
     {
         public DataStructureInfo Source { get; set; }
 
@@ -47,7 +47,7 @@ namespace Rhetos.Dsl.DefaultConcepts
                         ConceptInfoHelper.GetKeywordOrTypeName(typeof(BrowseFromPropertyInfo))));
         }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new[] { new DataStructureExtendsInfo { Extension = this, Base = Source } };
         }

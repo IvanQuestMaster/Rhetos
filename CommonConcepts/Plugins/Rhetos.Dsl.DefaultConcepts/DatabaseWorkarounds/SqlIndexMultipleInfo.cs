@@ -27,7 +27,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("SqlIndexMultiple")]
-    public class SqlIndexMultipleInfo : IValidationConcept, IMacroConcept
+    public class SqlIndexMultipleInfo : IValidatedConcept, IMacroConcept2
     {
         [ConceptKey]
         public DataStructureInfo DataStructure { get; set; }
@@ -35,7 +35,7 @@ namespace Rhetos.Dsl.DefaultConcepts
         [ConceptKey]
         public string PropertyNames { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var newConcepts = new List<IConceptInfo>();
 
@@ -85,7 +85,7 @@ namespace Rhetos.Dsl.DefaultConcepts
             return DataStructure is EntityInfo;
         }
 
-        public void CheckSemantics(IEnumerable<IConceptInfo> concepts)
+        public void CheckSemantics(IDslModel concepts)
         {
             CheckIfSupported(DataStructure, this);
 

@@ -28,14 +28,14 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("KeyProperties")]
-    public class PersistedKeyPropertiesInfo : IMacroConcept
+    public class PersistedKeyPropertiesInfo : IMacroConcept2
     {
         [ConceptKey]
         public PersistedDataStructureInfo Persisted { get; set; }
 
         public string KeyProperties { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new[]
             {

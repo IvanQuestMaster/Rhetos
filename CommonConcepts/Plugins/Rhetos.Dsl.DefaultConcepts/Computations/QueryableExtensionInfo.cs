@@ -27,13 +27,13 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("QueryableExtension")]
-    public class QueryableExtensionInfo : DataStructureInfo, IMacroConcept
+    public class QueryableExtensionInfo : DataStructureInfo, IMacroConcept2
     {
         public DataStructureInfo Base { get; set; }
 
         public string Expression { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             // TODO (?) Copy all filters from base concept (it makes more sense for ComputedExtension because of efficient implementation, not really necessary for QueryableExtension)
             return new[] { new DataStructureExtendsInfo { Base = Base, Extension = this } };

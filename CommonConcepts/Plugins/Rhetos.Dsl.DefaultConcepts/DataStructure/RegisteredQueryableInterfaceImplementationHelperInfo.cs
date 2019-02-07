@@ -33,12 +33,12 @@ namespace Rhetos.Dsl.DefaultConcepts
     /// </summary>
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("RegisteredImplementation")]
-    public class RegisteredQueryableInterfaceImplementationHelperInfo : IMacroConcept
+    public class RegisteredQueryableInterfaceImplementationHelperInfo : IMacroConcept2
     {
         [ConceptKey]
         public ImplementsQueryableInterfaceInfo ImplementsQueryableInterface { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new[] { new RegisteredInterfaceImplementationInfo
             {

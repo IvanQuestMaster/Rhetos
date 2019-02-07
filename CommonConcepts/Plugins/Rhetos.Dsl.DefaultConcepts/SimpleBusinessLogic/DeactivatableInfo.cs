@@ -23,12 +23,12 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("Deactivatable")]
-    public class DeactivatableInfo : IConceptInfo, IMacroConcept
+    public class DeactivatableInfo : IConceptInfo, IMacroConcept2
     {
         [ConceptKey]
         public EntityInfo Entity { get; set; }
         
-        public System.Collections.Generic.IEnumerable<IConceptInfo> CreateNewConcepts(System.Collections.Generic.IEnumerable<IConceptInfo> existingConcepts)
+        public System.Collections.Generic.IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             var activePropertyInfo = new BoolPropertyInfo
             {

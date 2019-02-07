@@ -27,7 +27,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("Unique")]
-    public class UniquePropertiesInfo : IValidationConcept, IMacroConcept
+    public class UniquePropertiesInfo : IValidationConcept, IMacroConcept2
     {
         [ConceptKey]
         public DataStructureInfo DataStructure { get; set; }
@@ -36,7 +36,7 @@ namespace Rhetos.Dsl.DefaultConcepts
         [ConceptKey]
         public PropertyInfo Property2 { get; set; }
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             return new[] { new UniqueMultiplePropertiesInfo { DataStructure = DataStructure, PropertyNames = Property1.Name + " " + Property2.Name } };
         }

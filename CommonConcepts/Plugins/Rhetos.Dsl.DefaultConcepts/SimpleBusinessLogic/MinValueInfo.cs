@@ -29,7 +29,7 @@ namespace Rhetos.Dsl.DefaultConcepts
 {
     [Export(typeof(IConceptInfo))]
     [ConceptKeyword("MinValue")]
-    public class MinValueInfo : IMacroConcept, IValidationConcept
+    public class MinValueInfo : IMacroConcept2, IValidationConcept
     {
         [ConceptKey]
         public PropertyInfo Property { get; set; }
@@ -45,7 +45,7 @@ namespace Rhetos.Dsl.DefaultConcepts
             { typeof(DateTimePropertyInfo), limit => String.Format(@"var limit = DateTime.Parse({0})", CsUtility.QuotedString(limit)) },
         };
 
-        public IEnumerable<IConceptInfo> CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
+        public IEnumerable<IConceptInfo> CreateNewConcepts(IDslModel existingConcepts)
         {
             string limitSnippet = LimitSnippetByType
                 .Where(snippet => snippet.Key.IsAssignableFrom(Property.GetType()))

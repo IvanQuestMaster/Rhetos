@@ -88,9 +88,17 @@ namespace Rhetos.Dom.DefaultConcepts
             " + InitializationTag.Evaluate(info) + @"
 
             // Using old data, including lazy loading of navigation properties:
-            IEnumerable<Common.Queryable.{0}_{1}> deleted = this.Query(deletedIds.Select(item => item.ID)).ToList();
+		    IEnumerable<Common.Queryable.{0}_{1}> deleted = new List<Common.Queryable.{0}_{1}>();
+		    if(deletedIds.Any())
+            {{
+                deleted = this.Query(deletedIds.Select(item => item.ID)).ToList();
+            }}
             Rhetos.Utilities.Graph.SortByGivenOrder((List<Common.Queryable.{0}_{1}>)deleted, deletedIds.Select(item => item.ID), item => item.ID);
-            IEnumerable<Common.Queryable.{0}_{1}> updated = this.Query(updatedNew.Select(item => item.ID)).ToList();
+		    IEnumerable<Common.Queryable.{0}_{1}> updated = new List<Common.Queryable.{0}_{1}>();
+		    if(updatedNew.Any())
+            {{
+                updated = this.Query(updatedNew.Select(item => item.ID)).ToList();
+            }}
             Rhetos.Utilities.Graph.SortByGivenOrder((List<Common.Queryable.{0}_{1}>)updated, updatedNew.Select(item => item.ID), item => item.ID);
 
             " + OldDataLoadedTag.Evaluate(info) + @"
@@ -100,39 +108,35 @@ namespace Rhetos.Dom.DefaultConcepts
             DomHelper.SaveOperation saveOperation = DomHelper.SaveOperation.None;
             try
             {{
+			    var command = _executionContext.PersistenceTransaction.Connection.CreateCommand();
+			    command.Transaction = _executionContext.PersistenceTransaction.Transaction;
                 if (deletedIds.Count() > 0)
                 {{
                     saveOperation = DomHelper.SaveOperation.Delete;
-                    _executionContext.EntityFrameworkContext.Configuration.AutoDetectChangesEnabled = false;
-                    foreach (var item in deletedIds.Select(item => item.ToNavigation()))
-                        _executionContext.EntityFrameworkContext.Entry(item).State = System.Data.Entity.EntityState.Deleted;
-                    _executionContext.EntityFrameworkContext.Configuration.AutoDetectChangesEnabled = true;
-                    _executionContext.EntityFrameworkContext.SaveChanges();
+                    command.DeleteMultiple(deletedIds);
                 }}
 
                 if (updatedNew.Count() > 0)
                 {{
                     saveOperation = DomHelper.SaveOperation.Update;
-                    _executionContext.EntityFrameworkContext.Configuration.AutoDetectChangesEnabled = false;
-                    foreach (var item in updatedNew.Select(item => item.ToNavigation()))
-                        _executionContext.EntityFrameworkContext.Entry(item).State = System.Data.Entity.EntityState.Modified;
-                    _executionContext.EntityFrameworkContext.Configuration.AutoDetectChangesEnabled = true;
-                    _executionContext.EntityFrameworkContext.SaveChanges();
+                    command.UpdateMultiple(updatedNew);
                 }}
 
                 if (insertedNew.Count() > 0)
                 {{
                     saveOperation = DomHelper.SaveOperation.Insert;
-                    _executionContext.EntityFrameworkContext.{0}_{1}.AddRange(insertedNew.Select(item => item.ToNavigation()));
-                    _executionContext.EntityFrameworkContext.SaveChanges();
+                    command.InsertMultiple(insertedNew);
                 }}
 
                 saveOperation = DomHelper.SaveOperation.None;
-                _executionContext.EntityFrameworkContext.ClearCache();
             }}
-            catch (System.Data.Entity.Infrastructure.DbUpdateException saveException)
+            catch (DbException saveException)
             {{
                 DomHelper.ThrowIfSavingNonexistentId(saveException, checkUserPermissions, saveOperation);
+                throw;
+            }}
+            catch (System.Data.SqlClient.SqlException saveException)
+            {{
         		Rhetos.RhetosException interpretedException = _sqlUtility.InterpretSqlException(saveException);
         		" + OnDatabaseErrorTag.Evaluate(info) + @"
                 if (checkUserPermissions)

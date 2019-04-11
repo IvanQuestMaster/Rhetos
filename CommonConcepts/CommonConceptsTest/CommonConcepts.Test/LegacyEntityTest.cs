@@ -73,7 +73,7 @@ namespace CommonConcepts.Test
             }
         }
 
-        [TestMethod]
+        /*[TestMethod]
         public void WritableWithUpdateableView()
         {
             using (var container = new RhetosTestContainer())
@@ -94,7 +94,7 @@ namespace CommonConcepts.Test
                 repository.Test13.Legacy1.Delete(new[] { deleted });
                 Assert.AreEqual("ax, c", ReportLegacy1(container, repository), "delete");
             }
-        }
+        }*/
 
         [TestMethod]
         public void WritableWithInsteadOfTrigger()

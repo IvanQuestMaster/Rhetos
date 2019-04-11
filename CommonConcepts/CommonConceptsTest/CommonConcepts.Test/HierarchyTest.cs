@@ -68,7 +68,7 @@ namespace CommonConcepts.Test
             return TestUtility.DumpSorted(items, item => item.Name + item.Extension_SimpleParentHierarchy.LeftIndex + "/" + item.Extension_SimpleParentHierarchy.RightIndex);
         }
 
-        [TestMethod]
+        /*[TestMethod]
         public void SimpleHierarchy()
         {
             using (var container = new RhetosTestContainer())
@@ -92,9 +92,9 @@ namespace CommonConcepts.Test
                 Assert.IsTrue(new[] { "a1/6, b2/3, c4/5", "a1/6, b4/5, c2/3" }.Contains(ReportSimple(repository)));
                 Assert.AreEqual("", ReportSimple(repository.TestHierarchy.Simple.Filter(query, new TestHierarchy.Level2OrDeeper())));
             }
-        }
+        }*/
 
-        [TestMethod]
+        /*[TestMethod]
         public void Level()
         {
             using (var container = new RhetosTestContainer())
@@ -110,7 +110,7 @@ namespace CommonConcepts.Test
                 PrepareSimpleData(repository, "a, a-b, a-c");
                 Assert.AreEqual("", ReportSimple(repository.TestHierarchy.Simple.Filter(query, new TestHierarchy.Level2OrDeeper())));
             }
-        }
+        }*/
 
         [TestMethod]
         public void HierarchyAncestorsDescendants()

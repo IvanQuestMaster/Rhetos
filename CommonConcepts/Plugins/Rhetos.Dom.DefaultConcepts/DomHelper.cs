@@ -79,9 +79,10 @@ namespace Rhetos.Dom.DefaultConcepts
 
         public enum SaveOperation { None, Insert, Update, Delete };
 
-        public static void ThrowIfSavingNonexistentId(DbUpdateException saveException, bool checkUserPermissions, SaveOperation saveOperation)
+        public static void ThrowIfSavingNonexistentId(DbException saveException, bool checkUserPermissions, SaveOperation saveOperation)
         {
-            if (saveException.Message.StartsWith("Store update, insert, or delete statement affected an unexpected number of rows (0)."))
+            if (saveException.Message.StartsWith("Updating a record that does not exist in database.") ||
+                saveException.Message.StartsWith("Deleting a record that does not exist in database."))
             {
                 string message;
                 if (saveOperation == SaveOperation.Update)
@@ -91,9 +92,9 @@ namespace Rhetos.Dom.DefaultConcepts
                 else
                     return;
 
-                if (saveException.Entries != null && saveException.Entries.Count() == 1)
+                if (saveException.Entites != null && saveException.Entites.Count() == 1)
                 {
-                    var entity = saveException.Entries.First().Entity as IEntity;
+                    var entity = saveException.Entites.First();
                     if (entity != null)
                         message += " ID=" + entity.ID.ToString();
                 }

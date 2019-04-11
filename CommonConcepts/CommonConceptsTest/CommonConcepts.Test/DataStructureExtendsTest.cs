@@ -44,7 +44,7 @@ namespace CommonConcepts.Test
             }
         }
 
-        [TestMethod]
+        /*[TestMethod]
         public void TableConstraints()
         {
             using (var container = new RhetosTestContainer())
@@ -82,7 +82,7 @@ namespace CommonConcepts.Test
                 Assert.AreEqual(1, repository.TestExtension.Old1.Query().Count(), "Old1 should have been deleted as it is a source for Legacy1.");
                 Assert.AreEqual(1, repository.TestExtension.EntityExtension1.Query().Count(), "'On delete cascade' should delete one extension record.");
             }
-        }
+        }*/
 
         [TestMethod]
         public void NavigationFromBaseToExtension_Query()

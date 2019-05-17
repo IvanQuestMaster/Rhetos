@@ -67,19 +67,21 @@ namespace Rhetos.Deployment
             _dslScriptsLoader = dslScriptsLoader;
         }
 
-        public void ExecuteGenerators(bool deployDatabaseOnly)
+        public void ExecuteGenerators(DeployArguments deployArgments)
         {
-            _deployPackagesLogger.Trace("SQL connection: " + SqlUtility.SqlConnectionInfo(SqlUtility.ConnectionString));
-            ValidateDbConnection();
-
-            _deployPackagesLogger.Trace("Preparing Rhetos database.");
-            PrepareRhetosDatabase();
+            if (!deployArgments.ExecuteGeneratorsOnly)
+            {
+                _deployPackagesLogger.Trace("SQL connection: " + SqlUtility.SqlConnectionInfo(SqlUtility.ConnectionString));
+                ValidateDbConnection();
+                _deployPackagesLogger.Trace("Preparing Rhetos database.");
+                PrepareRhetosDatabase();
+            }
 
             _deployPackagesLogger.Trace("Parsing DSL scripts.");
             int dslModelConceptsCount = _dslModel.Concepts.Count();
             _deployPackagesLogger.Trace("Application model has " + dslModelConceptsCount + " statements.");
 
-            if (deployDatabaseOnly)
+            if (deployArgments.DeployDatabaseOnly)
                 _deployPackagesLogger.Info("Skipped code generators (DeployDatabaseOnly).");
             else
             {
@@ -101,6 +103,9 @@ namespace Rhetos.Deployment
                 if (!generators.Any())
                     _deployPackagesLogger.Trace("No additional generators.");
             }
+
+            if (deployArgments.ExecuteGeneratorsOnly)
+                return;
 
             _deployPackagesLogger.Trace("Cleaning old migration data.");
             _databaseCleaner.RemoveRedundantMigrationColumns();

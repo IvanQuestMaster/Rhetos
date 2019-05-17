@@ -68,7 +68,9 @@ namespace DeployPackages
                 InitialCleanup(logger, arguments);
                 DownloadPackages(logger, arguments);
                 GenerateApplication(logger, arguments);
-                InitializeGeneratedApplication(logger, arguments);
+
+                if(!arguments.ExecuteGeneratorsOnly)
+                    InitializeGeneratedApplication(logger, arguments);
                 logger.Trace("Done.");
             }
             catch (Exception ex)
@@ -181,7 +183,7 @@ namespace DeployPackages
                 if (arguments.Debug)
                     container.Resolve<DomGeneratorOptions>().Debug = true;
 
-                container.Resolve<ApplicationGenerator>().ExecuteGenerators(arguments.DeployDatabaseOnly);
+                container.Resolve<ApplicationGenerator>().ExecuteGenerators(arguments);
             }
         }
 

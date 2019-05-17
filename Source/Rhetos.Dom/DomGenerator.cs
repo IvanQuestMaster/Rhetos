@@ -41,6 +41,7 @@ namespace Rhetos.Dom
         private readonly ILogProvider _log;
         private readonly IAssemblyGenerator _assemblyGenerator;
         private readonly DomGeneratorOptions _domGeneratorOptions;
+        private readonly GeneratedFilesCache _filesCache;
 
         private List<Assembly> _assemblies;
 
@@ -53,13 +54,15 @@ namespace Rhetos.Dom
             ICodeGenerator codeGenerator,
             ILogProvider logProvider,
             IAssemblyGenerator assemblyGenerator,
-            DomGeneratorOptions domGeneratorOptions)
+            DomGeneratorOptions domGeneratorOptions,
+            GeneratedFilesCache filesCache)
         {
             _domGeneratorOptions = domGeneratorOptions;
             _pluginRepository = plugins;
             _codeGenerator = codeGenerator;
             _log = logProvider;
             _assemblyGenerator = assemblyGenerator;
+            _filesCache = filesCache;
         }
 
         public IEnumerable<Assembly> Assemblies

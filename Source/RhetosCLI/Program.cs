@@ -1,0 +1,146 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using Autofac;
+using Mono.Options;
+using Rhetos;
+using Rhetos.Deployment;
+using Rhetos.Dom;
+using Rhetos.Extensibility;
+using Rhetos.Logging;
+using Rhetos.Utilities;
+
+namespace RhetosCLI
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var mainArgs = new MainArgs();
+
+            var command = args[0];
+
+            var p = new OptionSet() {
+                { "project-folder=",
+                   v => mainArgs.ProjectFolder = v },
+                { "output-folder=",
+                    v => mainArgs.OutputFolder = v },
+                { "plugins-folder=",
+                   v => mainArgs.PluginsFolder = v },
+                { "p|package=",
+                   v => mainArgs.Packages.Add (v) },
+                { "database-language=",
+                   v => mainArgs.DatabaseLanguage = v },
+                { "h|help",  "show this message and exit",
+                   v => mainArgs.ShowHelp = v != null },
+            };
+            p.Parse(args);
+
+            if (mainArgs.ShowHelp || command.Equals("help", StringComparison.InvariantCultureIgnoreCase))
+                ShowHelp(p);
+
+            if (command.Equals("generate", StringComparison.InvariantCultureIgnoreCase))
+                GenerateCommand(mainArgs);
+        }
+
+        static void ShowHelp(OptionSet p)
+        {
+            Console.WriteLine("Rhetos - A DSL platform");
+            p.WriteOptionDescriptions(Console.Out);
+        }
+
+        static void GenerateCommand(MainArgs args)
+        {
+            Paths.InitializePaths(args.ProjectFolder, args.PluginsFolder, args.OutputFolder, args.Packages.ToArray());
+            SqlUtility.Initialize(args.DatabaseLanguage);
+
+            ILogger logger = new ConsoleLogger("DeployPackages"); // Using the simplest logger outside of try-catch block.
+            string oldCurrentDirectory = null;
+            DeployArguments arguments = new DeployArguments(new string[] { "/ExecuteGeneratorsOnly"});
+
+            /*try
+            {*/
+                logger = DeploymentUtility.InitializationLogProvider.GetLogger("DeployPackages"); // Setting the final log provider inside the try-catch block, so that the simple ConsoleLogger can be used (see above) in case of an initialization error.
+
+                Paths.InitializeRhetosServerRootPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".."));
+
+                oldCurrentDirectory = Directory.GetCurrentDirectory();
+                Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
+
+                InitialCleanup(logger);
+                GenerateApplication(logger, arguments);
+
+                logger.Trace("Done.");
+            /*}
+            catch (Exception ex)
+            {
+                logger.Error(ex.ToString());
+
+                if (ex is ReflectionTypeLoadException)
+                    logger.Error(CsUtility.ReportTypeLoadException((ReflectionTypeLoadException)ex));
+
+                if (Environment.UserInteractive)
+                {
+                    PrintSummary(ex);
+                    if (arguments != null && !arguments.NoPauseOnError)
+                    {
+                        Console.WriteLine("Press any key to continue . . .  (use /NoPause switch to avoid pause on error)");
+                        Console.ReadKey(true);
+                    }
+                }
+            }
+            finally
+            {
+                if (oldCurrentDirectory != null && Directory.Exists(oldCurrentDirectory))
+                    Directory.SetCurrentDirectory(oldCurrentDirectory);
+            }*/
+        }
+
+        private static void InitialCleanup(ILogger logger)
+        {
+
+            logger.Trace("Moving old generated files to cache.");
+            var filesUtility = new FilesUtility(DeploymentUtility.InitializationLogProvider);
+            foreach (var file in Directory.GetFiles(Paths.GeneratedFolder))
+                File.Delete(file);
+            filesUtility.SafeCreateDirectory(Paths.GeneratedFolder);
+        }
+
+        private static void GenerateApplication(ILogger logger, DeployArguments arguments)
+        {
+            logger.Trace("Loading plugins.");
+            var stopwatch = Stopwatch.StartNew();
+
+            var builder = new ContainerBuilder();
+            builder.RegisterModule(new AutofacModuleConfiguration(
+                deploymentTime: true,
+                configurationArguments: arguments));
+
+            using (var container = builder.Build())
+            {
+                var performanceLogger = container.Resolve<ILogProvider>().GetLogger("Performance");
+                performanceLogger.Write(stopwatch, "DeployPackages.Program: Modules and plugins registered.");
+                Plugins.LogRegistrationStatistics("Generating application", container);
+
+                if (arguments.Debug)
+                    container.Resolve<DomGeneratorOptions>().Debug = true;
+
+                container.Resolve<ApplicationGenerator>().ExecuteGenerators(arguments);
+            }
+        }
+
+        private static void PrintSummary(Exception ex)
+        {
+            Console.WriteLine();
+            Console.WriteLine("=== ERROR SUMMARY ===");
+            DeploymentUtility.WriteError(ex.GetType().Name + ": " + ExceptionsUtility.SafeFormatUserMessage(ex));
+            Console.WriteLine();
+            Console.WriteLine("See DeployPackages.log for more information on error. Enable TraceLog in DeployPackages.exe.config for even more details.");
+        }
+    }
+}

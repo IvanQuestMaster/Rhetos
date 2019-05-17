@@ -46,6 +46,24 @@ namespace Rhetos.Utilities
             IsRhetosServer = false;
         }
 
+        private static bool _implicitlyInitialized;
+
+        private static string _projectFolder;
+        private static string _pluginsFolder;
+        private static string _generatedFolder;
+        private static string[] _packagesFolder;
+
+        public static void InitializePaths(string projectFolder, string pluginsFolder, string generatedFolder, string[] packagesFolder)
+        {
+            _projectFolder = projectFolder;
+            _pluginsFolder = pluginsFolder;
+            _generatedFolder = generatedFolder;
+            _packagesFolder = packagesFolder;
+
+            IsRhetosServer = false;
+            _implicitlyInitialized = true;
+        }
+
         private static bool? _isRhetosServer = null;
 
         public static bool IsRhetosServer
@@ -96,9 +114,27 @@ namespace Rhetos.Utilities
         public static string PackagesCacheFolder => Path.Combine(RhetosServerRootPath, "PackagesCache");
         public static string ResourcesFolder => Path.Combine(RhetosServerRootPath, "Resources");
         public static string BinFolder => Path.Combine(RhetosServerRootPath, "bin");
-        public static string GeneratedFolder => Path.Combine(RhetosServerRootPath, "bin\\Generated");
+        public static string GeneratedFolder {
+            get {
+                if (_generatedFolder != null)
+                    return _generatedFolder;
+                else
+                    return Path.Combine(RhetosServerRootPath, "bin\\Generated");
+            }
+        }
         public static string GeneratedFilesCacheFolder => Path.Combine(RhetosServerRootPath, "GeneratedFilesCache");
-        public static string PluginsFolder => Path.Combine(RhetosServerRootPath, "bin\\Plugins");
+        public static string PluginsFolder
+        {
+            get
+            {
+                if (_generatedFolder != null)
+                    return _pluginsFolder;
+                else
+                    return Path.Combine(RhetosServerRootPath, "bin\\Plugins");
+            }
+        }
+        public static string[] PackagesFolder => _packagesFolder;
+        public static string ProjectFolder => _projectFolder;
         public static string RhetosServerWebConfigFile => Path.Combine(RhetosServerRootPath, "Web.config");
         public static string ConnectionStringsFile => Path.Combine(RhetosServerRootPath, @"bin\ConnectionStrings.config");
         public static string GetDomAssemblyFile(DomAssemblies domAssembly) => Path.Combine(GeneratedFolder, $"ServerDom.{domAssembly}.dll");

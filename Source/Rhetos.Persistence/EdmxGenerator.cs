@@ -33,16 +33,17 @@ using System.Text.RegularExpressions;
 
 namespace Rhetos.Persistence
 {
-    public class EntityFrameworkMappingGenerator : IGenerator
+    public class EdmxGenerator : IGenerator
     {
-        private const string _segmentSplitter = "<!--SegmentSplitter-->";
+        public static readonly string[] ModelFiles = new[] { "ServerDomEdmFromCode.csdl", "ServerDomEdmFromCode.msl", "ServerDomEdmFromCode.ssdl" };
+
         private readonly ICodeGenerator _codeGenerator;
-        private readonly IPluginsContainer<IConceptMapping> _plugins;
+        private readonly IPluginsContainer<IEdmxCodeGenerator> _plugins;
         private readonly ILogger _performanceLogger;
 
-        public EntityFrameworkMappingGenerator(
+        public EdmxGenerator(
             ICodeGenerator codeGenerator,
-            IPluginsContainer<IConceptMapping> plugins,
+            IPluginsContainer<IEdmxCodeGenerator> plugins,
             ILogProvider logProvider)
         {
             _plugins = plugins;
@@ -51,24 +52,24 @@ namespace Rhetos.Persistence
         }
 
         private Lazy<string> GetProviderManifestToken = new Lazy<string>(() => MsSqlUtility.GetProviderManifestToken());
-        
+
         public void Generate()
         {
             var sw = Stopwatch.StartNew();
+            var a = _plugins.GetPlugins().Count();
+            string xml = _codeGenerator.ExecutePlugins(_plugins, "<!--", "-->", new EdmxInitialCodeSnippet()).GeneratedCode;
+            string[] segments = xml.Split(new[] { EdmxInitialCodeSnippet.SegmentSplitter }, StringSplitOptions.None);
 
-            string xml = _codeGenerator.ExecutePlugins(_plugins, "<!--", "-->", new InitialSnippet()).GeneratedCode;
-            string[] segments = xml.Split(new[] { _segmentSplitter }, StringSplitOptions.None);
+            if (segments.Count() != ModelFiles.Count())
+                throw new FrameworkException("Unexpected number of metadata segments: " + segments.Count() + ", expected " + ModelFiles.Count() + ".");
 
-            if (segments.Count() != EntityFrameworkMapping.ModelFiles.Count())
-                throw new FrameworkException("Unexpected number of metadata segments: " + segments.Count() + ", expected " + EntityFrameworkMapping.ModelFiles.Count() + ".");
-            
             for (int s = 0; s < segments.Count(); s++)
             {
                 string clearedXml = XmlUtility.RemoveComments(segments[s]);
                 if (!string.IsNullOrWhiteSpace(clearedXml))
                 {
                     clearedXml = string.Format(GetXmlRootElements()[s], clearedXml);
-                    string filePath = Path.Combine(Paths.GeneratedFolder, EntityFrameworkMapping.ModelFiles[s]);
+                    string filePath = Path.Combine(Paths.GeneratedFolder, ModelFiles[s]);
                     File.WriteAllText(filePath, clearedXml, Encoding.UTF8);
                 }
             }
@@ -78,33 +79,16 @@ namespace Rhetos.Persistence
 
         private string[] GetXmlRootElements()
         {
-                return new[]
-                {
-@"<Schema Namespace=""Rhetos"" Alias=""Self"" annotation:UseStrongSpatialTypes=""false"" xmlns:annotation=""http://schemas.microsoft.com/ado/2009/02/edm/annotation"" xmlns:customannotation=""http://schemas.microsoft.com/ado/2013/11/edm/customannotation"" xmlns=""http://schemas.microsoft.com/ado/2009/11/edm"">
-{0}
+            return new[]
+            {
+@"<Schema Namespace=""Common"" Alias=""Self"" annotation:UseStrongSpatialTypes=""false"" xmlns:annotation=""http://schemas.microsoft.com/ado/2009/02/edm/annotation"" xmlns:customannotation=""http://schemas.microsoft.com/ado/2013/11/edm/customannotation"" xmlns=""http://schemas.microsoft.com/ado/2009/11/edm"">{0}
 </Schema>",
-@"<Mapping Space=""C-S"" xmlns=""http://schemas.microsoft.com/ado/2009/11/mapping/cs"">
-{0}
+@"<Mapping Space=""C-S"" xmlns=""http://schemas.microsoft.com/ado/2009/11/mapping/cs"">{0}
 </Mapping>",
-@"<Schema Namespace=""Rhetos"" Provider=""System.Data.SqlClient"" ProviderManifestToken=""" + "\"" + @" Alias=""Self"" xmlns:customannotation=""http://schemas.microsoft.com/ado/2013/11/edm/customannotation"" xmlns=""http://schemas.microsoft.com/ado/2009/11/edm/ssdl"">
+@"<Schema Namespace=""CodeFirstDatabaseSchema"" Provider=""System.Data.SqlClient"" ProviderManifestToken=""" + "\"" + @" Alias=""Self"" xmlns:customannotation=""http://schemas.microsoft.com/ado/2013/11/edm/customannotation"" xmlns=""http://schemas.microsoft.com/ado/2009/11/edm/ssdl"">
 {0}
 </Schema>"
             };
-        }
-
-        private class InitialSnippet : IConceptCodeGenerator
-        {
-            public void GenerateCode(IConceptInfo conceptInfo, ICodeBuilder codeBuilder)
-            {
-                codeBuilder.InsertCode(string.Join("\r\n", new[]
-                {
-                    EntityFrameworkMapping.ConceptualModelTag,
-                    _segmentSplitter,
-                    EntityFrameworkMapping.MappingTag,
-                    _segmentSplitter,
-                    EntityFrameworkMapping.StorageModelTag
-                }));
-            }
         }
 
         public IEnumerable<string> Dependencies

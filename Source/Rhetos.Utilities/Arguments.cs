@@ -35,6 +35,10 @@ namespace Rhetos.Utilities
         public bool ShortTransactions { get; private set; }
         public bool DeployDatabaseOnly { get; private set; }
         public bool SkipRecompute { get; private set; }
+        public bool ExecuteGeneratorsOnly { get; private set; }
+        public string GeneratedFilesFolderDestination { get; private set; }
+
+        public string MoveGen { get; private set; }
 
         public DeployArguments(string[] args)
         {
@@ -54,6 +58,7 @@ namespace Rhetos.Utilities
             ShortTransactions = Pop(arguments, "/ShortTransactions");
             DeployDatabaseOnly = Pop(arguments, "/DatabaseOnly");
             SkipRecompute = Pop(arguments, "/SkipRecompute");
+            ExecuteGeneratorsOnly = Pop(arguments, "/ExecuteGeneratorsOnly");
 
             if (arguments.Count > 0)
             {
@@ -84,6 +89,25 @@ namespace Rhetos.Utilities
                 arguments.RemoveAt(position);
 
             return position != -1;
+        }
+
+        /// <summary>
+        /// Reads and removes the option form the arguments list.
+        /// </summary>
+        private string PopValue(List<string> arguments, string option)
+        {
+            var position = arguments.FindIndex(a => option.Equals(a, StringComparison.InvariantCultureIgnoreCase));
+
+            if (position == arguments.Count - 1)
+                throw new Exception("Invalid command line argumnets");
+
+            if (position != -1)
+                arguments.RemoveAt(position);
+
+            var argumentValue = arguments[position];
+            arguments.RemoveAt(position);
+
+            return argumentValue;
         }
     }
 }

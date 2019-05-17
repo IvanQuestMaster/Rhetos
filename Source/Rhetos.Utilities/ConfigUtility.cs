@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Web.Configuration;
@@ -27,6 +28,20 @@ namespace Rhetos.Utilities
 {
     public static class ConfigUtility
     {
+        private static bool _initialized;
+        private static Dictionary<string, string> _settings;
+        private static ConnectionStringSettings _connectionStringSettings;
+
+        public static void Initialize(Dictionary<string, string> settings, ConnectionStringSettings connectionStringSettings)
+        {
+            if (_initialized)
+                throw new Exception("ConfigUtility has already been initialized.");
+
+            _settings = settings;
+            _connectionStringSettings = connectionStringSettings;
+            _initialized = true;
+        }
+
         /// <summary>
         /// Use "Configuration.GetInt" or "Configuration.GetBool" instead.
         /// Reads the web service configuration from appSettings group in web.config file.
@@ -35,6 +50,9 @@ namespace Rhetos.Utilities
         /// </summary>
         public static string GetAppSetting(string key)
         {
+            if (_initialized)
+                return _settings[key];
+
             string settingValue = System.Configuration.ConfigurationManager.AppSettings[key];
 
             if (settingValue == null && !Paths.IsRhetosServer)
@@ -51,6 +69,9 @@ namespace Rhetos.Utilities
 
         public static System.Configuration.ConnectionStringSettings GetConnectionString()
         {
+            if (_initialized) 
+                return _connectionStringSettings;
+
             System.Configuration.ConnectionStringSettings connectionStringConfiguration = System.Configuration.ConfigurationManager.ConnectionStrings[ServerConnectionStringName];
 
             if (connectionStringConfiguration == null && !Paths.IsRhetosServer)

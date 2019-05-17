@@ -58,6 +58,17 @@ namespace Rhetos.Utilities
         private static string _databaseLanguage;
         private static string _nationalLanguage;
 
+        private static bool _initialized;
+
+        public static void Initialize(string providerName)
+        {
+            if (_initialized)
+                throw new Exception();
+            _databaseLanguage = providerName;
+            _nationalLanguage = "";
+            _initialized = true;
+        }
+
         private static void SetLanguageFromProviderName(string connectionStringProvider)
         {
             var match = new Regex(@"^Rhetos\.(?<DatabaseLanguage>\w+)(.(?<NationalLanguage>\w+))?$").Match(connectionStringProvider);
@@ -106,7 +117,9 @@ namespace Rhetos.Utilities
         {
             get
             {
-                if (_connectionString == null)
+                if (_initialized)
+                    return null;
+                else if (_connectionString == null)
                 {
                     _connectionString = ConfigUtility.GetConnectionString().ConnectionString;
                     if (string.IsNullOrEmpty(_connectionString))

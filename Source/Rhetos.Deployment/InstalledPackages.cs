@@ -49,16 +49,24 @@ namespace Rhetos.Deployment
 
         private IEnumerable<InstalledPackage> Load()
         {
-            string serialized = File.ReadAllText(PackagesFilePath, Encoding.UTF8);
-            var packages = (IEnumerable<InstalledPackage>)JsonConvert.DeserializeObject(serialized, _serializerSettings);
+            List<InstalledPackage> packages;
+            if (Paths.ProjectFolder != null)
+            {
+                packages = new List<InstalledPackage>(Paths.PackagesFolder.Select(x => new InstalledPackage(null, null, null, x, null, null)));
+                packages.Add(new InstalledPackage(null, null, null, Paths.ProjectFolder, null, null));
+            }
+            else
+            {
+                string serialized = File.ReadAllText(PackagesFilePath, Encoding.UTF8);
+                packages = new List<InstalledPackage>((IEnumerable<InstalledPackage>)JsonConvert.DeserializeObject(serialized, _serializerSettings));
 
-            // Package folder is saved as relative path, to allow moving the deployed folder.
-            foreach (var package in packages)
-                package.SetAbsoluteFolderPath();
+                // Package folder is saved as relative path, to allow moving the deployed folder.
+                foreach (var package in packages)
+                    package.SetAbsoluteFolderPath();
 
-            foreach (var package in packages)
-                _logger.Trace(() => package.Report());
-
+                foreach (var package in packages)
+                    _logger.Trace(() => package.Report());
+            }
             return packages;
         }
 

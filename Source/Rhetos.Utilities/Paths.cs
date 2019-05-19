@@ -150,6 +150,20 @@ namespace Rhetos.Utilities
         /// <summary>
         /// List of the generated dll files that make the domain object model (ServerDom.*.dll).
         /// </summary>
-        public static IEnumerable<string> DomAssemblyFiles => Enum.GetValues(typeof(DomAssemblies)).Cast<DomAssemblies>().Select(domAssembly => GetDomAssemblyFile(domAssembly));
+        public static IEnumerable<string> DomAssemblyFiles
+        {
+            get
+            {
+                if (_pluginsFolder != null)
+                {
+                    var asseblies = Directory.GetFiles(_pluginsFolder, "*.dll").Union(Directory.GetFiles(_pluginsFolder, "*.exe")).OrderByDescending(x => File.GetLastWriteTime(x));
+                    return asseblies.Take(1); //HACK: This should look for the assembly that contains teh DomRepository
+                }
+                else
+                {
+                    return Enum.GetValues(typeof(DomAssemblies)).Cast<DomAssemblies>().Select(domAssembly => GetDomAssemblyFile(domAssembly));
+                }
+            }
+        }
     }
 }

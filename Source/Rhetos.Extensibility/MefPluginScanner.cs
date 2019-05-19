@@ -70,12 +70,7 @@ namespace Rhetos.Extensibility
 
             string[] pluginsPath = new[] { Paths.PluginsFolder, Paths.GeneratedFolder };
 
-            List<string> assemblies = new List<string>();
-            foreach (var path in pluginsPath)
-                if (File.Exists(path))
-                    assemblies.Add(Path.GetFullPath(path));
-                else if (Directory.Exists(path))
-                    assemblies.AddRange(Directory.GetFiles(path, "*.dll", SearchOption.AllDirectories));
+            List<string> assemblies = Directory.GetFiles(Paths.PluginsFolder, "*.dll").ToList();
             // If the path does not exist, it may be generated later (see DetectAndRegisterNewModulesAndPlugins).
 
             assemblies.Sort();
@@ -109,6 +104,7 @@ namespace Rhetos.Extensibility
 
             var pluginsByExport = new MultiDictionary<string, PluginInfo>();
             int pluginsCount = 0;
+
             foreach (var mefPlugin in mefPlugins)
             {
                 pluginsCount++;

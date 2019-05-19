@@ -60,10 +60,11 @@ namespace Rhetos.Dom
         {
             var loaded = new List<Assembly>();
             var sw = Stopwatch.StartNew();
-            foreach (string name in Paths.DomAssemblyFiles.Select(Path.GetFileNameWithoutExtension))
+            foreach (string name in Paths.DomAssemblyFiles)
             {
                 _logger.Trace("Loading assembly \"" + name + "\".");
-                var assembly = Assembly.Load(name);
+                var assembly = Assembly.LoadFrom(name);
+            
                 if (assembly == null)
                     throw new FrameworkException($"Failed to load assebly '{name}'.");
                 loaded.Add(assembly);

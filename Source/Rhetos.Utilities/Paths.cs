@@ -122,12 +122,21 @@ namespace Rhetos.Utilities
                     return Path.Combine(RhetosServerRootPath, "bin\\Generated");
             }
         }
-        public static string GeneratedFilesCacheFolder => Path.Combine(RhetosServerRootPath, "GeneratedFilesCache");
-        public static string PluginsFolder
+        public static string GeneratedFilesCacheFolder
         {
             get
             {
                 if (_generatedFolder != null)
+                    return Path.Combine(_generatedFolder, "Cache");
+                else
+                    return Path.Combine(RhetosServerRootPath, "GeneratedFilesCache");
+            }
+        }
+        public static string PluginsFolder
+        {
+            get
+            {
+                if (_pluginsFolder != null)
                     return _pluginsFolder;
                 else
                     return Path.Combine(RhetosServerRootPath, "bin\\Plugins");

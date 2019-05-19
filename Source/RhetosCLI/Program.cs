@@ -14,6 +14,7 @@ using Rhetos.Dom;
 using Rhetos.Extensibility;
 using Rhetos.Logging;
 using Rhetos.Utilities;
+using System.Configuration;
 
 namespace RhetosCLI
 {
@@ -45,7 +46,9 @@ namespace RhetosCLI
                 ShowHelp(p);
 
             if (command.Equals("generate", StringComparison.InvariantCultureIgnoreCase))
-                GenerateCommand(mainArgs);
+                ExecuteGenerateCommand(mainArgs);
+
+            Console.ReadKey();
         }
 
         static void ShowHelp(OptionSet p)
@@ -54,29 +57,24 @@ namespace RhetosCLI
             p.WriteOptionDescriptions(Console.Out);
         }
 
-        static void GenerateCommand(MainArgs args)
+        static void ExecuteGenerateCommand(MainArgs args)
         {
             Paths.InitializePaths(args.ProjectFolder, args.PluginsFolder, args.OutputFolder, args.Packages.ToArray());
             SqlUtility.Initialize(args.DatabaseLanguage);
+            ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", "", "Rhetos.MsSql"));
 
             ILogger logger = new ConsoleLogger("DeployPackages"); // Using the simplest logger outside of try-catch block.
-            string oldCurrentDirectory = null;
             DeployArguments arguments = new DeployArguments(new string[] { "/ExecuteGeneratorsOnly"});
 
-            /*try
-            {*/
+            try
+            {
                 logger = DeploymentUtility.InitializationLogProvider.GetLogger("DeployPackages"); // Setting the final log provider inside the try-catch block, so that the simple ConsoleLogger can be used (see above) in case of an initialization error.
-
-                Paths.InitializeRhetosServerRootPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".."));
-
-                oldCurrentDirectory = Directory.GetCurrentDirectory();
-                Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
 
                 InitialCleanup(logger);
                 GenerateApplication(logger, arguments);
-
+              
                 logger.Trace("Done.");
-            /*}
+            }
             catch (Exception ex)
             {
                 logger.Error(ex.ToString());
@@ -94,11 +92,6 @@ namespace RhetosCLI
                     }
                 }
             }
-            finally
-            {
-                if (oldCurrentDirectory != null && Directory.Exists(oldCurrentDirectory))
-                    Directory.SetCurrentDirectory(oldCurrentDirectory);
-            }*/
         }
 
         private static void InitialCleanup(ILogger logger)
@@ -106,8 +99,7 @@ namespace RhetosCLI
 
             logger.Trace("Moving old generated files to cache.");
             var filesUtility = new FilesUtility(DeploymentUtility.InitializationLogProvider);
-            foreach (var file in Directory.GetFiles(Paths.GeneratedFolder))
-                File.Delete(file);
+            new GeneratedFilesCache(DeploymentUtility.InitializationLogProvider).MoveGeneratedFilesToCache();
             filesUtility.SafeCreateDirectory(Paths.GeneratedFolder);
         }
 

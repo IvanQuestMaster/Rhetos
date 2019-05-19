@@ -51,7 +51,11 @@ namespace Rhetos.Utilities
         public static string GetAppSetting(string key)
         {
             if (_initialized)
-                return _settings[key];
+            {
+                string value = null;
+                _settings.TryGetValue(key, out value);
+                return value;
+            }
 
             string settingValue = System.Configuration.ConfigurationManager.AppSettings[key];
 

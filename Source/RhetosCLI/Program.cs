@@ -37,6 +37,8 @@ namespace RhetosCLI
                    v => mainArgs.Packages.Add (v) },
                 { "database-language=",
                    v => mainArgs.DatabaseLanguage = v },
+                { "connection-string=",
+                   v => mainArgs.ConnectionString = v },
                 { "h|help",  "show this message and exit",
                    v => mainArgs.ShowHelp = v != null },
             };
@@ -47,6 +49,9 @@ namespace RhetosCLI
 
             if (command.Equals("generate", StringComparison.InvariantCultureIgnoreCase))
                 ExecuteGenerateCommand(mainArgs);
+
+            if (command.Equals("deploy", StringComparison.InvariantCultureIgnoreCase))
+                ExecuteDeployCommand(mainArgs);
 
             Console.ReadKey();
         }
@@ -123,6 +128,42 @@ namespace RhetosCLI
                     container.Resolve<DomGeneratorOptions>().Debug = true;
 
                 container.Resolve<ApplicationGenerator>().ExecuteGenerators(arguments);
+            }
+        }
+
+        private static void ExecuteDeployCommand(MainArgs args)
+        {
+            Paths.InitializePaths(args.ProjectFolder, args.PluginsFolder, args.OutputFolder, args.Packages.ToArray());
+            ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", args.ConnectionString, "Rhetos." + args.DatabaseLanguage));
+
+            ILogger logger = new ConsoleLogger("DeployPackages"); // Using the simplest logger outside of try-catch block.
+            DeployArguments arguments = new DeployArguments(new string[] { });
+
+            logger.Trace("Loading generated plugins.");
+            var stopwatch = Stopwatch.StartNew();
+
+            var builder = new ContainerBuilder();
+            builder.RegisterModule(new AutofacModuleConfiguration(
+                deploymentTime: false,
+                configurationArguments: arguments));
+
+            using (var container = builder.Build())
+            {
+                var performanceLogger = container.Resolve<ILogProvider>().GetLogger("Performance");
+                var initializers = ApplicationInitialization.GetSortedInitializers(container);
+
+                performanceLogger.Write(stopwatch, "DeployPackages.Program: New modules and plugins registered.");
+                Plugins.LogRegistrationStatistics("Initializing application", container);
+
+                if (!initializers.Any())
+                {
+                    logger.Trace("No server initialization plugins.");
+                }
+                else
+                {
+                    foreach (var initializer in initializers)
+                        ApplicationInitialization.ExecuteInitializer(container, initializer);
+                }
             }
         }
 

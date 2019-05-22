@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Mono.Options;
-using Rhetos;
 using Rhetos.Deployment;
 using Rhetos.Dom;
 using Rhetos.Extensibility;
@@ -136,6 +135,8 @@ namespace RhetosCLI
             Paths.InitializePaths(args.ProjectFolder, args.PluginsFolder, args.OutputFolder, args.Packages.ToArray());
             ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", args.ConnectionString, "Rhetos." + args.DatabaseLanguage));
 
+            AppDomain.CurrentDomain.AssemblyResolve += SearchForAssembly;
+
             ILogger logger = new ConsoleLogger("DeployPackages"); // Using the simplest logger outside of try-catch block.
             DeployArguments arguments = new DeployArguments(new string[] { });
 
@@ -146,6 +147,7 @@ namespace RhetosCLI
             builder.RegisterModule(new AutofacModuleConfiguration(
                 deploymentTime: false,
                 configurationArguments: arguments));
+            builder.RegisterInstance(arguments);
 
             using (var container = builder.Build())
             {
@@ -165,6 +167,14 @@ namespace RhetosCLI
                         ApplicationInitialization.ExecuteInitializer(container, initializer);
                 }
             }
+        }
+
+        protected static Assembly SearchForAssembly(object sender, ResolveEventArgs args)
+        {
+            string pluginAssemblyPath = Path.Combine(Paths.PluginsFolder, new AssemblyName(args.Name).Name + ".dll");
+            if (File.Exists(pluginAssemblyPath))
+                return Assembly.LoadFrom(pluginAssemblyPath);
+            return null;
         }
 
         private static void PrintSummary(Exception ex)

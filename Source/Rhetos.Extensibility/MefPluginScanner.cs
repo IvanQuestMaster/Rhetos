@@ -70,7 +70,7 @@ namespace Rhetos.Extensibility
 
             string[] pluginsPath = new[] { Paths.PluginsFolder, Paths.GeneratedFolder };
 
-            List<string> assemblies = Directory.GetFiles(Paths.PluginsFolder, "*.dll").ToList();
+            List<string> assemblies = Directory.GetFiles(Paths.PluginsFolder, "*.dll").Union(Directory.GetFiles(Paths.PluginsFolder, "*.exe")).ToList();
             // If the path does not exist, it may be generated later (see DetectAndRegisterNewModulesAndPlugins).
 
             assemblies.Sort();

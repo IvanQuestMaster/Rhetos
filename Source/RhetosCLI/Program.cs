@@ -143,6 +143,7 @@ namespace RhetosCLI
             using (var container = builder.Build())
             {
                 var performanceLogger = container.Resolve<ILogProvider>().GetLogger("Performance");
+                container.Resolve<ApplicationGenerator>().UpdateDatabase(arguments);
                 var initializers = ApplicationInitialization.GetSortedInitializers(container);
 
                 performanceLogger.Write(stopwatch, "DeployPackages.Program: New modules and plugins registered.");

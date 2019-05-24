@@ -67,11 +67,15 @@ namespace Rhetos.Extensibility
         private static List<string> ListAssemblies()
         {
             var stopwatch = Stopwatch.StartNew();
-
-            string[] pluginsPath = new[] { Paths.PluginsFolder, Paths.GeneratedFolder };
-
-            List<string> assemblies = Directory.GetFiles(Paths.PluginsFolder, "*.dll").Union(Directory.GetFiles(Paths.PluginsFolder, "*.exe")).ToList();
-            // If the path does not exist, it may be generated later (see DetectAndRegisterNewModulesAndPlugins).
+            var assemblies = new List<string>();
+            if (Paths.References != null && Paths.References.Length > 0)
+            {
+                assemblies = Paths.References.ToList();
+            }
+            else {
+                string[] pluginsPath = new[] { Paths.PluginsFolder, Paths.GeneratedFolder }.Union(Paths.References).ToArray();
+                assemblies = Directory.GetFiles(Paths.PluginsFolder, "*.dll").Union(Directory.GetFiles(Paths.PluginsFolder, "*.exe")).ToList();
+            }
 
             assemblies.Sort();
 

@@ -9,6 +9,7 @@ namespace RhetosCLI
     public class MainArgs
     {
         public List<string> Packages {get; set;}
+        public List<string> References { get; set; }
         public string OutputFolder { get; set; }
         public string PluginsFolder { get; set; }
         public string ProjectFolder { get; set; }
@@ -19,6 +20,7 @@ namespace RhetosCLI
         public MainArgs()
         {
             Packages = new List<string>();
+            References = new List<string>();
             DatabaseLanguage = "MsSql";
             ConnectionString = "";
         }

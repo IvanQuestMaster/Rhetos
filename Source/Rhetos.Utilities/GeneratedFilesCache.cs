@@ -50,7 +50,7 @@ namespace Rhetos.Utilities
         {
             // Group files by name without extension:
 
-            var generatedFiles = _filesUtility.SafeGetFiles(Paths.GeneratedFolder, "*", SearchOption.AllDirectories)
+            var generatedFiles = _filesUtility.SafeGetFiles(Paths.GeneratedFolder, "*", SearchOption.AllDirectories).Where(x => Path.GetDirectoryName(x) != "Cache")
                 .GroupBy(file => Path.GetFileNameWithoutExtension(file))
                 .ToDictionary(g => g.Key, g => g.ToList());
 

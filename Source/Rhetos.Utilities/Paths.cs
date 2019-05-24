@@ -52,13 +52,15 @@ namespace Rhetos.Utilities
         private static string _pluginsFolder;
         private static string _generatedFolder;
         private static string[] _packagesFolder;
+        private static string[] _references;
 
-        public static void InitializePaths(string projectFolder, string pluginsFolder, string generatedFolder, string[] packagesFolder)
+        public static void InitializePaths(string projectFolder, string pluginsFolder, string generatedFolder, string[] packagesFolder, string[] references)
         {
             _projectFolder = projectFolder;
             _pluginsFolder = pluginsFolder;
             _generatedFolder = generatedFolder;
             _packagesFolder = packagesFolder;
+            _references = references;
 
             IsRhetosServer = false;
             _implicitlyInitialized = true;
@@ -143,6 +145,7 @@ namespace Rhetos.Utilities
             }
         }
         public static string[] PackagesFolder => _packagesFolder;
+        public static string[] References => _references;
         public static string ProjectFolder => _projectFolder;
         public static string RhetosServerWebConfigFile => Path.Combine(RhetosServerRootPath, "Web.config");
         public static string ConnectionStringsFile => Path.Combine(RhetosServerRootPath, @"bin\ConnectionStrings.config");

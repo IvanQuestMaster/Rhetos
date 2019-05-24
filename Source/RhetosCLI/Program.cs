@@ -14,6 +14,7 @@ using Rhetos.Extensibility;
 using Rhetos.Logging;
 using Rhetos.Utilities;
 using System.Configuration;
+using System.Threading;
 
 namespace RhetosCLI
 {
@@ -34,6 +35,8 @@ namespace RhetosCLI
                    v => mainArgs.PluginsFolder = v },
                 { "p|package=",
                    v => mainArgs.Packages.Add (v) },
+                { "r|reference=",
+                   v => mainArgs.References.Add (v) },
                 { "database-language=",
                    v => mainArgs.DatabaseLanguage = v },
                 { "connection-string=",
@@ -51,8 +54,6 @@ namespace RhetosCLI
 
             if (command.Equals("deploy", StringComparison.InvariantCultureIgnoreCase))
                 ExecuteDeployCommand(mainArgs);
-
-            Console.ReadKey();
         }
 
         static void ShowHelp(OptionSet p)
@@ -63,7 +64,7 @@ namespace RhetosCLI
 
         static void ExecuteGenerateCommand(MainArgs args)
         {
-            Paths.InitializePaths(args.ProjectFolder, args.PluginsFolder, args.OutputFolder, args.Packages.ToArray());
+            Paths.InitializePaths(args.ProjectFolder, args.PluginsFolder, args.OutputFolder, args.Packages.ToArray(), args.References.ToArray());
             SqlUtility.Initialize(args.DatabaseLanguage);
             ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", "", "Rhetos.MsSql"));
 
@@ -85,16 +86,6 @@ namespace RhetosCLI
 
                 if (ex is ReflectionTypeLoadException)
                     logger.Error(CsUtility.ReportTypeLoadException((ReflectionTypeLoadException)ex));
-
-                if (Environment.UserInteractive)
-                {
-                    PrintSummary(ex);
-                    if (arguments != null && !arguments.NoPauseOnError)
-                    {
-                        Console.WriteLine("Press any key to continue . . .  (use /NoPause switch to avoid pause on error)");
-                        Console.ReadKey(true);
-                    }
-                }
             }
         }
 
@@ -132,7 +123,7 @@ namespace RhetosCLI
 
         private static void ExecuteDeployCommand(MainArgs args)
         {
-            Paths.InitializePaths(args.ProjectFolder, args.PluginsFolder, args.OutputFolder, args.Packages.ToArray());
+            Paths.InitializePaths(args.ProjectFolder, args.PluginsFolder, args.OutputFolder, args.Packages.ToArray(), new string[0]);
             ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", args.ConnectionString, "Rhetos." + args.DatabaseLanguage));
 
             AppDomain.CurrentDomain.AssemblyResolve += SearchForAssembly;
@@ -174,6 +165,9 @@ namespace RhetosCLI
             string pluginAssemblyPath = Path.Combine(Paths.PluginsFolder, new AssemblyName(args.Name).Name + ".dll");
             if (File.Exists(pluginAssemblyPath))
                 return Assembly.LoadFrom(pluginAssemblyPath);
+            string reference = Paths.References.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == args.Name);
+            if ( reference!= null && File.Exists(reference))
+                return Assembly.LoadFrom(reference);
             return null;
         }
 

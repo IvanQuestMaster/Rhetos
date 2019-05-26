@@ -9,11 +9,6 @@ using Autofac;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Newtonsoft.Json.Linq;
-using Rhetos.Deployment;
-using Rhetos.Dom;
-using Rhetos.Extensibility;
-using Rhetos.Logging;
-using Rhetos.Utilities;
 
 namespace Rhetos.MSBuildExtension
 {
@@ -55,83 +50,33 @@ namespace Rhetos.MSBuildExtension
                 packagesPaths.Add(Path.Combine(NugetFolder, (string)libraryValue["path"]));
             }
 
-            AppDomain.CurrentDomain.AssemblyResolve += SearchForAssembly;
-
-            ExecuteGenerateCommand();
+            try
+            {
+                using (Process myProcess = new Process())
+                {
+                    myProcess.StartInfo.UseShellExecute = false;
+                    myProcess.StartInfo.FileName = @"..\..\..\RhetosCLI\bin\Debug";
+                    myProcess.StartInfo.CreateNoWindow = true;
+                    myProcess.StartInfo.Arguments = "generate" + " " + string.Join(" ", references.Select(x => "--reference \"" + x + "\"").ToArray()) +
+                         " " + string.Join(" ", packagesPaths.Select(x => "--package \"" + x + "\"").ToArray()) + 
+                        " --output-folder " + generatedFolderFullPath + " --project-folder " + projectFolderFullPath;
+                    Log.LogMessage(MessageImportance.High, "Command line arguments: " + myProcess.StartInfo.Arguments);
+                    myProcess.OutputDataReceived += MyProcess_OutputDataReceived;
+                    myProcess.Start();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
 
             return true;
         }
 
-        void ExecuteGenerateCommand()
+        private void MyProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            Paths.InitializePaths(projectFolderFullPath, Path.Combine(projectFolderFullPath, @"\bin\Debug"), generatedFolderFullPath, packagesPaths.ToArray(), references.ToArray());
-            ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", "EmptyString", "Rhetos.MsSql"));
-
-            Rhetos.Logging.ILogger logger = new ConsoleLogger("DeployPackages"); // Using the simplest logger outside of try-catch block.
-            DeployArguments arguments = new DeployArguments(new string[] { "/ExecuteGeneratorsOnly" });
-
-            try
-            {
-                logger = DeploymentUtility.InitializationLogProvider.GetLogger("DeployPackages"); // Setting the final log provider inside the try-catch block, so that the simple ConsoleLogger can be used (see above) in case of an initialization error.
-
-                InitialCleanup(logger);
-                GenerateApplication(logger, arguments);
-
-                logger.Trace("Done.");
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex.ToString());
-
-                if (ex is ReflectionTypeLoadException)
-                    logger.Error(CsUtility.ReportTypeLoadException((ReflectionTypeLoadException)ex));
-            }
-        }
-
-        private void InitialCleanup(Rhetos.Logging.ILogger logger)
-        {
-
-            logger.Trace("Moving old generated files to cache.");
-            var filesUtility = new FilesUtility(DeploymentUtility.InitializationLogProvider);
-            new GeneratedFilesCache(DeploymentUtility.InitializationLogProvider).MoveGeneratedFilesToCache();
-            filesUtility.SafeCreateDirectory(Paths.GeneratedFolder);
-        }
-
-        private void GenerateApplication(Rhetos.Logging.ILogger logger, DeployArguments arguments)
-        {
-            logger.Trace("Loading plugins.");
-            var stopwatch = Stopwatch.StartNew();
-
-            var builder = new ContainerBuilder();
-            builder.RegisterModule(new AutofacModuleConfiguration(
-                deploymentTime: true,
-                configurationArguments: arguments));
-
-            using (var container = builder.Build())
-            {
-                var performanceLogger = container.Resolve<ILogProvider>().GetLogger("Performance");
-                performanceLogger.Write(stopwatch, "DeployPackages.Program: Modules and plugins registered.");
-                Plugins.LogRegistrationStatistics("Generating application", container);
-
-                if (arguments.Debug)
-                    container.Resolve<DomGeneratorOptions>().Debug = true;
-
-                container.Resolve<ApplicationGenerator>().ExecuteGenerators(arguments);
-            }
-        }
-
-        protected Assembly SearchForAssembly(object sender, ResolveEventArgs args)
-        {
-            string pluginAssemblyPath = Path.Combine(Paths.PluginsFolder, new AssemblyName(args.Name).Name + ".dll");
-            if (File.Exists(pluginAssemblyPath))
-                return Assembly.LoadFrom(pluginAssemblyPath);
-            string reference = Paths.References.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == args.Name);
-            if (reference != null && File.Exists(reference))
-                return Assembly.LoadFrom(reference);
-            string reference2 = Paths.References.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == args.Name.Split(',').FirstOrDefault());
-            if (reference2 != null && File.Exists(reference2))
-                return Assembly.LoadFrom(reference2);
-            return null;
+            Log.LogMessage(MessageImportance.High, e.Data);
         }
     }
 }

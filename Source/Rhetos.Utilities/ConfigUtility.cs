@@ -34,9 +34,6 @@ namespace Rhetos.Utilities
 
         public static void Initialize(Dictionary<string, string> settings, ConnectionStringSettings connectionStringSettings)
         {
-            if (_initialized)
-                throw new Exception("ConfigUtility has already been initialized.");
-
             _settings = settings;
             _connectionStringSettings = connectionStringSettings;
             _initialized = true;

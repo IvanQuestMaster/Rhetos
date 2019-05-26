@@ -29,7 +29,7 @@ namespace Rhetos.MSBuildExtension
         public ITaskItem[] References { get; set; }
 
         [Required]
-        public string ProjectFolder { get; set; }
+        public string ProjectFullPath { get; set; }
 
         [Required]
         public string OutputFolder { get; set; }
@@ -38,8 +38,14 @@ namespace Rhetos.MSBuildExtension
 
         private List<string> packagesPaths;
 
+        private string projectFolderFullPath;
+
+        private string generatedFolderFullPath;
+
         public override bool Execute()
         {
+            projectFolderFullPath = Path.GetDirectoryName(ProjectFullPath);
+            generatedFolderFullPath = Path.Combine(projectFolderFullPath, OutputFolder);
             references = References.Select(x => x.ToString()).ToList();
             var resolvedPackages = JObject.Parse(File.ReadAllText(ResolvedPackagesFile));
             packagesPaths = new List<string>();
@@ -49,14 +55,17 @@ namespace Rhetos.MSBuildExtension
                 packagesPaths.Add(Path.Combine(NugetFolder, (string)libraryValue["path"]));
             }
 
+            AppDomain.CurrentDomain.AssemblyResolve += SearchForAssembly;
+
+            ExecuteGenerateCommand();
+
             return true;
         }
 
         void ExecuteGenerateCommand()
         {
-            Paths.InitializePaths(ProjectFolder,Path.Combine(ProjectFolder, @"\bin\Debug"), OutputFolder, packagesPaths.ToArray(), references.ToArray());
-            SqlUtility.Initialize("MsSql");
-            ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", "", "Rhetos.MsSql"));
+            Paths.InitializePaths(projectFolderFullPath, Path.Combine(projectFolderFullPath, @"\bin\Debug"), generatedFolderFullPath, packagesPaths.ToArray(), references.ToArray());
+            ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", "EmptyString", "Rhetos.MsSql"));
 
             Rhetos.Logging.ILogger logger = new ConsoleLogger("DeployPackages"); // Using the simplest logger outside of try-catch block.
             DeployArguments arguments = new DeployArguments(new string[] { "/ExecuteGeneratorsOnly" });
@@ -109,6 +118,20 @@ namespace Rhetos.MSBuildExtension
 
                 container.Resolve<ApplicationGenerator>().ExecuteGenerators(arguments);
             }
+        }
+
+        protected Assembly SearchForAssembly(object sender, ResolveEventArgs args)
+        {
+            string pluginAssemblyPath = Path.Combine(Paths.PluginsFolder, new AssemblyName(args.Name).Name + ".dll");
+            if (File.Exists(pluginAssemblyPath))
+                return Assembly.LoadFrom(pluginAssemblyPath);
+            string reference = Paths.References.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == args.Name);
+            if (reference != null && File.Exists(reference))
+                return Assembly.LoadFrom(reference);
+            string reference2 = Paths.References.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == args.Name.Split(',').FirstOrDefault());
+            if (reference2 != null && File.Exists(reference2))
+                return Assembly.LoadFrom(reference2);
+            return null;
         }
     }
 }

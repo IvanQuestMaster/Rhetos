@@ -27,5 +27,11 @@
     <file src="Source\Rhetos\bin\Rhetos*.dll" target="lib\net451" />
     <file src="Source\Rhetos\bin\Rhetos*.pdb" target="lib\net451" />
 	<file src="Source\Rhetos\bin\Rhetos*.xml" target="lib\net451" />
+	<file src="Source\RhetosCLI\bin\Debug*.dll" target="tools" />
+	<file src="Source\RhetosCLI\bin\Debug*.pdb" target="tools" />
+	<file src="Source\RhetosCLI\bin\Debug*.xml" target="tools" />
+	<file src="Source\MSBuildExtension\bin\Debug*.dll" target="build\bin" />
+	<file src="Source\MSBuildExtension\bin\Debug*.pdb" target="build\bin" />
+	<file src="Source\MSBuildExtension\Rhetos.targets" target="build" />
   </files>
 </package>

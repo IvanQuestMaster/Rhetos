@@ -67,7 +67,7 @@ namespace Rhetos.MSBuildExtension
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Log.LogMessage(MessageImportance.High, "Rhetos gneretae task: " + e.Message);
                 return false;
             }
 

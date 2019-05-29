@@ -39,6 +39,12 @@ namespace Rhetos.MSBuildExtension
 
         public override bool Execute()
         {
+            Log.LogMessage(MessageImportance.High, "Assembly.GetExecutingAssembly().Location: " + Assembly.GetExecutingAssembly().Location);
+            Log.LogMessage(MessageImportance.High, "Directory.GetCurrentDirectory: " + Directory.GetCurrentDirectory());
+            Log.LogMessage(MessageImportance.High, "Environment.CurrentDirectory: " + Environment.CurrentDirectory);
+            /*var a1 = Directory.GetCurrentDirectory();
+            var a2 = Environment.CurrentDirectory;*/
+
             projectFolderFullPath = Path.GetDirectoryName(ProjectFullPath);
             generatedFolderFullPath = Path.Combine(projectFolderFullPath, OutputFolder);
             references = References.Select(x => x.ToString()).ToList();
@@ -55,7 +61,10 @@ namespace Rhetos.MSBuildExtension
                 using (Process myProcess = new Process())
                 {
                     myProcess.StartInfo.UseShellExecute = false;
-                    myProcess.StartInfo.FileName = @"..\..\..\RhetosCLI\bin\Debug";
+                    var extensionDirecrtory = new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+                    var executableFilePath = Path.Combine(extensionDirecrtory.Parent.Parent.FullName, @"tools\RhetosCLI.exe");
+                    Log.LogMessage(MessageImportance.High, "executableFilePath: " + executableFilePath);
+                    myProcess.StartInfo.FileName = executableFilePath;
                     myProcess.StartInfo.CreateNoWindow = true;
                     myProcess.StartInfo.Arguments = "generate" + " " + string.Join(" ", references.Select(x => "--reference \"" + x + "\"").ToArray()) +
                          " " + string.Join(" ", packagesPaths.Select(x => "--package \"" + x + "\"").ToArray()) + 

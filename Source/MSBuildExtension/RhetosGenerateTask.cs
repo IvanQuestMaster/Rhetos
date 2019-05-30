@@ -42,8 +42,6 @@ namespace Rhetos.MSBuildExtension
             Log.LogMessage(MessageImportance.High, "Assembly.GetExecutingAssembly().Location: " + Assembly.GetExecutingAssembly().Location);
             Log.LogMessage(MessageImportance.High, "Directory.GetCurrentDirectory: " + Directory.GetCurrentDirectory());
             Log.LogMessage(MessageImportance.High, "Environment.CurrentDirectory: " + Environment.CurrentDirectory);
-            /*var a1 = Directory.GetCurrentDirectory();
-            var a2 = Environment.CurrentDirectory;*/
 
             projectFolderFullPath = Path.GetDirectoryName(ProjectFullPath);
             generatedFolderFullPath = Path.Combine(projectFolderFullPath, OutputFolder);
@@ -71,12 +69,14 @@ namespace Rhetos.MSBuildExtension
                         " --output-folder " + generatedFolderFullPath + " --project-folder " + projectFolderFullPath;
                     Log.LogMessage(MessageImportance.High, "Command line arguments: " + myProcess.StartInfo.Arguments);
                     myProcess.OutputDataReceived += MyProcess_OutputDataReceived;
+                    myProcess.ErrorDataReceived += MyProcess_ErrorDataReceived;
                     myProcess.Start();
+                    myProcess.WaitForExit();
                 }
             }
             catch (Exception e)
             {
-                Log.LogMessage(MessageImportance.High, "Rhetos gneretae task: " + e.Message);
+                Log.LogErrorFromException(e, true);
                 return false;
             }
 
@@ -86,6 +86,11 @@ namespace Rhetos.MSBuildExtension
         private void MyProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             Log.LogMessage(MessageImportance.High, e.Data);
+        }
+
+        private void MyProcess_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            Log.LogError(e.Data);
         }
     }
 }

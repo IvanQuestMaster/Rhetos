@@ -51,16 +51,32 @@ namespace Rhetos.Utilities
         private static string _projectFolder;
         private static string _pluginsFolder;
         private static string _generatedFolder;
+        private static string _domAssemblyName;
         private static string[] _packagesFolder;
         private static string[] _references;
 
-        public static void InitializePaths(string projectFolder, string pluginsFolder, string generatedFolder, string[] packagesFolder, string[] references)
+        public static void InitializePathsForGenerateTask(string projectFolder, string generatedFolder, string[] packagesFolder, string[] references)
         {
+            if (_implicitlyInitialized == true)
+                throw new Exception("The class Paths is already initialized.");
+
             _projectFolder = projectFolder;
-            _pluginsFolder = pluginsFolder;
             _generatedFolder = generatedFolder;
             _packagesFolder = packagesFolder;
             _references = references;
+
+            IsRhetosServer = false;
+            _implicitlyInitialized = true;
+        }
+
+        public static void InitializePaths(string pluginsFolder, string generatedFolder, string domAssemblyName)
+        {
+            if (_implicitlyInitialized == true)
+                throw new Exception("The class Paths is already initialized.");
+
+            _pluginsFolder = pluginsFolder;
+            _generatedFolder = generatedFolder;
+            _domAssemblyName = domAssemblyName;
 
             IsRhetosServer = false;
             _implicitlyInitialized = true;
@@ -118,7 +134,7 @@ namespace Rhetos.Utilities
         public static string BinFolder => Path.Combine(RhetosServerRootPath, "bin");
         public static string GeneratedFolder {
             get {
-                if (_generatedFolder != null)
+                if (_implicitlyInitialized)
                     return _generatedFolder;
                 else
                     return Path.Combine(RhetosServerRootPath, "bin\\Generated");
@@ -128,7 +144,7 @@ namespace Rhetos.Utilities
         {
             get
             {
-                if (_generatedFolder != null)
+                if (_implicitlyInitialized)
                     return Path.Combine(_generatedFolder, "Cache");
                 else
                     return Path.Combine(RhetosServerRootPath, "GeneratedFilesCache");
@@ -138,7 +154,7 @@ namespace Rhetos.Utilities
         {
             get
             {
-                if (_pluginsFolder != null)
+                if (_implicitlyInitialized)
                     return _pluginsFolder;
                 else
                     return Path.Combine(RhetosServerRootPath, "bin\\Plugins");
@@ -157,10 +173,9 @@ namespace Rhetos.Utilities
         {
             get
             {
-                if (_pluginsFolder != null)
+                if (_implicitlyInitialized)
                 {
-                    var asseblies = Directory.GetFiles(_pluginsFolder, "*.dll").Union(Directory.GetFiles(_pluginsFolder, "*.exe")).OrderByDescending(x => File.GetLastWriteTime(x));
-                    return asseblies.Take(1); //HACK: This should look for the assembly that contains teh DomRepository
+                    return new List<string> { Path.Combine(_pluginsFolder, _domAssemblyName)};
                 }
                 else
                 {

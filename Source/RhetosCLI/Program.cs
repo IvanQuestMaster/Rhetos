@@ -64,7 +64,7 @@ namespace RhetosCLI
 
         static void ExecuteGenerateCommand(MainArgs args)
         {
-            Paths.InitializePaths(args.ProjectFolder, args.PluginsFolder, args.OutputFolder, args.Packages.ToArray(), args.References.ToArray());
+            Paths.InitializePathsForGenerateTask(args.ProjectFolder, args.OutputFolder, args.Packages.ToArray(), args.References.ToArray());
             SqlUtility.Initialize(args.DatabaseLanguage);
             ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", "", "Rhetos.MsSql"));
 
@@ -123,7 +123,7 @@ namespace RhetosCLI
 
         private static void ExecuteDeployCommand(MainArgs args)
         {
-            Paths.InitializePaths(args.ProjectFolder, args.PluginsFolder, args.OutputFolder, args.Packages.ToArray(), new string[0]);
+            Paths.InitializePaths(args.PluginsFolder, args.OutputFolder, "");
             ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", args.ConnectionString, "Rhetos." + args.DatabaseLanguage));
 
             AppDomain.CurrentDomain.AssemblyResolve += SearchForAssembly;

@@ -12,7 +12,7 @@
 		<Folder Include="Generated" />
 	</ItemGroup>	
 	<UsingTask TaskName="RhetosGenerateTask" AssemblyFile="bin\MSBuildExtension.dll" />
-	<Target Name="RhetosGenerate" DependsOnTargets="ResolveProjectReferences;ResolveAssemblyReferences;Restore" BeforeTargets="CoreCompile">
+	<Target Name="RhetosGenerate" AfterTargets="ResolveProjectReferences;ResolveAssemblyReferences;Restore" BeforeTargets="CoreCompile">
 		<RhetosGenerateTask References="@(_ResolveAssemblyReferenceResolvedFiles)" NugetFolder="$(NuGetPackageFolders)" ResolvedPackagesFile="$(ProjectAssetsFile)" ProjectFullPath="$(MSBuildProjectFullPath)" OutputFolder="$(RhetosGeneratedFolder)" />
 		<Copy SourceFiles="$(RhetosGeneratedFolder)ServerDom.Repositories.cs;$(RhetosGeneratedFolder)ServerDom.Model.cs;$(RhetosGeneratedFolder)ServerDom.Orm.cs;" DestinationFolder="Generated"/>
 	</Target>

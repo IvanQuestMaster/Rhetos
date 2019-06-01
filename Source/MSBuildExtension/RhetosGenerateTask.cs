@@ -28,10 +28,8 @@ namespace Rhetos.MSBuildExtension
 
         [Required]
         public string OutputFolder { get; set; }
-
-#if DEBUG
-        public bool WaitForDebugger{ get; set; }
-#endif
+        
+        public string AdditionalCommandLineArguments { get; set; }
 
         private List<string> references;
 
@@ -43,10 +41,6 @@ namespace Rhetos.MSBuildExtension
 
         public override bool Execute()
         {
-            Log.LogMessage(MessageImportance.High, "Assembly.GetExecutingAssembly().Location: " + Assembly.GetExecutingAssembly().Location);
-            Log.LogMessage(MessageImportance.High, "Directory.GetCurrentDirectory: " + Directory.GetCurrentDirectory());
-            Log.LogMessage(MessageImportance.High, "Environment.CurrentDirectory: " + Environment.CurrentDirectory);
-
             projectFolderFullPath = Path.GetDirectoryName(ProjectFullPath);
             generatedFolderFullPath = Path.Combine(projectFolderFullPath, OutputFolder);
             references = References.Select(x => x.ToString()).ToList();
@@ -65,16 +59,13 @@ namespace Rhetos.MSBuildExtension
                     myProcess.StartInfo.UseShellExecute = false;
                     var extensionDirecrtory = new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
                     var executableFilePath = Path.Combine(extensionDirecrtory.Parent.Parent.FullName, @"tools\RhetosCLI.exe");
-                    Log.LogMessage(MessageImportance.High, "executableFilePath: " + executableFilePath);
                     myProcess.StartInfo.FileName = executableFilePath;
                     myProcess.StartInfo.CreateNoWindow = true;
                     myProcess.StartInfo.Arguments = "generate" + " " + string.Join(" ", references.Select(x => "--reference \"" + x + "\"").ToArray()) +
                          " " + string.Join(" ", packagesPaths.Select(x => "--package \"" + x + "\"").ToArray()) + 
                         " --output-folder " + generatedFolderFullPath + " --project-folder " + projectFolderFullPath;
-#if DEBUG
-                    if (WaitForDebugger)
-                        myProcess.StartInfo.Arguments += " --wait-for-debugger";
-#endif
+                    if (!string.IsNullOrEmpty(AdditionalCommandLineArguments))
+                        myProcess.StartInfo.Arguments = myProcess.StartInfo.Arguments + " " + AdditionalCommandLineArguments;
 
                     Log.LogMessage(MessageImportance.High, "Command line arguments: " + myProcess.StartInfo.Arguments);
                     myProcess.OutputDataReceived += MyProcess_OutputDataReceived;

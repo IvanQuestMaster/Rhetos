@@ -184,12 +184,7 @@ namespace RhetosCLI
             var assemblyNameToresolve = new AssemblyName(args.Name);
             if (assemblyNameToresolve != null)
             {
-                string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).Name == assemblyNameToresolve.Name);
-                if (reference != null && File.Exists(reference))
-                    return Assembly.LoadFrom(reference);
-            }
-            else {
-                string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).Name == args.Name);
+                string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).FullName == assemblyNameToresolve.FullName);
                 if (reference != null && File.Exists(reference))
                     return Assembly.LoadFrom(reference);
             }

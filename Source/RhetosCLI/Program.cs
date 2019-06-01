@@ -87,6 +87,7 @@ namespace RhetosCLI
             ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", "", "Rhetos.MsSql"));
 
             ILogger logger = new ConsoleLogger("DeployPackages"); // Using the simplest logger outside of try-catch block.
+            ConsoleLogger.MinLevel = EventType.Trace;
             DeployArguments arguments = new DeployArguments(new string[] { "/ExecuteGeneratorsOnly"});
 
             try
@@ -184,7 +185,12 @@ namespace RhetosCLI
             var assemblyNameToresolve = new AssemblyName(args.Name);
             if (assemblyNameToresolve != null)
             {
-                string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).FullName == assemblyNameToresolve.FullName);
+                string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).Name == assemblyNameToresolve.Name);
+                if (reference != null && File.Exists(reference))
+                    return Assembly.LoadFrom(reference);
+            }
+            {
+                string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).FullName == args.Name);
                 if (reference != null && File.Exists(reference))
                     return Assembly.LoadFrom(reference);
             }

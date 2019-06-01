@@ -44,13 +44,31 @@ namespace RhetosCLI
                 { "h|help",  "show this message and exit",
                    v => mainArgs.ShowHelp = v != null },
             };
+
+#if DEBUG
+            p.Add("wait-for-debugger", v => mainArgs.WaitForDebugger = v != null);
+#endif
+
             p.Parse(args);
+
+#if DEBUG
+            if (mainArgs.WaitForDebugger)
+            {
+                while (!Debugger.IsAttached)
+                {
+                    Thread.Sleep(100);
+                }
+            }
+#endif
 
             if (mainArgs.ShowHelp || command.Equals("help", StringComparison.InvariantCultureIgnoreCase))
                 ShowHelp(p);
 
             if (command.Equals("generate", StringComparison.InvariantCultureIgnoreCase))
+            {
+                AppDomain.CurrentDomain.AssemblyResolve += SearchForAssemblyInReferences;
                 ExecuteGenerateCommand(mainArgs);
+            }
 
             if (command.Equals("deploy", StringComparison.InvariantCultureIgnoreCase))
                 ExecuteDeployCommand(mainArgs);
@@ -74,7 +92,6 @@ namespace RhetosCLI
             try
             {
                 logger = DeploymentUtility.InitializationLogProvider.GetLogger("DeployPackages"); // Setting the final log provider inside the try-catch block, so that the simple ConsoleLogger can be used (see above) in case of an initialization error.
-
                 InitialCleanup(logger);
                 GenerateApplication(logger, arguments);
               
@@ -126,7 +143,7 @@ namespace RhetosCLI
             Paths.InitializePaths(args.PluginsFolder, args.OutputFolder, "");
             ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", args.ConnectionString, "Rhetos." + args.DatabaseLanguage));
 
-            AppDomain.CurrentDomain.AssemblyResolve += SearchForAssembly;
+            AppDomain.CurrentDomain.AssemblyResolve += SearchForAssemblyInPlugins;
 
             ILogger logger = new ConsoleLogger("DeployPackages"); // Using the simplest logger outside of try-catch block.
             DeployArguments arguments = new DeployArguments(new string[] { });
@@ -161,12 +178,30 @@ namespace RhetosCLI
             }
         }
 
-        protected static Assembly SearchForAssembly(object sender, ResolveEventArgs args)
+        protected static Assembly SearchForAssemblyInReferences(object sender, ResolveEventArgs args)
+        {
+            var a = Paths.References.Select(x => AssemblyName.GetAssemblyName(x).FullName);
+            var assemblyNameToresolve = new AssemblyName(args.Name);
+            if (assemblyNameToresolve != null)
+            {
+                string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).Name == assemblyNameToresolve.Name);
+                if (reference != null && File.Exists(reference))
+                    return Assembly.LoadFrom(reference);
+            }
+            else {
+                string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).Name == args.Name);
+                if (reference != null && File.Exists(reference))
+                    return Assembly.LoadFrom(reference);
+            }
+            return null;
+        }
+
+        protected static Assembly SearchForAssemblyInPlugins(object sender, ResolveEventArgs args)
         {
             string pluginAssemblyPath = Path.Combine(Paths.PluginsFolder, new AssemblyName(args.Name).Name + ".dll");
             if (File.Exists(pluginAssemblyPath))
                 return Assembly.LoadFrom(pluginAssemblyPath);
-            string reference = Paths.References.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == args.Name);
+            string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).FullName == args.Name);
             if ( reference!= null && File.Exists(reference))
                 return Assembly.LoadFrom(reference);
             return null;

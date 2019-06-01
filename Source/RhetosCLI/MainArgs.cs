@@ -16,6 +16,7 @@ namespace RhetosCLI
         public bool ShowHelp { get; set; }
         public string DatabaseLanguage { get; set; }
         public string ConnectionString{ get; set; }
+        public bool WaitForDebugger;
 
         public MainArgs()
         {

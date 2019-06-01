@@ -29,6 +29,10 @@ namespace Rhetos.MSBuildExtension
         [Required]
         public string OutputFolder { get; set; }
 
+#if DEBUG
+        public bool WaitForDebugger{ get; set; }
+#endif
+
         private List<string> references;
 
         private List<string> packagesPaths;
@@ -67,6 +71,11 @@ namespace Rhetos.MSBuildExtension
                     myProcess.StartInfo.Arguments = "generate" + " " + string.Join(" ", references.Select(x => "--reference \"" + x + "\"").ToArray()) +
                          " " + string.Join(" ", packagesPaths.Select(x => "--package \"" + x + "\"").ToArray()) + 
                         " --output-folder " + generatedFolderFullPath + " --project-folder " + projectFolderFullPath;
+#if DEBUG
+                    if (WaitForDebugger)
+                        myProcess.StartInfo.Arguments += " --wait-for-debugger";
+#endif
+
                     Log.LogMessage(MessageImportance.High, "Command line arguments: " + myProcess.StartInfo.Arguments);
                     myProcess.OutputDataReceived += MyProcess_OutputDataReceived;
                     myProcess.ErrorDataReceived += MyProcess_ErrorDataReceived;

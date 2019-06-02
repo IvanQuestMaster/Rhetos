@@ -53,9 +53,8 @@ namespace Rhetos.Utilities
         private static string _generatedFolder;
         private static string _domAssemblyName;
         private static string[] _packagesFolder;
-        private static string[] _references;
 
-        public static void InitializePathsForGenerateTask(string projectFolder, string generatedFolder, string[] packagesFolder, string[] references)
+        public static void InitializePathsForGenerateTask(string projectFolder, string generatedFolder, string[] packagesFolder)
         {
             if (_implicitlyInitialized == true)
                 throw new Exception("The class Paths is already initialized.");
@@ -63,7 +62,6 @@ namespace Rhetos.Utilities
             _projectFolder = projectFolder;
             _generatedFolder = generatedFolder;
             _packagesFolder = packagesFolder;
-            _references = references;
 
             IsRhetosServer = false;
             _implicitlyInitialized = true;
@@ -161,7 +159,6 @@ namespace Rhetos.Utilities
             }
         }
         public static string[] PackagesFolder => _packagesFolder;
-        public static string[] References => _references;
         public static string ProjectFolder => _projectFolder;
         public static string RhetosServerWebConfigFile => Path.Combine(RhetosServerRootPath, "Web.config");
         public static string ConnectionStringsFile => Path.Combine(RhetosServerRootPath, @"bin\ConnectionStrings.config");

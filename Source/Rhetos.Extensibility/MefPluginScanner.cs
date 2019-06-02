@@ -39,6 +39,12 @@ namespace Rhetos.Extensibility
         /// </summary>
         private static MultiDictionary<string, PluginInfo> _pluginsByExport = null;
         private static object _pluginsLock = new object();
+        private static List<string> _assemblyList;
+
+        internal static void SetAssemblyList(List<string> assemblyList)
+        {
+            _assemblyList = assemblyList;
+        }
 
         /// <summary>
         /// Returns plugins that are registered for the given interface, sorted by dependencies (MefPovider.DependsOn).
@@ -66,16 +72,20 @@ namespace Rhetos.Extensibility
 
         private static List<string> ListAssemblies()
         {
+            if (_assemblyList != null)
+                return _assemblyList;
+
             var stopwatch = Stopwatch.StartNew();
-            var assemblies = new List<string>();
-            if (Paths.References != null && Paths.References.Length > 0)
-            {
-                assemblies = Paths.References.ToList();
-            }
-            else {
-                string[] pluginsPath = new[] { Paths.PluginsFolder, Paths.GeneratedFolder }.Union(Paths.References).ToArray();
-                assemblies = Directory.GetFiles(Paths.PluginsFolder, "*.dll").Union(Directory.GetFiles(Paths.PluginsFolder, "*.exe")).ToList();
-            }
+
+            string[] pluginsPath = new[] { Paths.PluginsFolder, Paths.GeneratedFolder };
+
+            List<string> assemblies = new List<string>();
+            foreach (var path in pluginsPath)
+                if (File.Exists(path))
+                    assemblies.Add(Path.GetFullPath(path));
+                else if (Directory.Exists(path))
+                    assemblies.AddRange(Directory.GetFiles(path, "*.dll", SearchOption.AllDirectories));
+            // If the path does not exist, it may be generated later (see DetectAndRegisterNewModulesAndPlugins).
 
             assemblies.Sort();
 

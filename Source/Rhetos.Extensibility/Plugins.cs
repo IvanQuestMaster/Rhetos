@@ -33,6 +33,18 @@ namespace Rhetos.Extensibility
     {
         #region Global initialization
 
+        private static bool _initialized = false;
+
+        public static void Initialize(IEnumerable<string> assemblyList)
+        {
+            if (_initialized)
+                throw new Exception("Type Plugins has already been initialized.");
+
+            MefPluginScanner.SetAssemblyList(assemblyList.ToList());
+            _initialized = true;
+
+        }
+
         /// <summary>Plugins class is usually used before IoC container is built, so we use this
         /// improvised way of handling the logging, instead of using IoC registered components.</summary>
         public static void SetInitializationLogging(ILogProvider logProvider)

@@ -20,6 +20,8 @@ namespace RhetosCLI
 {
     class Program
     {
+        private static MainArgs _mainArguments;
+
         static void Main(string[] args)
         {
             var mainArgs = new MainArgs();
@@ -50,7 +52,7 @@ namespace RhetosCLI
 #endif
 
             p.Parse(args);
-
+            _mainArguments = mainArgs;
 #if DEBUG
             if (mainArgs.WaitForDebugger)
             {
@@ -82,7 +84,7 @@ namespace RhetosCLI
 
         static void ExecuteGenerateCommand(MainArgs args)
         {
-            Paths.InitializePathsForGenerateTask(args.ProjectFolder, args.OutputFolder, args.Packages.ToArray(), args.References.ToArray());
+            Paths.InitializePathsForGenerateTask(args.ProjectFolder, args.OutputFolder, args.Packages.ToArray());
             SqlUtility.Initialize(args.DatabaseLanguage);
             ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", "", "Rhetos.MsSql"));
 
@@ -181,16 +183,16 @@ namespace RhetosCLI
 
         protected static Assembly SearchForAssemblyInReferences(object sender, ResolveEventArgs args)
         {
-            var a = Paths.References.Select(x => AssemblyName.GetAssemblyName(x).FullName);
+            var a = _mainArguments.References.Select(x => AssemblyName.GetAssemblyName(x).FullName);
             var assemblyNameToresolve = new AssemblyName(args.Name);
             if (assemblyNameToresolve != null)
             {
-                string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).Name == assemblyNameToresolve.Name);
+                string reference = _mainArguments.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).Name == assemblyNameToresolve.Name);
                 if (reference != null && File.Exists(reference))
                     return Assembly.LoadFrom(reference);
             }
             {
-                string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).FullName == args.Name);
+                string reference = _mainArguments.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).FullName == args.Name);
                 if (reference != null && File.Exists(reference))
                     return Assembly.LoadFrom(reference);
             }
@@ -202,9 +204,6 @@ namespace RhetosCLI
             string pluginAssemblyPath = Path.Combine(Paths.PluginsFolder, new AssemblyName(args.Name).Name + ".dll");
             if (File.Exists(pluginAssemblyPath))
                 return Assembly.LoadFrom(pluginAssemblyPath);
-            string reference = Paths.References.FirstOrDefault(x => AssemblyName.GetAssemblyName(x).FullName == args.Name);
-            if ( reference!= null && File.Exists(reference))
-                return Assembly.LoadFrom(reference);
             return null;
         }
 

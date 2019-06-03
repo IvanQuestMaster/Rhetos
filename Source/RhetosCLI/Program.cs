@@ -87,6 +87,7 @@ namespace RhetosCLI
             Paths.InitializePathsForGenerateTask(args.ProjectFolder, args.OutputFolder, args.Packages.ToArray());
             SqlUtility.Initialize(args.DatabaseLanguage);
             ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", "", "Rhetos.MsSql"));
+            Plugins.Initialize(args.References);
 
             ILogger logger = new ConsoleLogger("DeployPackages"); // Using the simplest logger outside of try-catch block.
             ConsoleLogger.MinLevel = EventType.Trace;

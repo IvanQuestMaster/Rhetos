@@ -11,6 +11,7 @@
     <copyright>Copyright Omega software 2013</copyright>
     <tags>Rhetos</tags>
     <dependencies>
+	  <dependency id="Rhetos.Core" version="3.0.0-dev" />
       <dependency id="Autofac" version="3.5.2" />
       <dependency id="Autofac.Configuration" version="3.3.0" />
       <dependency id="Autofac.Wcf" version="3.0.1" />
@@ -24,9 +25,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="Source\Rhetos\bin\Rhetos*.dll" target="lib\net451" />
-    <file src="Source\Rhetos\bin\Rhetos*.pdb" target="lib\net451" />
-	<file src="Source\Rhetos\bin\Rhetos*.xml" target="lib\net451" />
 	<file src="Source\RhetosCLI\bin\Debug\*.exe" target="tools" />
 	<file src="Source\RhetosCLI\bin\Debug\*.dll" target="tools" />
 	<file src="Source\RhetosCLI\bin\Debug\*.pdb" target="tools" />

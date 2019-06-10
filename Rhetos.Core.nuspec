@@ -1,0 +1,85 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Rhetos.Core</id>
+    <version>3.0.0-dev</version>
+    <authors>Omega software</authors>
+    <owners>Omega software</owners>
+    <licenseUrl>http://opensource.org/licenses/AGPL-3.0</licenseUrl>
+    <projectUrl>https://github.com/rhetos/rhetos</projectUrl>
+    <description>Rhetos is a DSL framework that enables you to create your own domain-specific language to build server applications.</description>
+    <copyright>Copyright Omega software 2013</copyright>
+    <tags>Rhetos</tags>
+    <dependencies>
+      <dependency id="Autofac" version="3.5.2" />
+      <dependency id="Autofac.Configuration" version="3.3.0" />
+      <dependency id="EntityFramework" version="6.1.3" />
+      <dependency id="Microsoft.Web.Xdt" version="2.1.1" />
+      <dependency id="Newtonsoft.Json" version="6.0.8" />
+      <dependency id="NLog" version="4.5.4.0" />
+      <dependency id="Oracle.ManagedDataAccess" version="12.1.24160719" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Source\Rhetos.XmlSerialization\bin\$configuration$\Rhetos.XmlSerialization.dll" target="lib\net451" />
+    <file src="Source\Rhetos.XmlSerialization\bin\$configuration$\Rhetos.XmlSerialization.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.XmlSerialization\bin\$configuration$\Rhetos.XmlSerialization.xml" target="lib\net451" />
+    <file src="Source\Rhetos.Utilities\bin\$configuration$\Rhetos.Utilities.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Utilities\bin\$configuration$\Rhetos.Utilities.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Utilities\bin\$configuration$\Rhetos.Utilities.xml" target="lib\net451" />
+    <file src="Source\Rhetos.Security\bin\$configuration$\Rhetos.Security.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Security\bin\$configuration$\Rhetos.Security.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Security\bin\$configuration$\Rhetos.Security.xml" target="lib\net451" />		
+    <file src="Source\Rhetos.Security.Interfaces\bin\$configuration$\Rhetos.Security.Interfaces.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Security.Interfaces\bin\$configuration$\Rhetos.Security.Interfaces.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Security.Interfaces\bin\$configuration$\Rhetos.Security.Interfaces.xml" target="lib\net451" />
+    <file src="Source\Rhetos.Processing\bin\$configuration$\Rhetos.Processing.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Processing\bin\$configuration$\Rhetos.Processing.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Processing\bin\$configuration$\Rhetos.Processing.xml" target="lib\net451" />		
+    <file src="Source\Rhetos.Processing.Interfaces\bin\$configuration$\Rhetos.Processing.Interfaces.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Processing.Interfaces\bin\$configuration$\Rhetos.Processing.Interfaces.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Processing.Interfaces\bin\$configuration$\Rhetos.Processing.Interfaces.xml" target="lib\net451" />
+    <file src="Source\Rhetos.Persistence\bin\$configuration$\Rhetos.Persistence.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Persistence\bin\$configuration$\Rhetos.Persistence.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Persistence\bin\$configuration$\Rhetos.Persistence.xml" target="lib\net451" />		
+    <file src="Source\Rhetos.Persistence.Interfaces\bin\$configuration$\Rhetos.Persistence.Interfaces.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Persistence.Interfaces\bin\$configuration$\Rhetos.Persistence.Interfaces.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Persistence.Interfaces\bin\$configuration$\Rhetos.Persistence.Interfaces.xml" target="lib\net451" />
+    <file src="Source\Rhetos.Logging\bin\$configuration$\Rhetos.Logging.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Logging\bin\$configuration$\Rhetos.Logging.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Logging\bin\$configuration$\Rhetos.Logging.xml" target="lib\net451" />		
+    <file src="Source\Rhetos.Logging.Interfaces\bin\$configuration$\Rhetos.Logging.Interfaces.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Logging.Interfaces\bin\$configuration$\Rhetos.Logging.Interfaces.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Logging.Interfaces\bin\$configuration$\Rhetos.Logging.Interfaces.xml" target="lib\net451" />
+    <file src="Source\Rhetos.Extensibility\bin\$configuration$\Rhetos.Extensibility.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Extensibility\bin\$configuration$\Rhetos.Extensibility.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Extensibility\bin\$configuration$\Rhetos.Extensibility.xml" target="lib\net451" />		
+    <file src="Source\Rhetos.Extensibility.Interfaces\bin\$configuration$\Rhetos.Extensibility.Interfaces.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Extensibility.Interfaces\bin\$configuration$\Rhetos.Extensibility.Interfaces.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Extensibility.Interfaces\bin\$configuration$\Rhetos.Extensibility.Interfaces.xml" target="lib\net451" />
+    <file src="Source\Rhetos.Dsl\bin\$configuration$\Rhetos.Dsl.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Dsl\bin\$configuration$\Rhetos.Dsl.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Dsl\bin\$configuration$\Rhetos.Dsl.xml" target="lib\net451" />		
+    <file src="Source\Rhetos.Dsl.Interfaces\bin\$configuration$\Rhetos.Dsl.Interfaces.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Dsl.Interfaces\bin\$configuration$\Rhetos.Dsl.Interfaces.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Dsl.Interfaces\bin\$configuration$\Rhetos.Dsl.Interfaces.xml" target="lib\net451" />
+    <file src="Source\Rhetos.Dom\bin\$configuration$\Rhetos.Dom.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Dom\bin\$configuration$\Rhetos.Dom.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Dom\bin\$configuration$\Rhetos.Dom.xml" target="lib\net451" />		
+    <file src="Source\Rhetos.Dom.Interfaces\bin\$configuration$\Rhetos.Dom.Interfaces.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Dom.Interfaces\bin\$configuration$\Rhetos.Dom.Interfaces.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Dom.Interfaces\bin\$configuration$\Rhetos.Dom.Interfaces.xml" target="lib\net451" />
+    <file src="Source\Rhetos.DatabaseGenerator\bin\$configuration$\Rhetos.DatabaseGenerator.dll" target="lib\net451" />
+    <file src="Source\Rhetos.DatabaseGenerator\bin\$configuration$\Rhetos.DatabaseGenerator.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.DatabaseGenerator\bin\$configuration$\Rhetos.DatabaseGenerator.xml" target="lib\net451" />		
+    <file src="Source\Rhetos.DatabaseGenerator.Interfaces\bin\$configuration$\Rhetos.DatabaseGenerator.Interfaces.dll" target="lib\net451" />
+    <file src="Source\Rhetos.DatabaseGenerator.Interfaces\bin\$configuration$\Rhetos.DatabaseGenerator.Interfaces.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.DatabaseGenerator.Interfaces\bin\$configuration$\Rhetos.DatabaseGenerator.Interfaces.xml" target="lib\net451" />
+    <file src="Source\Rhetos.Compiler\bin\$configuration$\Rhetos.Compiler.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Compiler\bin\$configuration$\Rhetos.Compiler.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Compiler\bin\$configuration$\Rhetos.Compiler.xml" target="lib\net451" />		
+    <file src="Source\Rhetos.Compiler.Interfaces\bin\$configuration$\Rhetos.Compiler.Interfaces.dll" target="lib\net451" />
+    <file src="Source\Rhetos.Compiler.Interfaces\bin\$configuration$\Rhetos.Compiler.Interfaces.pdb" target="lib\net451" />
+	<file src="Source\Rhetos.Compiler.Interfaces\bin\$configuration$\Rhetos.Compiler.Interfaces.xml" target="lib\net451" />	
+  </files>
+</package>

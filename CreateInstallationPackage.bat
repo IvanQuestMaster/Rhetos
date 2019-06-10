@@ -13,6 +13,7 @@ REM Packing the files with an older version of nuget.exe for backward compatibil
 IF NOT EXIST Install\NuGet.exe POWERSHELL (New-Object System.Net.WebClient).DownloadFile('https://dist.nuget.org/win-x86-commandline/v4.5.1/nuget.exe', 'Install\NuGet.exe') || GOTO Error0
 
 Install\NuGet.exe pack Rhetos.nuspec -OutputDirectory Install || GOTO Error0
+Install\NuGet.exe pack Rhetos.Core.nuspec -OutputDirectory Install  -Prop Configuration=%Config% || GOTO Error0
 Install\NuGet.exe pack CommonConcepts\Rhetos.CommonConcepts.nuspec -OutputDirectory Install || GOTO Error0
 
 MD Install\RhetosServer

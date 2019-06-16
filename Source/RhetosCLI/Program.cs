@@ -15,6 +15,7 @@ using Rhetos.Logging;
 using Rhetos.Utilities;
 using System.Configuration;
 using System.Threading;
+using Newtonsoft.Json.Linq;
 
 namespace RhetosCLI
 {
@@ -37,6 +38,8 @@ namespace RhetosCLI
                    v => mainArgs.PluginsFolder = v },
                 { "p|package=",
                    v => mainArgs.Packages.Add (v) },
+                { "packages-file=",
+                   v => mainArgs.PackagesFile = v },
                 { "r|reference=",
                    v => mainArgs.References.Add (v) },
                 { "database-language=",
@@ -198,6 +201,17 @@ namespace RhetosCLI
                     return Assembly.LoadFrom(reference);
             }
             return null;
+        }
+
+        private InstalledPackages GetSortedPackages(MainArgs args)
+        {
+            var resolvedPackages = JArray.Parse(File.ReadAllText(args.PackagesFile));
+            var packages = new List<InstalledPackage>();
+            foreach (var package in resolvedPackages)
+            {
+                packages.Add(new InstalledPackage(package["id"].ToString(), package["version"].ToString(), new List<PackageRequest>(), package["path"].ToString(),new PackageRequest(),  null));
+            }
+            return new InstalledPackages(packages);
         }
 
         protected static Assembly SearchForAssemblyInPlugins(object sender, ResolveEventArgs args)

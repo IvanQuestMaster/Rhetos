@@ -16,6 +16,7 @@ using Rhetos.Utilities;
 using System.Configuration;
 using System.Threading;
 using Newtonsoft.Json.Linq;
+using Autofac.Features.Indexed;
 
 namespace RhetosCLI
 {
@@ -91,6 +92,7 @@ namespace RhetosCLI
             SqlUtility.Initialize(args.DatabaseLanguage);
             ConfigUtility.Initialize(new Dictionary<string, string>(), new ConnectionStringSettings("ServerConnectionString", "", "Rhetos.MsSql"));
             Plugins.Initialize(args.References);
+            Plugins.SetInitializationLogging(DeploymentUtility.InitializationLogProvider);
 
             ILogger logger = new ConsoleLogger("DeployPackages"); // Using the simplest logger outside of try-catch block.
             ConsoleLogger.MinLevel = EventType.Trace;
@@ -100,8 +102,38 @@ namespace RhetosCLI
             {
                 logger = DeploymentUtility.InitializationLogProvider.GetLogger("DeployPackages"); // Setting the final log provider inside the try-catch block, so that the simple ConsoleLogger can be used (see above) in case of an initialization error.
                 InitialCleanup(logger);
-                GenerateApplication(logger, arguments);
-              
+
+                logger.Trace("Loading plugins.");
+                var stopwatch = Stopwatch.StartNew();
+
+                var moduleBuilder = new ContainerBuilder();
+                moduleBuilder.RegisterGeneric(typeof(PluginsContainer<>)).As(typeof(IPluginsContainer<>)).InstancePerLifetimeScope();
+                Plugins.FindAndRegisterPlugins<IRhetosGenerationModule>(moduleBuilder);
+                var builder = new ContainerBuilder();
+                using (var moduleContainer = moduleBuilder.Build())
+                {
+                    var a = moduleContainer.Resolve<IEnumerable<IRhetosGenerationModule>>();
+                    var modules = moduleContainer.Resolve<IIndex<Type, IEnumerable<IRhetosGenerationModule>>>();
+                    foreach (var rhetosModule in modules[typeof(IRhetosGenerationModule)])
+                    {
+                        rhetosModule.Load(builder);
+                    }
+                }
+
+                builder.RegisterInstance(logger).As<ILogger>();
+
+                using (var container = builder.Build())
+                {
+                    var performanceLogger = container.Resolve<ILogProvider>().GetLogger("Performance");
+                    performanceLogger.Write(stopwatch, "DeployPackages.Program: Modules and plugins registered.");
+                    Plugins.LogRegistrationStatistics("Generating application", container);
+
+                    if (arguments.Debug)
+                        container.Resolve<DomGeneratorOptions>().Debug = true;
+
+                    container.Resolve<ApplicationGenerator>().ExecuteGenerators(arguments);
+                }
+
                 logger.Trace("Done.");
             }
             catch (Exception ex)
@@ -120,29 +152,6 @@ namespace RhetosCLI
             var filesUtility = new FilesUtility(DeploymentUtility.InitializationLogProvider);
             new GeneratedFilesCache(DeploymentUtility.InitializationLogProvider).MoveGeneratedFilesToCache();
             filesUtility.SafeCreateDirectory(Paths.GeneratedFolder);
-        }
-
-        private static void GenerateApplication(ILogger logger, DeployArguments arguments)
-        {
-            logger.Trace("Loading plugins.");
-            var stopwatch = Stopwatch.StartNew();
-
-            var builder = new ContainerBuilder();
-            builder.RegisterModule(new AutofacModuleConfiguration(
-                deploymentTime: true,
-                configurationArguments: arguments));
-
-            using (var container = builder.Build())
-            {
-                var performanceLogger = container.Resolve<ILogProvider>().GetLogger("Performance");
-                performanceLogger.Write(stopwatch, "DeployPackages.Program: Modules and plugins registered.");
-                Plugins.LogRegistrationStatistics("Generating application", container);
-
-                if (arguments.Debug)
-                    container.Resolve<DomGeneratorOptions>().Debug = true;
-
-                container.Resolve<ApplicationGenerator>().ExecuteGenerators(arguments);
-            }
         }
 
         private static void ExecuteDeployCommand(MainArgs args)

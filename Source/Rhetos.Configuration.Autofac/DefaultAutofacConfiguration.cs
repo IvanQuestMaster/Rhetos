@@ -23,6 +23,8 @@ using Rhetos.Deployment;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Rhetos.Extensibility;
+using System.ComponentModel.Composition;
 
 namespace Rhetos.Configuration.Autofac
 {

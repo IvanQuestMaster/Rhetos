@@ -26,6 +26,7 @@ using Rhetos.Dsl;
 using Rhetos.Compiler;
 using System.Diagnostics.Contracts;
 using Rhetos.Extensibility;
+using System.ComponentModel.Composition;
 
 namespace Rhetos.Configuration.Autofac
 {
@@ -49,6 +50,18 @@ namespace Rhetos.Configuration.Autofac
             }
 
             base.Load(builder);
+        }
+    }
+
+    [Export(typeof(IRhetosGenerationModule))]
+    public class CompilerConfiguration2 : IRhetosGenerationModule
+    {
+        public void Load(ContainerBuilder builder)
+        {
+            builder.RegisterType<CodeBuilder>().As<ICodeBuilder>();
+            builder.RegisterType<CodeGenerator>().As<ICodeGenerator>();
+            builder.RegisterType<AssemblyGenerator>().As<IAssemblyGenerator>();
+            Plugins.FindAndRegisterPlugins<IConceptCodeGenerator>(builder);
         }
     }
 }

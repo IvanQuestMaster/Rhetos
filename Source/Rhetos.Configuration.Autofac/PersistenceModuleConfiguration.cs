@@ -20,6 +20,7 @@
 using Autofac;
 using Rhetos.Extensibility;
 using Rhetos.Persistence;
+using System.ComponentModel.Composition;
 
 namespace Rhetos.Configuration.Autofac
 {
@@ -47,6 +48,18 @@ namespace Rhetos.Configuration.Autofac
             }
 
             base.Load(builder);
+        }
+    }
+
+    [Export(typeof(IRhetosGenerationModule))]
+    public class PersistenceModuleConfiguration2 : IRhetosGenerationModule
+    {
+        public void Load(ContainerBuilder builder)
+        {
+            builder.RegisterType<EdmxGenerator>().As<IGenerator>();
+            builder.RegisterType<EntityFrameworkMappingGenerator>().As<IGenerator>();
+            Plugins.FindAndRegisterPlugins<IConceptMapping>(builder, typeof(ConceptMapping<>));
+            Plugins.FindAndRegisterPlugins<IEdmxCodeGenerator>(builder);
         }
     }
 }

@@ -19,6 +19,7 @@
 
 using Autofac;
 using Rhetos.Extensibility;
+using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 
 namespace Rhetos.Configuration.Autofac
@@ -35,6 +36,18 @@ namespace Rhetos.Configuration.Autofac
             Plugins.FindAndRegisterModules(builder);
 
             base.Load(builder);
+        }
+    }
+
+    [Export(typeof(IRhetosGenerationModule))]
+    public class ExtensibilityModuleConfiguration2 : IRhetosGenerationModule
+    {
+        public void Load(ContainerBuilder builder)
+        {
+            builder.RegisterGeneric(typeof(PluginsMetadataCache<>)).SingleInstance();
+            builder.RegisterGeneric(typeof(PluginsContainer<>)).As(typeof(IPluginsContainer<>)).InstancePerLifetimeScope();
+            builder.RegisterGeneric(typeof(NamedPlugins<>)).As(typeof(INamedPlugins<>)).InstancePerLifetimeScope();
+            Plugins.FindAndRegisterModules(builder);
         }
     }
 }

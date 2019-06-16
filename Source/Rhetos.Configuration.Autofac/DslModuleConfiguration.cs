@@ -20,6 +20,7 @@
 using Autofac;
 using Rhetos.Dsl;
 using Rhetos.Extensibility;
+using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 
 namespace Rhetos.Configuration.Autofac
@@ -61,6 +62,25 @@ namespace Rhetos.Configuration.Autofac
             builder.RegisterType<DslModelIndexByReference>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
 
             base.Load(builder);
+        }
+    }
+
+    [Export(typeof(IRhetosGenerationModule))]
+    public class DomModuleConfiguration2 : IRhetosGenerationModule
+    {
+        public void Load(ContainerBuilder builder)
+        {
+            builder.RegisterType<DiskDslScriptLoader>().As<IDslScriptsProvider>().SingleInstance();
+            builder.RegisterType<Tokenizer>().SingleInstance();
+            builder.RegisterType<DslModelFile>().As<IDslModelFile>().SingleInstance();
+            builder.RegisterType<DslParser>().As<IDslParser>();
+            builder.RegisterType<MacroOrderRepository>().As<IMacroOrderRepository>();
+            builder.RegisterType<ConceptMetadata>().SingleInstance();
+            Plugins.FindAndRegisterPlugins<IConceptInfo>(builder);
+            Plugins.FindAndRegisterPlugins<IConceptMacro>(builder, typeof(IConceptMacro<>));
+            builder.RegisterType<DslModel>().As<IDslModel>().SingleInstance();
+            builder.RegisterType<DslContainer>();
+            Plugins.FindAndRegisterPlugins<IDslModelIndex>(builder);
         }
     }
 }

@@ -26,6 +26,7 @@ using Rhetos.Processing;
 using System.Diagnostics.Contracts;
 using Rhetos.XmlSerialization;
 using Rhetos.Extensibility;
+using System.ComponentModel.Composition;
 
 namespace Rhetos.Configuration.Autofac
 {

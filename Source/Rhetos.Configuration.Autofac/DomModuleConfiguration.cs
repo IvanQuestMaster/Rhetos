@@ -24,6 +24,8 @@ using System.Text;
 using Autofac;
 using Rhetos.Dom;
 using System.Diagnostics.Contracts;
+using System.ComponentModel.Composition;
+using Rhetos.Extensibility;
 
 namespace Rhetos.Configuration.Autofac
 {
@@ -47,6 +49,16 @@ namespace Rhetos.Configuration.Autofac
                 builder.RegisterType<DomLoader>().As<IDomainObjectModel>().SingleInstance();
 
             base.Load(builder);
+        }
+    }
+
+    [Export(typeof(IRhetosGenerationModule))]
+    public class DomModuleConfiguration2 : IRhetosGenerationModule
+    {
+        public void Load(ContainerBuilder builder)
+        {
+            builder.RegisterType<DomGeneratorOptions>().SingleInstance();
+            builder.RegisterType<DomGenerator>().As<IDomainObjectModel>().SingleInstance();
         }
     }
 }

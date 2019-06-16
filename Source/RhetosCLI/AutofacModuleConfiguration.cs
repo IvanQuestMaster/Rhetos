@@ -25,6 +25,7 @@ using Rhetos.Logging;
 using Rhetos.Security;
 using Rhetos.Utilities;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 
 namespace RhetosCLI
 {
@@ -70,6 +71,30 @@ namespace RhetosCLI
             builder.RegisterInstance(DeploymentUtility.InitializationLogProvider).As<ILogProvider>(); // InitializationLogProvider allows overriding deployment logging (both within and outside IoC).
 
             base.Load(builder);
+        }
+    }
+
+    [Export(typeof(IRhetosGenerationModule))]
+    public class AutofacModuleConfiguration2 : IRhetosGenerationModule
+    {
+        IConfiguration _configuration;
+
+        public AutofacModuleConfiguration2(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+        public void Load(ContainerBuilder builder)
+        {
+            builder.RegisterModule(new DatabaseGeneratorModuleConfiguration(_configuration.GetBool("Rhetos.ShortTransactions", false).Value));
+            builder.RegisterType<DataMigration>();
+            builder.RegisterType<DatabaseCleaner>();
+            builder.RegisterType<ApplicationGenerator>();
+            Plugins.FindAndRegisterPlugins<IGenerator>(builder);
+
+            // Specific registrations override:
+            builder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
+            builder.RegisterInstance(DeploymentUtility.InitializationLogProvider).As<ILogProvider>(); // InitializationLogProvider allows overriding deployment logging (both within and outside IoC).
         }
     }
 }

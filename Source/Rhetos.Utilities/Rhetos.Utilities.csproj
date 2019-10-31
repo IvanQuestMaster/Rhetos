@@ -147,6 +147,7 @@
     <Compile Include="ApplicationConfiguration\IConfigurationSource.cs" />
     <Compile Include="ApplicationConfiguration\DefaultSources\KeyValuesSource.cs" />
     <Compile Include="ApplicationConfiguration\InitializationContext.cs" />
+    <Compile Include="CommnadLineArgumentExtensions.cs" />
     <Compile Include="DeployOptions.cs" />
     <Compile Include="Legacy\Configuration.cs" />
     <Compile Include="Legacy\ConfigUtility.cs" />

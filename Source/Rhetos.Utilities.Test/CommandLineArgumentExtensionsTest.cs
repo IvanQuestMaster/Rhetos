@@ -59,17 +59,53 @@ namespace Rhetos.Utilities.Test
         [TestMethod]
         public void HasOptionTest()
         {
+            {
+                var foundOption = false;
+                var result = new string[] { "-o", "test", "--long-option" }.GetOption("long-option|short-option", hasOption => foundOption = hasOption);
+                Assert.AreEqual(true, foundOption);
+            }
+
+            {
+                var foundOption = false;
+                var result = new string[] { "test", "-short-option" }.GetOption("long-option|short-option", hasOption => foundOption = hasOption);
+                Assert.AreEqual(true, foundOption);
+            }
+
+            {
+                var foundOption = false;
+                var result = new string[] { "test", "-short-option", "-test", "some-value", "-short-option" }.GetOption("long-option|short-option", hasOption => foundOption = hasOption);
+                Assert.AreEqual(true, foundOption);
+            }
+        }
+
+        [TestMethod]
+        public void MultipleSameOptionTest()
+        {
             var foundOption = false;
-            var result = new string[] { "-o", "test", "--long-option" }.HasOption("long-option", hasOption => foundOption = hasOption);
+            var result = new string[] { "--long-option", "--other-value", "test", "-short-option", "-test", "some-value", "-short-option" }.GetOption("long-option|short-option", hasOption => foundOption = hasOption);
             Assert.AreEqual(true, foundOption);
+        }
 
-            var foundOption2 = false;
-            var result2 = new string[] { "test", "-short-option" }.HasOption("long-option|short-option", hasOption => foundOption2 = hasOption);
-            Assert.AreEqual(true, foundOption2);
+        [TestMethod]
+        public void ShortAndLongOptionNotFoundTest()
+        {
+            {
+                var foundOption = false;
+                var result = new string[] { "-o", "test", "-long-option" }.GetOption("long-option|short-option", hasOption => foundOption = hasOption);
+                Assert.AreEqual(false, foundOption, "The long option should not be found because it starts with \"-\"");
+            }
 
-            var foundOption3 = false;
-            var result3 = new string[] { "test", "-short-option", "test", "-short-option" }.HasOption("long-option|short-option", hasOption => foundOption3 = hasOption);
-            Assert.AreEqual(true, foundOption3);
+            {
+                var foundOption = false;
+                var result = new string[] { "-o", "test", "--short-option" }.GetOption("long-option|short-option", hasOption => foundOption = hasOption);
+                Assert.AreEqual(false, foundOption, "The short option should not be found because it starts with \"--\"");
+            }
+
+            {
+                var foundOption = false;
+                var result = new string[] { "-long-option", "-o", "test", "--short-option" }.GetOption("long-option|short-option", hasOption => foundOption = hasOption);
+                Assert.AreEqual(false, foundOption, "The short option should not be found because the long option should start with \"--\" and short option with\"-\"");
+            }
         }
 
         [TestMethod]
@@ -78,6 +114,24 @@ namespace Rhetos.Utilities.Test
             var value = "";
             new string[] {"--option-with-value", "1" }.GetOptionValue("option-with-value", optionValue => value = optionValue);
             Assert.AreEqual("1", value);
+        }
+
+        [TestMethod]
+        public void GetOptionWithMultipleValuesTest()
+        {
+            var value = "";
+            TestUtility.ShouldFail<ArgumentException>(() => {
+                new string[] { "--option-with-value", "1", "2" }.GetOptionValue("option-with-value", optionValue => value = optionValue);
+            }, "option-with-value", "should only have one value");
+        }
+
+        [TestMethod]
+        public void GetOptionWithoutValueTest()
+        {
+            var value = "";
+            TestUtility.ShouldFail<ArgumentException>(() => {
+                new string[] { "--option-with-value", "--other-option"}.GetOptionValue("option-with-value", optionValue => value = optionValue);
+            }, "option-with-value", "should contain a value");
         }
 
         [TestMethod]

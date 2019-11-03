@@ -1,5 +1,4 @@
-﻿using Mono.Options;
-using Rhetos.Logging;
+﻿using Rhetos.Logging;
 using Rhetos.Utilities;
 using Rhetos.Utilities.ApplicationConfiguration;
 using System;
@@ -22,8 +21,11 @@ namespace Rhetos
                 if (configuration.GetValue<bool>("ShowHelp", false))
                     Console.Write(CommandLineArgumentsSourceNew.GetHelp());
 
-                if (configuration.GetValue<bool>("RunGenerators__ShowHelp", false))
-                    Console.Write(CommandLineArgumentsSourceNew.GetRunGeneratorsHelp());
+                if (configuration.GetValue<bool>("Build__ShowHelp", false))
+                    Console.Write(CommandLineArgumentsSourceNew.GetBuildHelp());
+
+                if (configuration.GetValue<bool>("Deploy__ShowHelp", false))
+                    Console.Write(CommandLineArgumentsSourceNew.GetDeployHelp());
             }
             catch (Exception e)
             {

@@ -36,17 +36,29 @@ namespace Rhetos
         {
             var configuration = new Dictionary<string, object>();
 
-            args.HasCommand("generate", () => configuration.Add("RunGenerators", true))
-                .HasOption("help|h", hasOption => configuration.Add("RunGenerators__ShowHelp", hasOption))
-                .GetOptionValue("output|o", option => configuration.Add("RunGenerators__GeneratedFolderPath", option))
-                .GetOptionValues("assembly|a", options => configuration.Add("RunGenerators__Assemblies", options))
-                .GetOptionValues("source|s", options => configuration.Add("RunGenerators__GeneratorSources", options));
-
-            args.HasOption("help|h", hasOption => configuration.Add("ShowHelp", hasOption));
-
-            args.HasCommand("help", () => configuration.Add("ShowHelp", true));
-
-            args.HasCommand("deploy", () => configuration.Add("Deploy", true));
+            if (args.HasCommand("build"))
+            {
+                var remainaingArgs = args.GetCommand("build", () => configuration.Add("Build", true))
+                   .GetOption("help|h", hasOption => configuration.Add("Build__ShowHelp", hasOption))
+                   .GetOptionValue("output|o", option => configuration.Add("Build__GeneratedFolderPath", option))
+                   .GetOptionValues("assembly|a", options => configuration.Add("Build__Assemblies", options))
+                   .GetOptionValues("source|s", options => configuration.Add("Build__GeneratorSources", options));
+            }
+            else if (args.HasCommand("deploy"))
+            {
+                var remainaingArgs = args.GetCommand("deploy", () => configuration.Add("Deploy", true))
+                    .GetOption("help|h", hasOption => configuration.Add("Deploy__ShowHelp", hasOption))
+                    .GetOptionValue("output|o", option => configuration.Add("Deploy__GeneratedFolderPath", option))
+                    .GetOptionValues("assembly|a", options => configuration.Add("Deploy__Assemblies", options))
+                    .GetOption("short-transactions", hasOption => configuration.Add("Deploy__ShortTransactions", hasOption));
+            }
+            else if (args.HasCommand("help"))
+            {
+                var remainaingArgs = args.GetCommand("help", () => configuration.Add("ShowHelp", true));
+            }
+            else {
+                args.GetOption("help|h", hasOption => configuration.Add("ShowHelp", hasOption));
+            }
 
             return configuration;
         }
@@ -64,13 +76,22 @@ Rhetos commands:
 Run 'rhetos [command] --help' for more information on a command.";
         }
 
-        public static string GetRunGeneratorsHelp()
+        public static string GetBuildHelp()
         {
             return $@"Options:
     -h, --help              Show command line help.
     -o, --output            Path to the folder where the generated files will be created
     -a, --assembly          List of assemblies that will be used to generate the files.
     -s, --source            List of source folders that will be used as input to generate the files.";
+        }
+
+        public static string GetDeployHelp()
+        {
+            return $@"Options:
+    -h, --help              Show command line help.
+    -o, --output            Path to the folder where the generated files are located
+    -a, --assembly          List of assemblies that will be used to deploy the application.
+    --short-transactions    Commit transaction after creating or dropping each database object.";
         }
     }
 }

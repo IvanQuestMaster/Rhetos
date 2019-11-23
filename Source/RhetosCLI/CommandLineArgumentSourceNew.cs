@@ -18,7 +18,7 @@
 */
 
 using Rhetos.Utilities;
-using Rhetos.Utilities.ApplicationConfiguration;
+using Rhetos.Utilities.ApplicationConfiguration.ConfigurationSources;
 using System.Collections.Generic;
 
 namespace Rhetos
@@ -32,7 +32,7 @@ namespace Rhetos
             this.args = args;
         }
 
-        public Dictionary<string, object> Load()
+        public IDictionary<string, object> Load()
         {
             var configuration = new Dictionary<string, object>();
 

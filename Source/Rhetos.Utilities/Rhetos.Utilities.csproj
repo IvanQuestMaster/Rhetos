@@ -144,9 +144,6 @@
     <Compile Include="ApplicationConfiguration\ConfigurationSources\DotNetConfigurationSource.cs" />
     <Compile Include="ApplicationConfiguration\IConfigurationBuilder.cs" />
     <Compile Include="ApplicationConfiguration\IConfigurationProvider.cs" />
-    <Compile Include="ApplicationConfiguration\IConfigurationSource.cs" />
-    <Compile Include="ApplicationConfiguration\DefaultSources\KeyValuesSource.cs" />
-    <Compile Include="ApplicationConfiguration\InitializationContext.cs" />
     <Compile Include="CommnadLineArgumentExtensions.cs" />
     <Compile Include="ApplicationConfiguration\ConfigurationSources\IConfigurationSource.cs" />
     <Compile Include="ApplicationConfiguration\ConfigurationSources\KeyValuesSource.cs" />
@@ -215,7 +212,9 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="ApplicationConfiguration\DefaultSources\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -11,11 +11,8 @@ namespace Rhetos.Utilities
     public class RhetosAppEnvironment
     {
         public string RootPath { get; }
-        public string PackagesCacheFolder { get; }
-        public string ResourcesFolder { get; }
         public string BinFolder { get; }
         public string GeneratedFolder { get; }
-        public string GeneratedFilesCacheFolder { get; }
         public string PluginsFolder { get; }
 
         public RhetosAppEnvironment(string rootPath)
@@ -24,11 +21,8 @@ namespace Rhetos.Utilities
                 throw new FrameworkException($"Can't initialize {nameof(RhetosAppEnvironment)}. RootPath is null or not configured.");
 
             RootPath = Path.GetFullPath(rootPath);
-            PackagesCacheFolder = Path.Combine(RootPath, "PackagesCache");
-            ResourcesFolder = Path.Combine(RootPath, "Resources");
             BinFolder = Path.Combine(RootPath, "bin");
             GeneratedFolder = Path.Combine(RootPath, "bin\\Generated");
-            GeneratedFilesCacheFolder = Path.Combine(RootPath, "GeneratedFilesCache");
             PluginsFolder = Path.Combine(RootPath, "bin\\Plugins");
         }
 

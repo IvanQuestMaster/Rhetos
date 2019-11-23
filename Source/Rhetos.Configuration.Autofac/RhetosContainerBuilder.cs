@@ -47,7 +47,7 @@ namespace Rhetos
             this.RegisterInstance(initializationContext.ConfigurationProvider);
             this.RegisterInstance(initializationContext.RhetosAppEnvironment);
 
-            var pluginScanner = new MefPluginScanner(initializationContext.RhetosAppEnvironment, initializationContext.LogProvider);
+            var pluginScanner = new MefPluginScanner(initializationContext.RhetosOptions, initializationContext.RhetosAppEnvironment, initializationContext.LogProvider);
 
             // make properties accessible to modules which are provided with new/unique instance of ContainerBuilder
             this.Properties.Add(nameof(InitializationContext), initializationContext);

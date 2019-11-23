@@ -54,7 +54,7 @@ namespace DeployPackages
                 if (!ValidateArguments(args))
                     return 1;
 
-                var configurationProvider = BuildConfigurationProvider(args);
+                var configurationProvider = BuildConfigurationProvider(args, null);
                 var deployOptions = configurationProvider.GetOptions<DeployOptions>();
 
                 pauseOnError = !deployOptions.NoPause;
@@ -62,13 +62,15 @@ namespace DeployPackages
                 if (deployOptions.StartPaused)
                     StartPaused();
                 
-                var packageManager = new PackageManager(configurationProvider, logProvider);
+                var packageManager = new PackageManager(configurationProvider, logProvider, configurationProvider.GetOptions<RhetosAppOptions>().RootPath);
                 packageManager.InitialCleanup();
-                packageManager.DownloadPackages();
-                
-                var deployManager = new ApplicationDeployment(configurationProvider, logProvider);
+                var installedPackages = packageManager.DownloadPackages();
+
+                var configurationProvider2 = BuildConfigurationProvider(args, installedPackages.Select(x => x.Folder).ToArray());
+                var deployManager = new ApplicationDeployment(configurationProvider2, logProvider);
                 deployManager.GenerateApplication();
                 deployManager.InitializeGeneratedApplication();
+
 
                 logger.Trace("Done.");
             }
@@ -89,11 +91,11 @@ namespace DeployPackages
             return 0;
         }
 
-        private static IConfigurationProvider BuildConfigurationProvider(string[] args)
+        private static IConfigurationProvider BuildConfigurationProvider(string[] args,string[] sources)
         {
             var rhetosAppRootPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..");
             return new ConfigurationBuilder()
-                .AddRhetosAppConfiguration(rhetosAppRootPath)
+                .AddRhetosAppConfiguration(rhetosAppRootPath, sources)
                 .AddConfigurationManagerConfiguration()
                 .AddCommandLineArguments(args, "/")
                 .Build();

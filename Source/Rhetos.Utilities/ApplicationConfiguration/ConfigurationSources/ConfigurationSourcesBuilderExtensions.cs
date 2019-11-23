@@ -69,10 +69,14 @@ namespace Rhetos
         /// Currently, web.config is expected to exist at the path and configuration will be loaded from it.
         /// This is planned for phasing out in favor of separate config file used only for Rhetos app.
         /// </summary>
-        public static IConfigurationBuilder AddRhetosAppConfiguration(this IConfigurationBuilder builder, string rhetosAppRootPath)
+        public static IConfigurationBuilder AddRhetosAppConfiguration(this IConfigurationBuilder builder, string rhetosAppRootPath, string[] sources = null)
         {
             rhetosAppRootPath = Path.GetFullPath(rhetosAppRootPath);
             builder.AddKeyValue(nameof(RhetosAppOptions.RootPath), rhetosAppRootPath);
+            builder.AddKeyValue(nameof(RhetosOptions.GeneratedFolder), Paths.GetGeneratedFolder(rhetosAppRootPath));
+            builder.AddKeyValue(nameof(RhetosOptions.GeneratedCacheFolder), Paths.GetGeneratedFilesCacheFolder(rhetosAppRootPath));
+            if (sources != null)
+                builder.AddKeyValue(nameof(RhetosOptions.Sources), sources);
             builder.AddWebConfiguration(rhetosAppRootPath);
             return builder;
         }

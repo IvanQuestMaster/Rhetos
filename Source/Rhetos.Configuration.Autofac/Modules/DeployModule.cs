@@ -71,7 +71,10 @@ namespace Rhetos.Configuration.Autofac.Modules
 
         private void AddDslDeployment(ContainerBuilder builder, ContainerBuilderPluginRegistration pluginRegistration)
         {
-            builder.RegisterType<DiskDslScriptLoader>().As<IDslScriptsProvider>().SingleInstance();
+            if(builder.GetInitializationContext().RhetosOptions.Sources != null)
+                builder.RegisterType<DiskDslScriptLoader>().As<IDslScriptsProvider>().SingleInstance();
+            else
+                builder.RegisterType<DiskDslScriptLoaderFromSource>().As<IDslScriptsProvider>().SingleInstance();
             builder.RegisterType<Tokenizer>().SingleInstance();
             builder.RegisterType<DslModelFile>().As<IDslModelFile>().SingleInstance();
             builder.RegisterType<DslParser>().As<IDslParser>();
@@ -91,7 +94,10 @@ namespace Rhetos.Configuration.Autofac.Modules
 
         private void AddPersistence(ContainerBuilder builder, ContainerBuilderPluginRegistration pluginRegistration)
         {
-            builder.RegisterType<DataMigrationScriptsFromDisk>().As<IDataMigrationScriptsProvider>();
+            if (builder.GetInitializationContext().RhetosOptions.Sources != null)
+                builder.RegisterType<DataMigrationScriptsFromDisk>().As<IDataMigrationScriptsProvider>();
+            else
+                builder.RegisterType<DataMigrationScriptsFromDiskFromSources>().As<IDataMigrationScriptsProvider>();
             builder.RegisterType<EntityFrameworkMappingGenerator>().As<IGenerator>();
             pluginRegistration.FindAndRegisterPlugins<IConceptMapping>(typeof(ConceptMapping<>));
 

@@ -35,6 +35,7 @@ namespace Rhetos
         public ILogProvider LogProvider { get; }
         public IConfigurationProvider ConfigurationProvider { get; }
         public RhetosAppEnvironment RhetosAppEnvironment { get; }
+        public RhetosOptions RhetosOptions { get; }
 
         /// <summary>
         /// Creates a a new context with specified arguments.
@@ -44,6 +45,7 @@ namespace Rhetos
             this.ConfigurationProvider = configurationProvider;
             this.LogProvider = logProvider;
             this.RhetosAppEnvironment = rhetosAppEnvironment;
+            this.RhetosOptions = configurationProvider.GetOptions<RhetosOptions>();
         }
 
         /// <summary>

@@ -27,5 +27,8 @@ namespace Rhetos.Deployment
     public class PackageDownloaderOptions
     {
         public bool IgnorePackageDependencies { get; set; }
+        public string ResourcesFolder { get; set; }
+        public string PackagesCacheFolder { get; set; }
+        public string PluginsFolder { get; set; }
     }
 }

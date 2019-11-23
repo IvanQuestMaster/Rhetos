@@ -18,9 +18,8 @@ namespace Rhetos
         {
             var rhetosAppOptions = configurationProvider.GetOptions<RhetosAppOptions>();
             var rhetosAppEnvironment = new RhetosAppEnvironment(rhetosAppOptions.RootPath);
-            Paths.Initialize(rhetosAppEnvironment);
+            Paths.Initialize(rhetosAppEnvironment, configurationProvider.GetValue<string>(nameof(RhetosOptions.GeneratedCacheFolder)));
             ConfigUtility.Initialize(configurationProvider);
-            
             var connectionStringOptions = configurationProvider.GetOptions<ConnectionStringOptions>("ConnectionStrings:ServerConnectionString");
             SqlUtility.Initialize(rhetosAppOptions, connectionStringOptions);
         }

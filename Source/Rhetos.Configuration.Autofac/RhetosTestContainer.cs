@@ -173,7 +173,7 @@ namespace Rhetos.Configuration.Autofac
 
         protected Assembly SearchForAssembly(object sender, ResolveEventArgs args)
         {
-            foreach (var folder in new[] { _rhetosAppEnvironment.PluginsFolder, _rhetosAppEnvironment.GeneratedFolder, _rhetosAppEnvironment.BinFolder })
+            foreach (var folder in new[] { Paths.GetPluginsFolder(_rhetosAppEnvironment.RootPath), _rhetosAppEnvironment.GeneratedFolder, _rhetosAppEnvironment.BinFolder })
             {
                 string pluginAssemblyPath = Path.Combine(folder, new AssemblyName(args.Name).Name + ".dll");
                 if (File.Exists(pluginAssemblyPath))

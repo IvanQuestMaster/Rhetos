@@ -31,23 +31,26 @@ namespace Rhetos.Utilities
     {
         private static RhetosAppEnvironment _rhetosAppEnvironment;
 
+        private static string _generatedFilesCacheFolder;
+
         /// <summary>
         /// Initialize Paths for the Rhetos server.
         /// </summary>
-        public static void Initialize(RhetosAppEnvironment rhetosAppEnvironment)
+        public static void Initialize(RhetosAppEnvironment rhetosAppEnvironment, string generatedFilesCacheFolder)
         {
             _rhetosAppEnvironment = rhetosAppEnvironment;
+            _generatedFilesCacheFolder = generatedFilesCacheFolder;
             if (rhetosAppEnvironment == null) 
                 throw new ArgumentNullException(nameof(rhetosAppEnvironment), "Can't initialize utility with null RhetosAppEnvironment.");
         }
 
         public static string RhetosServerRootPath => NonNullRhetosAppEnvironment.RootPath;
-        public static string PackagesCacheFolder => NonNullRhetosAppEnvironment.PackagesCacheFolder;
-        public static string ResourcesFolder => NonNullRhetosAppEnvironment.ResourcesFolder;
-        public static string BinFolder => NonNullRhetosAppEnvironment.BinFolder;
+        public static string PackagesCacheFolder => GetPackagesCacheFolder(NonNullRhetosAppEnvironment.RootPath);
+        public static string ResourcesFolder => GetResourcesFolder(NonNullRhetosAppEnvironment.RootPath);
+        public static string BinFolder => Paths.GetBinFolder(NonNullRhetosAppEnvironment.RootPath);
         public static string GeneratedFolder => NonNullRhetosAppEnvironment.GeneratedFolder;
-        public static string GeneratedFilesCacheFolder => NonNullRhetosAppEnvironment.GeneratedFilesCacheFolder;
-        public static string PluginsFolder => NonNullRhetosAppEnvironment.PluginsFolder;
+        public static string GeneratedFilesCacheFolder => _generatedFilesCacheFolder;
+        public static string PluginsFolder => GetPluginsFolder(NonNullRhetosAppEnvironment.RootPath);
         public static string RhetosServerWebConfigFile => Path.Combine(NonNullRhetosAppEnvironment.RootPath, "Web.config");
         public static string ConnectionStringsFile => Path.Combine(NonNullRhetosAppEnvironment.RootPath, @"bin\ConnectionStrings.config");
         public static string GetDomAssemblyFile(DomAssemblies domAssembly) => NonNullRhetosAppEnvironment.GetDomAssemblyFile(domAssembly);
@@ -55,6 +58,36 @@ namespace Rhetos.Utilities
         /// List of the generated dll files that make the domain object model (ServerDom.*.dll).
         /// </summary>
         public static IEnumerable<string> DomAssemblyFiles => NonNullRhetosAppEnvironment.DomAssemblyFiles;
+
+        public static string GetPluginsFolder(string rhetosRootFolder)
+        {
+            return Path.Combine(rhetosRootFolder, "bin\\Plugins");
+        }
+
+        public static string GetPackagesCacheFolder(string rhetosRootFolder)
+        {
+            return Path.Combine(rhetosRootFolder, "PackagesCache");
+        }
+
+        public static string GetGeneratedFilesCacheFolder(string rhetosRootFolder)
+        {
+            return Path.Combine(rhetosRootFolder, "GeneratedFilesCache");
+        }
+
+        public static string GetResourcesFolder(string rhetosRootFolder)
+        {
+            return Path.Combine(rhetosRootFolder, "Resources");
+        }
+
+        public static string GetBinFolder(string rhetosRootFolder)
+        {
+            return Path.Combine(rhetosRootFolder, "bin");
+        }
+
+        public static string GetGeneratedFolder(string rhetosRootFolder)
+        {
+            return Path.Combine(rhetosRootFolder, "bin\\Generated");
+        }
 
         private static void AssertRhetosAppEnvironmentNotNull()
         {

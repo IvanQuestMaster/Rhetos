@@ -41,12 +41,14 @@ namespace Rhetos.Extensibility
         private object _pluginsLock = new object();
         private readonly ILogger _logger;
         private readonly ILogger _performanceLogger;
+        private readonly RhetosOptions _rhetosOptions;
         private readonly RhetosAppEnvironment _rhetosAppEnvironment;
 
-        public MefPluginScanner(RhetosAppEnvironment rhetosAppEnvironment, ILogProvider logProvider)
+        public MefPluginScanner(RhetosOptions rhetosOptions, RhetosAppEnvironment rhetosAppEnvironment, ILogProvider logProvider)
         {
             _performanceLogger = logProvider.GetLogger("Performance");
             _logger = logProvider.GetLogger("Plugins");
+            _rhetosOptions = rhetosOptions;
             _rhetosAppEnvironment = rhetosAppEnvironment;
         }
 
@@ -81,10 +83,11 @@ namespace Rhetos.Extensibility
         {
             var stopwatch = Stopwatch.StartNew();
 
-            string[] pluginsPath = new[] { _rhetosAppEnvironment.PluginsFolder, _rhetosAppEnvironment.GeneratedFolder };
-
             List<string> assemblies = new List<string>();
-            foreach (var path in pluginsPath)
+
+            var locationToSearch = _rhetosOptions.Sources == null ? new[] { Paths.GetPluginsFolder(_rhetosAppEnvironment.RootPath), _rhetosAppEnvironment.GeneratedFolder } : _rhetosOptions.Sources;
+
+            foreach (var path in locationToSearch)
                 if (File.Exists(path))
                     assemblies.Add(Path.GetFullPath(path));
                 else if (Directory.Exists(path))

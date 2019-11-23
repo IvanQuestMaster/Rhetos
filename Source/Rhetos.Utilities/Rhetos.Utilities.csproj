@@ -163,6 +163,7 @@
     <Compile Include="ListOfTuples.cs" />
     <Compile Include="RhetosAppOptions.cs" />
     <Compile Include="RhetosAppEnvironment.cs" />
+    <Compile Include="RhetosOptions.cs" />
     <Compile Include="SqlTransactionBatches.cs" />
     <Compile Include="NoLocalizer.cs" />
     <Compile Include="ILocalizer.cs" />

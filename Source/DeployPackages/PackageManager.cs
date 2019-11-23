@@ -21,11 +21,9 @@ using Rhetos;
 using Rhetos.Deployment;
 using Rhetos.Logging;
 using Rhetos.Utilities;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace DeployPackages
 {
@@ -36,10 +34,12 @@ namespace DeployPackages
         private readonly DeployOptions _deployOptions;
         private readonly InitializationContext _initializationContext;
         private readonly RhetosAppEnvironment _rhetosAppEnvironment;
+        private readonly string _rhetosServerRootFolder;
 
-        public PackageManager(IConfigurationProvider configurationProvider, ILogProvider logProvider)
+        public PackageManager(IConfigurationProvider configurationProvider, ILogProvider logProvider, string rhetosServerRootFolder)
         {
             _logger = logProvider.GetLogger("DeployPackages");
+            _rhetosServerRootFolder = rhetosServerRootFolder;
             _filesUtility = new FilesUtility(logProvider);
             _deployOptions = configurationProvider.GetOptions<DeployOptions>();
             _initializationContext = new InitializationContext(configurationProvider, logProvider);
@@ -56,8 +56,8 @@ namespace DeployPackages
             if (!_deployOptions.DatabaseOnly)
             {
                 _logger.Trace("Moving old generated files to cache.");
-                new GeneratedFilesCache(_rhetosAppEnvironment, _initializationContext.LogProvider).MoveGeneratedFilesToCache();
-                _filesUtility.SafeCreateDirectory(_rhetosAppEnvironment.GeneratedFolder);
+                new GeneratedFilesCache(_initializationContext.ConfigurationProvider.GetOptions<RhetosOptions>(), _initializationContext.LogProvider).MoveGeneratedFilesToCache();
+                _filesUtility.SafeCreateDirectory(_initializationContext.ConfigurationProvider.GetOptions<RhetosOptions>().GeneratedFolder);
             }
             else
             {
@@ -69,29 +69,35 @@ namespace DeployPackages
             }
         }
 
-        public void DownloadPackages()
+        public List<InstalledPackage> DownloadPackages()
         {
             if (_deployOptions.DatabaseOnly)
             {
                 _logger.Info("Skipped download packages (DeployDatabaseOnly).");
-                return;
+                return new List<InstalledPackage>();
             }
 
             _logger.Trace("Getting packages.");
             var config = new DeploymentConfiguration(_rhetosAppEnvironment, _initializationContext.LogProvider);
-            var packageDownloaderOptions = new PackageDownloaderOptions { IgnorePackageDependencies = _deployOptions.IgnoreDependencies };
+            var packageDownloaderOptions = new PackageDownloaderOptions {
+                IgnorePackageDependencies = _deployOptions.IgnoreDependencies,
+                ResourcesFolder = Paths.GetResourcesFolder(_rhetosServerRootFolder),
+                PackagesCacheFolder = Paths.GetResourcesFolder(_rhetosServerRootFolder),
+                PluginsFolder = Paths.GetPluginsFolder(_rhetosServerRootFolder),
+            };
             var packageDownloader = new PackageDownloader(config, _rhetosAppEnvironment, _initializationContext.LogProvider, packageDownloaderOptions);
             var packages = packageDownloader.GetPackages();
 
             InstalledPackages.Save(packages, _rhetosAppEnvironment);
+            return packages;
         }
 
         private void ThrowOnObsoleteFolders()
         {
             var obsoleteFolders = new string[]
             {
-                Path.Combine(_rhetosAppEnvironment.RootPath, "DslScripts"),
-                Path.Combine(_rhetosAppEnvironment.RootPath, "DataMigration")
+                Path.Combine(_rhetosServerRootFolder, "DslScripts"),
+                Path.Combine(_rhetosServerRootFolder, "DataMigration")
             };
             var obsoleteFolder = obsoleteFolders.FirstOrDefault(folder => Directory.Exists(folder));
             if (obsoleteFolder != null)
@@ -102,9 +108,9 @@ namespace DeployPackages
         {
             var deleteObsoleteFiles = new string[]
             {
-                Path.Combine(_rhetosAppEnvironment.BinFolder, "ServerDom.cs"),
-                Path.Combine(_rhetosAppEnvironment.BinFolder, "ServerDom.dll"),
-                Path.Combine(_rhetosAppEnvironment.BinFolder, "ServerDom.pdb")
+                Path.Combine(Paths.GetBinFolder(_rhetosServerRootFolder), "ServerDom.cs"),
+                Path.Combine(Paths.GetBinFolder(_rhetosServerRootFolder), "ServerDom.dll"),
+                Path.Combine(Paths.GetBinFolder(_rhetosServerRootFolder), "ServerDom.pdb")
             };
 
             foreach (var path in deleteObsoleteFiles)

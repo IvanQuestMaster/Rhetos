@@ -38,16 +38,16 @@ namespace Rhetos.Dsl
     public class MacroOrderRepository : IMacroOrderRepository
     {
         private const string MacroOrderFileName = "MacroOrder.json";
-        private readonly RhetosAppEnvironment _rhetosAppEnvironment;
+        private readonly RhetosOptions _rhetosOptions;
 
-        public MacroOrderRepository(RhetosAppEnvironment rhetosAppEnvironment)
+        public MacroOrderRepository(RhetosOptions rhetosArguments)
         {
-            _rhetosAppEnvironment = rhetosAppEnvironment;
+            _rhetosOptions = rhetosArguments;
         }
 
         public List<MacroOrder> Load()
         {
-            var cacheFilePath = Path.Combine(_rhetosAppEnvironment.GeneratedFilesCacheFolder, Path.GetFileNameWithoutExtension(MacroOrderFileName), MacroOrderFileName);
+            var cacheFilePath = Path.Combine(_rhetosOptions.GeneratedCacheFolder, Path.GetFileNameWithoutExtension(MacroOrderFileName), MacroOrderFileName);
             if (File.Exists(cacheFilePath))
             {
                 var serializedConcepts = File.ReadAllText(cacheFilePath, Encoding.UTF8);
@@ -62,7 +62,7 @@ namespace Rhetos.Dsl
         public void Save(IEnumerable<MacroOrder> macroOrders)
         {
             string serializedConcepts = JsonConvert.SerializeObject(macroOrders, Formatting.Indented);
-            string path = Path.Combine(_rhetosAppEnvironment.GeneratedFolder, MacroOrderFileName);
+            string path = Path.Combine(_rhetosOptions.GeneratedFolder, MacroOrderFileName);
             File.WriteAllText(path, serializedConcepts, Encoding.UTF8);
         }
     }

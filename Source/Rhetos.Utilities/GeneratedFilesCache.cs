@@ -29,15 +29,15 @@ namespace Rhetos.Utilities
 {
     public class GeneratedFilesCache
     {
-        private readonly RhetosAppEnvironment _rhetosAppEnvironment;
+        private readonly RhetosOptions _rhetosOptions;
         private readonly FilesUtility _filesUtility;
         private readonly FileSyncer _syncer;
         private readonly ILogger _logger;
         private readonly SHA1 _sha1;
 
-        public GeneratedFilesCache(RhetosAppEnvironment rhetosAppEnvironment, ILogProvider logProvider)
+        public GeneratedFilesCache(RhetosOptions rhetosArguments, ILogProvider logProvider)
         {
-            _rhetosAppEnvironment = rhetosAppEnvironment;
+            _rhetosOptions = rhetosArguments;
             _filesUtility = new FilesUtility(logProvider);
             _syncer = new FileSyncer(logProvider);
             _logger = logProvider.GetLogger("FilesCache");
@@ -52,7 +52,7 @@ namespace Rhetos.Utilities
         {
             // Group files by name without extension:
 
-            var generatedFiles = _filesUtility.SafeGetFiles(_rhetosAppEnvironment.GeneratedFolder, "*", SearchOption.AllDirectories)
+            var generatedFiles = _filesUtility.SafeGetFiles(_rhetosOptions.GeneratedFolder, "*", SearchOption.AllDirectories)
                 .GroupBy(file => Path.GetFileNameWithoutExtension(file))
                 .ToDictionary(g => g.Key, g => g.ToList());
 
@@ -66,7 +66,7 @@ namespace Rhetos.Utilities
 
             foreach (string moveGroup in succesfullyGeneratedGroups)
                 foreach (string moveFile in generatedFiles[moveGroup])
-                    _syncer.AddFile(moveFile, Path.Combine(_rhetosAppEnvironment.GeneratedFilesCacheFolder, moveGroup));
+                    _syncer.AddFile(moveFile, Path.Combine(_rhetosOptions.GeneratedCacheFolder, moveGroup));
             _syncer.UpdateDestination(deleteSource: true);
 
             foreach (string deleteGroup in generatedFiles.Keys.Except(succesfullyGeneratedGroups))
@@ -137,7 +137,7 @@ namespace Rhetos.Utilities
 
         private Dictionary<string, List<string>> ListCachedFiles()
         {
-            return _filesUtility.SafeGetFiles(_rhetosAppEnvironment.GeneratedFilesCacheFolder, "*", SearchOption.AllDirectories)
+            return _filesUtility.SafeGetFiles(_rhetosOptions.GeneratedCacheFolder, "*", SearchOption.AllDirectories)
                 .GroupBy(file => Path.GetFileName(Path.GetDirectoryName(file)))
                 .ToDictionary(g => g.Key, g => g.ToList());
         }

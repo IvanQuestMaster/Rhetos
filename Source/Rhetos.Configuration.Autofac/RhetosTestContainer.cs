@@ -18,13 +18,10 @@
 */
 
 using Autofac;
-using Rhetos.Configuration.Autofac;
-using Rhetos.Extensibility;
 using Rhetos.Logging;
 using Rhetos.Persistence;
 using Rhetos.Security;
 using Rhetos.Utilities;
-using Rhetos.Utilities.ApplicationConfiguration;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -38,10 +35,12 @@ namespace Rhetos.Configuration.Autofac
     /// </summary>
     public class RhetosTestContainer : IDisposable
     {
+
         // Global:
         private static IContainer _iocContainer;
         private static object _containerInitializationLock = new object();
         protected static ILogger _performanceLogger = new ConsoleLogger("Performance");
+        private static RhetosAppEnvironment _rhetosAppEnvironment;
 
         // Instance per test or session:
         protected ILifetimeScope _lifetimeScope;
@@ -102,10 +101,10 @@ namespace Rhetos.Configuration.Autofac
                             var rhetosAppRootPath = SearchForRhetosServerRootFolder();
                             var configurationProvider = new ConfigurationBuilder()
                                 .AddRhetosAppConfiguration(rhetosAppRootPath)
+                                .AddConfigurationManagerConfiguration()
                                 .Build();
 
-                            LegacyUtilities.Initialize(configurationProvider);
-
+                            _rhetosAppEnvironment = new RhetosAppEnvironment(rhetosAppRootPath);
                             _iocContainer = InitializeIocContainer(configurationProvider);
                         }
                 }
@@ -118,7 +117,7 @@ namespace Rhetos.Configuration.Autofac
             }
         }
 
-        protected virtual bool IsValidRhetosServerDirectory(string path)
+        private static bool IsValidRhetosServerDirectory(string path)
         {
             return
                 File.Exists(Path.Combine(path, @"web.config"))
@@ -158,7 +157,7 @@ namespace Rhetos.Configuration.Autofac
             AppDomain.CurrentDomain.AssemblyResolve += SearchForAssembly;
 
             // General registrations:
-            var builder = new ContextContainerBuilder(configurationProvider, new ConsoleLogProvider())
+            var builder = new RhetosContainerBuilder(configurationProvider, new ConsoleLogProvider())
                 .AddRhetosRuntime();
 
             // Specific registrations override:
@@ -174,7 +173,7 @@ namespace Rhetos.Configuration.Autofac
 
         protected Assembly SearchForAssembly(object sender, ResolveEventArgs args)
         {
-            foreach (var folder in new[] { Paths.PluginsFolder, Paths.GeneratedFolder, Paths.BinFolder })
+            foreach (var folder in new[] { _rhetosAppEnvironment.PluginsFolder, _rhetosAppEnvironment.GeneratedFolder, _rhetosAppEnvironment.BinFolder })
             {
                 string pluginAssemblyPath = Path.Combine(folder, new AssemblyName(args.Name).Name + ".dll");
                 if (File.Exists(pluginAssemblyPath))

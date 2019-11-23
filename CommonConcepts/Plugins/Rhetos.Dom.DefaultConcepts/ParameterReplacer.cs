@@ -17,26 +17,27 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 
-namespace Rhetos.Utilities.ApplicationConfiguration.DefaultSources
+namespace Rhetos.Dom.DefaultConcepts
 {
-    public class KeyValuesSource : IConfigurationSource
+    public class ParameterReplacer : ExpressionVisitor
     {
-        private readonly IList<KeyValuePair<string, object>> keyValuePairs;
+        private readonly ParameterExpression _oldParameter;
+        private readonly ParameterExpression _newParameter;
 
-        public KeyValuesSource(IList<KeyValuePair<string, object>> keyValuePairs)
+        public ParameterReplacer(ParameterExpression oldParameter, ParameterExpression newParameter)
         {
-            this.keyValuePairs = keyValuePairs;
+            _oldParameter = oldParameter;
+            _newParameter = newParameter;
         }
 
-        public Dictionary<string, object> Load()
+        protected override Expression VisitParameter(ParameterExpression node)
         {
-            return keyValuePairs.ToDictionary(a => a.Key, a => a.Value);
+            if (node == _oldParameter)
+                return _newParameter;
+            else
+                return base.VisitParameter(node);
         }
     }
 }

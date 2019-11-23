@@ -17,21 +17,20 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rhetos.Utilities.ApplicationConfiguration
+namespace Rhetos.Dsl.Test
 {
-    /// <summary>
-    /// Each implementation source is responsible for normalizing configuration paths to predefined colon (:) separator.
-    /// Empty path fragments are not allowed. Path should not start with a separator (root configuration items are just verbatim setting names).
-    /// Paths and keys are NOT case sensitive.
-    /// </summary>
-    public interface IConfigurationSource
+    public class TestTokenizer : Tokenizer
     {
-        Dictionary<string, object> Load();
+        public TestTokenizer(params string[] dslScripts)
+            : base(new MockDslScriptsProvider(dslScripts), new FilesUtility(new ConsoleLogProvider()))
+        {
+        }
     }
 }

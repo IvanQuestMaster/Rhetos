@@ -26,7 +26,7 @@ using System.IO;
 using System.Linq;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Ionic.Zip;
+using System.IO.Compression;
 
 namespace Rhetos.Deployment
 {
@@ -37,6 +37,7 @@ namespace Rhetos.Deployment
     public class PackageDownloader
     {
         private readonly DeploymentConfiguration _deploymentConfiguration;
+        private readonly RhetosAppEnvironment _rhetosAppEnvironment;
         private readonly ILogProvider _logProvider;
         private readonly Rhetos.Logging.ILogger _logger;
         private readonly Rhetos.Logging.ILogger _packagesLogger;
@@ -47,10 +48,12 @@ namespace Rhetos.Deployment
 
         public PackageDownloader(
             DeploymentConfiguration deploymentConfiguration,
+            RhetosAppEnvironment rhetosAppEnvironment,
             ILogProvider logProvider,
             PackageDownloaderOptions options)
         {
             _deploymentConfiguration = deploymentConfiguration;
+            _rhetosAppEnvironment = rhetosAppEnvironment;
             _logProvider = logProvider;
             _logger = logProvider.GetLogger(GetType().Name);
             _packagesLogger = logProvider.GetLogger("Packages");
@@ -68,13 +71,13 @@ namespace Rhetos.Deployment
         {
             var sw = Stopwatch.StartNew();
             var installedPackages = new List<InstalledPackage>();
-            installedPackages.Add(new InstalledPackage("Rhetos", SystemUtility.GetRhetosVersion(), new List<PackageRequest>(), Paths.RhetosServerRootPath,
+            installedPackages.Add(new InstalledPackage("Rhetos", SystemUtility.GetRhetosVersion(), new List<PackageRequest>(), _rhetosAppEnvironment.RootPath,
                 new PackageRequest { Id = "Rhetos", VersionsRange = "", Source = "", RequestedBy = "Rhetos framework" }, ".", new List<ContentFile> { }));
 
             var binFileSyncer = new FileSyncer(_logProvider);
-            binFileSyncer.AddDestinations(Paths.PluginsFolder, Paths.ResourcesFolder); // Even if there are no packages, those folders must be created and emptied.
+            binFileSyncer.AddDestinations(_rhetosAppEnvironment.PluginsFolder, _rhetosAppEnvironment.ResourcesFolder); // Even if there are no packages, those folders must be created and emptied.
 
-            _filesUtility.SafeCreateDirectory(Paths.PackagesCacheFolder);
+            _filesUtility.SafeCreateDirectory(_rhetosAppEnvironment.PackagesCacheFolder);
             var packageRequests = _deploymentConfiguration.PackageRequests;
             while (packageRequests.Any())
             {
@@ -162,7 +165,7 @@ namespace Rhetos.Deployment
         private IEnumerable<PackageSource> SelectPackageSources(PackageRequest request)
         {
             if (request.Source != null)
-                return new List<PackageSource> { new PackageSource(request.Source) };
+                return new List<PackageSource> { new PackageSource(_rhetosAppEnvironment.RootPath, request.Source) };
             else
                 return _deploymentConfiguration.PackageSources;
         }
@@ -216,8 +219,9 @@ namespace Rhetos.Deployment
             if (source.Path == null || !Directory.Exists(source.Path))
                 return null;
 
-            var packageExtensions = new[] { "*.nupkg", GetZipPackageName(request) };
-            var existingPackageFiles = packageExtensions.SelectMany(ext => Directory.GetFiles(source.Path, ext));
+            var packageFilePatterns = new[] { "*.nupkg", GetExpectedZipPackage(request)?.FileName };
+            var existingPackageFiles = packageFilePatterns.Where(pattern => pattern != null)
+                .SelectMany(ext => Directory.GetFiles(source.Path, ext));
 
             var existingMetadataFiles = Directory.GetFiles(source.Path, "*.nuspec");
             if (existingMetadataFiles.Length > 1)
@@ -281,13 +285,13 @@ namespace Rhetos.Deployment
             // Copy binary files and resources:
 
             foreach (var file in FilterCompatibleLibFiles(packageBuilder.Files).Cast<PhysicalPackageFile>())
-                binFileSyncer.AddFile(file.SourcePath, Paths.PluginsFolder, Path.Combine(Paths.PluginsFolder, file.EffectivePath));
+                binFileSyncer.AddFile(file.SourcePath, _rhetosAppEnvironment.PluginsFolder, Path.Combine(_rhetosAppEnvironment.PluginsFolder, file.EffectivePath));
 
             foreach (var file in packageBuilder.Files.Cast<PhysicalPackageFile>())
                 if (file.Path.StartsWith(@"Plugins\")) // Obsolete bin folder; lib should be used instead.
-                    binFileSyncer.AddFile(file.SourcePath, Paths.PluginsFolder);
+                    binFileSyncer.AddFile(file.SourcePath, _rhetosAppEnvironment.PluginsFolder);
                 else if (file.Path.StartsWith(@"Resources\"))
-                    binFileSyncer.AddFile(file.SourcePath, Paths.ResourcesFolder, Path.Combine(SimplifyPackageName(packageBuilder.Id), file.Path.Substring(@"Resources\".Length)));
+                    binFileSyncer.AddFile(file.SourcePath, _rhetosAppEnvironment.ResourcesFolder, Path.Combine(SimplifyPackageName(packageBuilder.Id), file.Path.Substring(@"Resources\".Length)));
 
             var contentFiles = packageBuilder.Files.Cast<PhysicalPackageFile>()
                 .Select(file => new ContentFile { PhysicalPath = file.SourcePath, InPackagePath = file.Path })
@@ -313,7 +317,7 @@ namespace Rhetos.Deployment
                 .Select(dependency => new PackageRequest
                 {
                     Id = dependency.Id,
-                    VersionsRange = dependency.VersionSpec != null ? dependency.VersionSpec.ToString() : null,
+                    VersionsRange = dependency.VersionSpec?.ToString(),
                     RequestedBy = "package " + package.Id
                 }).ToList();
 
@@ -322,8 +326,8 @@ namespace Rhetos.Deployment
                 // FrameworkAssembly is an obsolete way of marking package dependency on a specific Rhetos version:
                 var rhetosFrameworkAssemblyRegex = new Regex(@"^Rhetos\s*,\s*Version\s*=\s*(\S+)$");
                 var parseFrameworkAssembly = package.FrameworkAssemblies
-                    .Select(fa => rhetosFrameworkAssemblyRegex.Match(fa.AssemblyName.Trim()))
-                    .SingleOrDefault(m => m.Success);
+                    .Select(assembly => rhetosFrameworkAssemblyRegex.Match(assembly.AssemblyName.Trim()))
+                    .SingleOrDefault(match => match.Success);
                 if (parseFrameworkAssembly != null)
                     dependencies.Add(new PackageRequest
                     {
@@ -355,8 +359,8 @@ namespace Rhetos.Deployment
                 && Directory.EnumerateFiles(sourcePluginsFolder, "*.dll", SearchOption.TopDirectoryOnly).FirstOrDefault() == null)
                 _logger.Error(() => "Package " + request.Id + " source folder contains Plugins that will not be installed to the Rhetos server. Add '" + request.Id + ".nuspec' file to define the which plugin files should be installed.");
 
-            binFileSyncer.AddFolderContent(Path.Combine(sourceFolder, "Plugins"), Paths.PluginsFolder, recursive: false);
-            binFileSyncer.AddFolderContent(Path.Combine(sourceFolder, "Resources"), Paths.ResourcesFolder, SimplifyPackageName(request.Id), recursive: true);
+            binFileSyncer.AddFolderContent(Path.Combine(sourceFolder, "Plugins"), _rhetosAppEnvironment.PluginsFolder, recursive: false);
+            binFileSyncer.AddFolderContent(Path.Combine(sourceFolder, "Resources"), _rhetosAppEnvironment.ResourcesFolder, SimplifyPackageName(request.Id), recursive: true);
 
             string defaultVersion = CreateVersionInRangeOrZero(request);
             return new InstalledPackage(request.Id, defaultVersion, new List<PackageRequest> { }, sourceFolder, request, sourceFolder);
@@ -370,37 +374,58 @@ namespace Rhetos.Deployment
         {
             if (source.Path == null)
                 return null;
-            Version simpleVersion;
-            if (!Version.TryParse(request.VersionsRange, out simpleVersion))
+
+            var zipPackage = GetExpectedZipPackage(request);
+            if (zipPackage == null)
                 return null;
 
-            string zipPackageName = GetZipPackageName(request);
-            string zipPackagePath = Path.Combine(source.Path, zipPackageName);
+            string zipPackagePath = Path.Combine(source.Path, zipPackage.FileName);
 
             if (!File.Exists(zipPackagePath))
             {
-                _logger.Trace(() => "There is no legacy file " + zipPackageName + " in " + source.ProvidedLocation + ".");
+                _logger.Trace(() => $"There is no legacy zip package at {zipPackagePath}.");
                 return null;
             }
 
-            _logger.Trace(() => "Reading package " + request.Id + " from legacy file " + zipPackageName + ".");
-            _deployPackagesLogger.Trace(() => "Reading " + request.Id + " from legacy file.");
+            _logger.Trace(() => $"Reading package {request.Id} from legacy file {zipPackagePath}.");
+            _deployPackagesLogger.Trace(() => $"Reading {request.Id} from legacy zip file.");
 
-            string targetFolder = GetTargetFolder(request.Id, request.VersionsRange);
+            string targetFolder = GetTargetFolder(request.Id, zipPackage.Version);
             _filesUtility.EmptyDirectory(targetFolder);
-            using (var zipFile = ZipFile.Read(zipPackagePath))
-                foreach (var zipEntry in zipFile)
-                    zipEntry.Extract(targetFolder, ExtractExistingFileAction.OverwriteSilently);
+            ZipFile.ExtractToDirectory(zipPackagePath, targetFolder);
 
-            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Plugins"), Paths.PluginsFolder, recursive: false);
-            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Resources"), Paths.ResourcesFolder, SimplifyPackageName(request.Id), recursive: true);
+            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Plugins"), _rhetosAppEnvironment.PluginsFolder, recursive: false);
+            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Resources"), _rhetosAppEnvironment.ResourcesFolder, SimplifyPackageName(request.Id), recursive: true);
 
-            return new InstalledPackage(request.Id, request.VersionsRange, new List<PackageRequest> { }, targetFolder, request, source.ProcessedLocation);
+            return new InstalledPackage(request.Id, zipPackage.Version, new List<PackageRequest> { }, targetFolder, request, source.ProcessedLocation);
         }
 
-        private string GetZipPackageName(PackageRequest request)
+        public class ExpectedZipPackage
         {
-            return request.Id + (request.VersionsRange != null ? "_" + request.VersionsRange.Replace('.', '_') : "") + ".zip";
+            public string FileName { get; set; }
+            public string Version { get; set; }
+        }
+
+        /// <summary>
+        /// Returns null if the zip package is not supported for this request.
+        /// </summary>
+        private ExpectedZipPackage GetExpectedZipPackage(PackageRequest request)
+        {
+            if (request.VersionsRange == null)
+                return null;
+
+            var requestVersionsRange = VersionUtility.ParseVersionSpec(request.VersionsRange);
+            if (!SpecifiedMinVersion(requestVersionsRange))
+                return null;
+
+            string version = requestVersionsRange.MinVersion.ToString();
+
+            return new ExpectedZipPackage { FileName = $"{request.Id}_{version?.Replace('.', '_')}.zip", Version = version };
+        }
+
+        private static bool SpecifiedMinVersion(IVersionSpec requestVersionsRange)
+        {
+            return requestVersionsRange.MinVersion != null && !requestVersionsRange.MinVersion.Equals(new SemanticVersion("0.0"));
         }
 
         #endregion
@@ -421,7 +446,7 @@ namespace Rhetos.Deployment
                 : new VersionSpec();
 
             // Default NuGet behavior is to download the smallest version in the given range, so only MinVersion is checked here:
-            if (requestVersionsRange.MinVersion == null || requestVersionsRange.MinVersion.Equals(new SemanticVersion("0.0")))
+            if (!SpecifiedMinVersion(requestVersionsRange))
             {
                 _logger.Trace(() => $"Not looking for {request.ReportIdVersionsRange()} in packages cache because the request does not specify an exact version.");
                 return null;
@@ -429,7 +454,7 @@ namespace Rhetos.Deployment
 
             // Find the NuGet package:
 
-            var nugetRepository = new LocalPackageRepository(Paths.PackagesCacheFolder, enableCaching: false);
+            var nugetRepository = new LocalPackageRepository(_rhetosAppEnvironment.PackagesCacheFolder, enableCaching: false);
             IPackage package = nugetRepository.FindPackage(request.Id, requestVersionsRange, allowPrereleaseVersions: true, allowUnlisted: true);
 
             _performanceLogger.Write(sw, () => $"PackageDownloader: {(package == null ? "Did not find" : "Found")} the NuGet package {request.ReportIdVersionsRange()} in cache.");
@@ -441,15 +466,15 @@ namespace Rhetos.Deployment
             string packageSubfolder = nugetRepository.PathResolver.GetPackageDirectory(request.Id, package.Version);
             _logger.Trace(() => $"Reading package {request.Id} from cache '{packageSubfolder}'.");
             _deployPackagesLogger.Trace(() => $"Reading {request.Id} from cache.");
-            string targetFolder = Path.Combine(Paths.PackagesCacheFolder, packageSubfolder);
+            string targetFolder = Path.Combine(_rhetosAppEnvironment.PackagesCacheFolder, packageSubfolder);
 
             foreach (var file in FilterCompatibleLibFiles(package.GetFiles()))
-                binFileSyncer.AddFile(Path.Combine(targetFolder, file.Path), Paths.PluginsFolder, Path.Combine(Paths.PluginsFolder, file.EffectivePath));
+                binFileSyncer.AddFile(Path.Combine(targetFolder, file.Path), _rhetosAppEnvironment.PluginsFolder, Path.Combine(_rhetosAppEnvironment.PluginsFolder, file.EffectivePath));
 
-            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Plugins"), Paths.PluginsFolder, recursive: false); // Obsolete bin folder; lib should be used instead.
-            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Resources"), Paths.ResourcesFolder, SimplifyPackageName(package.Id), recursive: true);
+            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Plugins"), _rhetosAppEnvironment.PluginsFolder, recursive: false); // Obsolete bin folder; lib should be used instead.
+            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Resources"), _rhetosAppEnvironment.ResourcesFolder, SimplifyPackageName(package.Id), recursive: true);
 
-            return new InstalledPackage(package.Id, package.Version.ToString(), GetNuGetPackageDependencies(package), targetFolder, request, Paths.PackagesCacheFolder);
+            return new InstalledPackage(package.Id, package.Version.ToString(), GetNuGetPackageDependencies(package), targetFolder, request, _rhetosAppEnvironment.PackagesCacheFolder);
         }
 
         private InstalledPackage TryGetPackageFromNuGet(PackageSource source, PackageRequest request, FileSyncer binFileSyncer)
@@ -466,7 +491,7 @@ namespace Rhetos.Deployment
                 : new VersionSpec();
             IEnumerable<IPackage> packages = nugetRepository.FindPackages(request.Id, requestVersionsRange, allowPrereleaseVersions: true, allowUnlisted: true).ToList();
 
-            if (requestVersionsRange.MinVersion != null && !requestVersionsRange.MinVersion.Equals(new SemanticVersion("0.0")))
+            if (SpecifiedMinVersion(requestVersionsRange))
                 packages = packages.OrderBy(p => p.Version); // Find the lowest compatible version if the version is specified (default NuGet behavior).
             else
                 packages = packages.OrderByDescending(p => p.Version);
@@ -480,7 +505,7 @@ namespace Rhetos.Deployment
             // Download the NuGet package:
 
             _logger.Trace("Downloading NuGet package " + package.Id + " " + package.Version + " from " + source.ProcessedLocation + ".");
-            var packageManager = new PackageManager(nugetRepository, Paths.PackagesCacheFolder)
+            var packageManager = new PackageManager(nugetRepository, _rhetosAppEnvironment.PackagesCacheFolder)
             {
                 Logger = new LoggerForNuget(_logProvider)
             };
@@ -494,10 +519,10 @@ namespace Rhetos.Deployment
             // Copy binary files and resources:
 
             foreach (var file in FilterCompatibleLibFiles(package.GetFiles()))
-                binFileSyncer.AddFile(Path.Combine(targetFolder, file.Path), Paths.PluginsFolder, Path.Combine(Paths.PluginsFolder, file.EffectivePath));
+                binFileSyncer.AddFile(Path.Combine(targetFolder, file.Path), _rhetosAppEnvironment.PluginsFolder, Path.Combine(_rhetosAppEnvironment.PluginsFolder, file.EffectivePath));
 
-            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Plugins"), Paths.PluginsFolder, recursive: false); // Obsolete bin folder; lib should be used instead.
-            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Resources"), Paths.ResourcesFolder, SimplifyPackageName(package.Id), recursive: true);
+            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Plugins"), _rhetosAppEnvironment.PluginsFolder, recursive: false); // Obsolete bin folder; lib should be used instead.
+            binFileSyncer.AddFolderContent(Path.Combine(targetFolder, "Resources"), _rhetosAppEnvironment.ResourcesFolder, SimplifyPackageName(package.Id), recursive: true);
 
             return new InstalledPackage(package.Id, package.Version.ToString(), GetNuGetPackageDependencies(package), targetFolder, request, source.ProcessedLocation);
         }
@@ -530,7 +555,7 @@ namespace Rhetos.Deployment
 
         private static HashSet<char> _invalidPackageChars = new HashSet<char>(Path.GetInvalidFileNameChars().Concat(new[] { ' ' }));
 
-        private static string GetTargetFolder(string packageId, string packageVersion)
+        private string GetTargetFolder(string packageId, string packageVersion)
         {
             char invalidChar = packageId.FirstOrDefault(c => _invalidPackageChars.Contains(c));
             if (invalidChar != default(char))
@@ -540,14 +565,14 @@ namespace Rhetos.Deployment
             if (invalidChar != default(char))
                 throw new UserException("Invalid character '" + invalidChar + "' in package version. Package " + packageId + ", version '" + packageVersion + "'.");
 
-            return Path.Combine(Paths.PackagesCacheFolder, packageId + "." + packageVersion);
+            return Path.Combine(_rhetosAppEnvironment.PackagesCacheFolder, packageId + "." + packageVersion);
         }
 
         private void DeleteObsoletePackages(List<InstalledPackage> installedPackages)
         {
             var sw = Stopwatch.StartNew();
 
-            var obsoletePackages = Directory.GetDirectories(Paths.PackagesCacheFolder)
+            var obsoletePackages = Directory.GetDirectories(_rhetosAppEnvironment.PackagesCacheFolder)
                 .Except(installedPackages.Select(p => p.Folder), StringComparer.OrdinalIgnoreCase);
 
             foreach (var folder in obsoletePackages)

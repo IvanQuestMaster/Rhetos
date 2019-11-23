@@ -23,13 +23,14 @@ using Rhetos.Logging;
 using Rhetos.Security;
 using Rhetos.TestCommon;
 using Rhetos.Utilities;
+using Rhetos.Utilities.ApplicationConfiguration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonConcepts.Test.Helpers
+namespace CommonConcepts.Test
 {
     /// <summary>
     /// These methods should be called before any object is resolved from the container.
@@ -70,6 +71,17 @@ namespace CommonConcepts.Test.Helpers
             container.InitializeSession += builder =>
                 builder.RegisterInstance(new TestUserInfo(username))
                 .As<IUserInfo>();
+        }
+
+        public static void SetUseDatabaseNullSemantics(this RhetosTestContainer container, bool useDatabaseNullSemantics)
+        {
+            container.InitializeSession += builder => 
+            {
+                var newRhetosAppOptions = builder.GetInitializationContext().ConfigurationProvider.GetOptions<RhetosAppOptions>();
+                newRhetosAppOptions.EntityFramework__UseDatabaseNullSemantics = useDatabaseNullSemantics;
+                builder.RegisterInstance(newRhetosAppOptions);
+            };
+            Console.WriteLine($"{nameof(RhetosAppOptions)}.{nameof(RhetosAppOptions.EntityFramework__UseDatabaseNullSemantics)} = {useDatabaseNullSemantics}");
         }
     }
 }

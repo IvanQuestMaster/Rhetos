@@ -17,29 +17,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Rhetos.Deployment
+namespace Rhetos.Utilities.ApplicationConfiguration.ConfigurationSources
 {
-    public static class DeploymentUtility
+    public class KeyValuesSource : IConfigurationSource
     {
-        private static ILogProvider _initializationLogProvider;
+        private readonly IEnumerable<KeyValuePair<string, object>> keyValuePairs;
 
-        /// <summary>To be used during system initialization while the IoC container is yet not built.
-        /// In all other situations the ILogProvider should be resolved from the IoC container.</summary>
-        public static ILogProvider InitializationLogProvider
+        public KeyValuesSource(IEnumerable<KeyValuePair<string, object>> keyValuePairs)
         {
-            get
-            {
-                if (_initializationLogProvider == null)
-                    _initializationLogProvider = new NLogProvider();
-                return _initializationLogProvider;
-            }
-            set
-            {
-                _initializationLogProvider = value;
-            }
+            this.keyValuePairs = keyValuePairs;
+        }
+
+        public IDictionary<string, object> Load()
+        {
+            return keyValuePairs.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
     }
 }

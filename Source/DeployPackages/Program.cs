@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using Rhetos;
 using Rhetos.Logging;
 using Rhetos.Utilities;
-using Rhetos.Utilities.ApplicationConfiguration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,7 +45,7 @@ namespace DeployPackages
         {
             var logProvider = new NLogProvider();
             var logger = logProvider.GetLogger("DeployPackages");
-            var pauseOnError = true;
+            var pauseOnError = false;
 
             logger.Trace(() => "Logging configured.");
 
@@ -55,20 +55,18 @@ namespace DeployPackages
                     return 1;
 
                 var configurationProvider = BuildConfigurationProvider(args);
-                var initializationContext = new InitializationContext(configurationProvider, logProvider);
                 var deployOptions = configurationProvider.GetOptions<DeployOptions>();
 
                 pauseOnError = !deployOptions.NoPause;
 
                 if (deployOptions.StartPaused)
                     StartPaused();
-
                 
-                var packageManager = new PackageManager(initializationContext);
+                var packageManager = new PackageManager(configurationProvider, logProvider);
                 packageManager.InitialCleanup();
                 packageManager.DownloadPackages();
                 
-                var deployManager = new ApplicationDeployment(initializationContext);
+                var deployManager = new ApplicationDeployment(configurationProvider, logProvider);
                 deployManager.GenerateApplication();
                 deployManager.InitializeGeneratedApplication();
 
@@ -78,8 +76,9 @@ namespace DeployPackages
             {
                 logger.Error(e.ToString());
 
-                if (e is ReflectionTypeLoadException reflectionTypeLoadException)
-                    logger.Error(CsUtility.ReportTypeLoadException(reflectionTypeLoadException));
+                string typeLoadReport = CsUtility.ReportTypeLoadException(e);
+                if (typeLoadReport != null)
+                    logger.Error(typeLoadReport);
 
                 if (Environment.UserInteractive)
                     InteractiveExceptionInfo(e, pauseOnError);
@@ -100,6 +99,9 @@ namespace DeployPackages
                 .Build();
         }
 
+        /// <summary>
+        /// This feature is intended to simplify attaching debugger to the process that was run from a build script.
+        /// </summary>
         private static void StartPaused()
         {
             if (!Environment.UserInteractive)
@@ -117,7 +119,7 @@ namespace DeployPackages
                 return false;
             }
 
-            var invalidArgument = args.FirstOrDefault(a => !_validArguments.Keys.Contains(a, StringComparer.InvariantCultureIgnoreCase));
+            var invalidArgument = args.FirstOrDefault(arg => !_validArguments.Keys.Contains(arg, StringComparer.InvariantCultureIgnoreCase));
             if (invalidArgument != null)
             {
                 ShowHelp();

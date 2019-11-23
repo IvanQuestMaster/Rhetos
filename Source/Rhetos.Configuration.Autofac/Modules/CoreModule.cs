@@ -25,12 +25,10 @@ using Rhetos.Logging;
 using Rhetos.Persistence;
 using Rhetos.Security;
 using Rhetos.Utilities;
-using Rhetos.Utilities.ApplicationConfiguration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Rhetos.Configuration.Autofac.Modules
 {
@@ -38,23 +36,25 @@ namespace Rhetos.Configuration.Autofac.Modules
     {
         protected override void Load(ContainerBuilder builder)
         {
+            var pluginRegistration = builder.GetPluginRegistration();
+
             AddCommon(builder);
-            AddSecurity(builder);
-            AddUtilities(builder);
-            AddDsl(builder);
+            AddSecurity(builder, pluginRegistration);
+            AddUtilities(builder, pluginRegistration);
+            AddDsl(builder, pluginRegistration);
 
             base.Load(builder);
         }
 
         private void AddCommon(ContainerBuilder builder)
         {
-            builder.Register(a => a.Resolve<IConfigurationProvider>().GetOptions<RhetosAppOptions>()).SingleInstance().PreserveExistingDefaults();
+            builder.Register(context => context.Resolve<IConfigurationProvider>().GetOptions<RhetosAppOptions>()).SingleInstance().PreserveExistingDefaults();
             builder.RegisterType<InstalledPackages>().As<IInstalledPackages>().SingleInstance();
             builder.RegisterInstance(new ConnectionString(SqlUtility.ConnectionString));
             builder.RegisterType<NLogProvider>().As<ILogProvider>().InstancePerLifetimeScope();
         }
 
-        private void AddSecurity(ContainerBuilder builder)
+        private void AddSecurity(ContainerBuilder builder, ContainerBuilderPluginRegistration pluginRegistration)
         {
             builder.RegisterType<WindowsSecurity>().As<IWindowsSecurity>().SingleInstance();
             builder.RegisterType<AuthorizationManager>().As<IAuthorizationManager>().InstancePerLifetimeScope();
@@ -64,15 +64,16 @@ namespace Rhetos.Configuration.Autofac.Modules
             builder.RegisterType<NullAuthorizationProvider>().As<IAuthorizationProvider>().PreserveExistingDefaults();
 
             // Cannot use FindAndRegisterPlugins on IUserInfo because each type should be manually registered with InstancePerLifetimeScope.
-            Plugins.FindAndRegisterPlugins<IAuthorizationProvider>(builder);
-            Plugins.FindAndRegisterPlugins<IClaimProvider>(builder);
+            pluginRegistration.FindAndRegisterPlugins<IAuthorizationProvider>();
+            pluginRegistration.FindAndRegisterPlugins<IClaimProvider>();
         }
 
-        private void AddUtilities(ContainerBuilder builder)
+        private void AddUtilities(ContainerBuilder builder, ContainerBuilderPluginRegistration pluginRegistration)
         {
             builder.RegisterType<XmlUtility>().SingleInstance();
+            builder.RegisterType<FilesUtility>().SingleInstance();
             builder.RegisterType<Rhetos.Utilities.Configuration>().As<Rhetos.Utilities.IConfiguration>().SingleInstance();
-            Plugins.FindAndRegisterPlugins<ILocalizer>(builder);
+            pluginRegistration.FindAndRegisterPlugins<ILocalizer>();
             builder.RegisterType<NoLocalizer>().As<ILocalizer>().SingleInstance().PreserveExistingDefaults();
             builder.RegisterType<GeneratedFilesCache>().SingleInstance();
 
@@ -81,6 +82,9 @@ namespace Rhetos.Configuration.Autofac.Modules
                 new { Dialect = "MsSql", SqlExecuter = typeof(MsSqlExecuter), SqlUtility = typeof(MsSqlUtility) },
                 new { Dialect = "Oracle", SqlExecuter = typeof(OracleSqlExecuter), SqlUtility = typeof(OracleSqlUtility) },
             }.ToDictionary(imp => imp.Dialect);
+
+            if (string.IsNullOrEmpty(SqlUtility.DatabaseLanguage))
+                throw new FrameworkException("SqlUtility has not been initialized. LegacyUtilities.Initialize() should be called at application startup.");
 
             var sqlImplementation = sqlImplementations.GetValue(SqlUtility.DatabaseLanguage,
                 () => "Unsupported database language '" + SqlUtility.DatabaseLanguage
@@ -91,10 +95,10 @@ namespace Rhetos.Configuration.Autofac.Modules
             builder.RegisterType<SqlTransactionBatches>().InstancePerLifetimeScope();
         }
 
-        private void AddDsl(ContainerBuilder builder)
+        private void AddDsl(ContainerBuilder builder, ContainerBuilderPluginRegistration pluginRegistration)
         {
             builder.RegisterType<DslContainer>();
-            Plugins.FindAndRegisterPlugins<IDslModelIndex>(builder);
+            pluginRegistration.FindAndRegisterPlugins<IDslModelIndex>();
             builder.RegisterType<DslModelIndexByType>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
             builder.RegisterType<DslModelIndexByReference>().As<IDslModelIndex>(); // This plugin is registered manually because FindAndRegisterPlugins does not scan core Rhetos dlls.
             builder.RegisterType<DslModelFile>().As<IDslModel>().SingleInstance();

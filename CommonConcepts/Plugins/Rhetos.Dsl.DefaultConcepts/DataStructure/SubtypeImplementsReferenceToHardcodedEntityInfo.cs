@@ -17,22 +17,34 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Rhetos.Dsl;
+using Rhetos.Utilities;
+using System.ComponentModel.Composition;
 
-namespace Rhetos.Extensibility
+namespace Rhetos.Dsl.DefaultConcepts
 {
-    internal static class InitializationLogging
+    [Export(typeof(IConceptInfo))]
+    [ConceptKeyword("Implements")]
+    public class SubtypeImplementsReferenceToHardcodedEntityInfo : IMacroConcept
     {
-        public static ILogger Logger = new NullLogger();
-        public static ILogger PerformanceLogger = new NullLogger();
+        [ConceptKey]
+        public IsSubtypeOfInfo IsSubtypeOf { get; set; }
 
-        private class NullLogger : ILogger
+        [ConceptKey]
+        public PropertyInfo Property { get; set; }
+
+        public EntryInfo Entry { get; set; }
+
+        IEnumerable<IConceptInfo> IMacroConcept.CreateNewConcepts(IEnumerable<IConceptInfo> existingConcepts)
         {
-            public void Write(EventType eventType, Func<string> logMessage) { }
+            return new List<IConceptInfo>
+            {
+                new SubtypeImplementsPropertyInfo { IsSubtypeOf = IsSubtypeOf, Property = Property, Expression = SqlUtility.QuoteGuid(Entry.GetIdentifier()) }
+            };
         }
     }
 }

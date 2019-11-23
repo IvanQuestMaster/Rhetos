@@ -18,13 +18,8 @@
 */
 
 using Autofac;
-using Autofac.Configuration;
 using Autofac.Integration.Wcf;
-using Rhetos.Configuration.Autofac;
-using Rhetos.Extensibility;
 using Rhetos.Logging;
-using Rhetos.Utilities;
-using Rhetos.Utilities.ApplicationConfiguration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -42,11 +37,12 @@ namespace Rhetos
         {
             var stopwatch = Stopwatch.StartNew();
 
+            // Temporary logger used in Application_Error event handler, which can occur during configuration process.
+            _logger = new NLogProvider().GetLogger("Configuration");
+
             var configurationProvider = new ConfigurationBuilder()
                 .AddRhetosAppConfiguration(AppDomain.CurrentDomain.BaseDirectory)
                 .Build();
-
-            LegacyUtilities.Initialize(configurationProvider);
 
             var builder = CreateServerContainer(configurationProvider);
             AutofacServiceHostFactory.Container = builder.Build();
@@ -79,12 +75,12 @@ namespace Rhetos
 
         private ContainerBuilder CreateServerContainer(IConfigurationProvider configurationProvider)
         {
-            var builder = new ContextContainerBuilder(configurationProvider, new NLogProvider());
+            var builder = new RhetosContainerBuilder(configurationProvider, new NLogProvider());
 
             builder.RegisterType<RhetosService>().As<RhetosService>().As<IServerApplication>();
             builder.RegisterType<Rhetos.Web.GlobalErrorHandler>();
-            Plugins.FindAndRegisterPlugins<IService>(builder);
-            Plugins.FindAndRegisterPlugins<IHomePageSnippet>(builder);
+            builder.GetPluginRegistration().FindAndRegisterPlugins<IService>();
+            builder.GetPluginRegistration().FindAndRegisterPlugins<IHomePageSnippet>();
 
             // General registrations:
             builder.AddRhetosRuntime();

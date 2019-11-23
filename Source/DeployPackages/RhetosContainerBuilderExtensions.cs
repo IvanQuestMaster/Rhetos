@@ -26,20 +26,23 @@ using Rhetos.Security;
 using Rhetos.Utilities;
 using System.Collections.Generic;
 
-namespace Rhetos.Configuration.Autofac
+namespace Rhetos
 {
-    public static class ContextContainerBuilderExtensions
+    public static class RhetosContainerBuilderExtensions
     {
-        public static ContextContainerBuilder AddApplicationInitialization(this ContextContainerBuilder builder)
+        public static RhetosContainerBuilder AddApplicationInitialization(this RhetosContainerBuilder builder)
         {
-            var deployOptions = builder.InitializationContext.ConfigurationProvider.GetOptions<DeployOptions>();
+            var deployOptions = builder.GetInitializationContext().ConfigurationProvider.GetOptions<DeployOptions>();
             builder.RegisterInstance(deployOptions).PreserveExistingDefaults();
             builder.RegisterType<ApplicationInitialization>();
-            Plugins.FindAndRegisterPlugins<IServerInitializer>(builder);
+            builder.GetPluginRegistration().FindAndRegisterPlugins<IServerInitializer>();
             return builder;
         }
 
-        public static ContextContainerBuilder AddUserOverride(this ContextContainerBuilder builder)
+        /// <summary>
+        /// No matter what authentication plugin is installed, deployment is run as the user that executed the process.
+        /// </summary>
+        public static RhetosContainerBuilder AddProcessUserOverride(this RhetosContainerBuilder builder)
         {
             builder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
             return builder;

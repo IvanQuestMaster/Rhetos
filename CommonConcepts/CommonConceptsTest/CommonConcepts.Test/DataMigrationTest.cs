@@ -37,7 +37,7 @@ namespace CommonConcepts.Test
     {
         class SimpleScriptsProvider : IDataMigrationScriptsProvider
         {
-            List<DataMigrationScript> _scripts;
+            readonly List<DataMigrationScript> _scripts;
 
             public SimpleScriptsProvider(string scriptsDescription)
             {
@@ -78,11 +78,8 @@ namespace CommonConcepts.Test
                 foreach (string scriptsDescription in scriptsDescriptions)
                 {
                     var scriptsProvider = new SimpleScriptsProvider(scriptsDescription);
-                    var configuration = new MockConfiguration
-                    {
-                        { "DataMigration.SkipScriptsWithWrongOrder", skipScriptsWithWrongOrder }
-                    };
-                    var dataMigration = new DataMigrationScripts(sqlExecuter, container.Resolve<ILogProvider>(), scriptsProvider, configuration, sqlBatches);
+                    var deployOptions = new DeployOptions() { DataMigration__SkipScriptsWithWrongOrder = skipScriptsWithWrongOrder };
+                    var dataMigration = new DataMigrationScripts(sqlExecuter, container.Resolve<ILogProvider>(), scriptsProvider, deployOptions, sqlBatches);
                     dataMigration.Execute();
                 }
 

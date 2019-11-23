@@ -38,16 +38,16 @@ namespace Rhetos.Compiler
     {
         private readonly ILogger _performanceLogger;
         private readonly ILogger _logger;
-        private readonly Lazy<int> _errorReportLimit;
+        private readonly int _errorReportLimit;
         private readonly GeneratedFilesCache _filesCache;
         private readonly DomGeneratorOptions _domGeneratorOptions;
 
-        public AssemblyGenerator(ILogProvider logProvider, IConfiguration configuration,
+        public AssemblyGenerator(ILogProvider logProvider, IConfigurationProvider configurationProvider,
             GeneratedFilesCache filesCache, DomGeneratorOptions domGeneratorOptions)
         {
             _performanceLogger = logProvider.GetLogger("Performance");
             _logger = logProvider.GetLogger("AssemblyGenerator");
-            _errorReportLimit = configuration.GetInt("AssemblyGenerator.ErrorReportLimit", 5);
+            _errorReportLimit = configurationProvider.GetValue("AssemblyGenerator.ErrorReportLimit", 5);
             _filesCache = filesCache;
             _domGeneratorOptions = domGeneratorOptions;
         }
@@ -84,7 +84,7 @@ namespace Rhetos.Compiler
                 generatedAssembly = Assembly.LoadFrom(outputAssemblyPath);
                 _performanceLogger.Write(stopwatch, $"AssemblyGenerator: Assembly from cache ({dllName}).");
 
-                FailOnTypeLoadErrors(generatedAssembly, outputAssemblyPath);
+                FailOnTypeLoadErrors(generatedAssembly, outputAssemblyPath, assemblySource.RegisteredReferences);
                 _performanceLogger.Write(stopwatch, $"AssemblyGenerator: Report errors ({dllName}).");
             }
             else
@@ -123,7 +123,7 @@ namespace Rhetos.Compiler
 
                     generatedAssembly = Assembly.LoadFrom(outputAssemblyPath);
 
-                    FailOnTypeLoadErrors(generatedAssembly, outputAssemblyPath);
+                    FailOnTypeLoadErrors(generatedAssembly, outputAssemblyPath, assemblySource.RegisteredReferences);
                     _performanceLogger.Write(stopwatch, $"AssemblyGenerator: Report errors ({dllName}).");
                 }
             }
@@ -172,15 +172,15 @@ namespace Rhetos.Compiler
             var report = new StringBuilder();
             report.Append($"{errors.Count} error(s) while compiling {Path.GetFileName(outputAssemblyPath)}");
 
-            if (errors.Count > _errorReportLimit.Value)
-                report.AppendLine($". The first {_errorReportLimit.Value} errors:");
+            if (errors.Count > _errorReportLimit)
+                report.AppendLine($". The first {_errorReportLimit} errors:");
             else
                 report.AppendLine(":");
 
             report.Append(string.Join("\r\n",
-                errors.Take(_errorReportLimit.Value).Select(error => error.ToString() + ReportContext(error, sourceCode, sourcePath))));
+                errors.Take(_errorReportLimit).Select(error => error.ToString() + ReportContext(error, sourceCode, sourcePath))));
 
-            if (errors.Count > _errorReportLimit.Value)
+            if (errors.Count > _errorReportLimit)
             {
                 report.AppendLine();
                 report.AppendLine("...");
@@ -200,15 +200,20 @@ namespace Rhetos.Compiler
                 return "";
         }
 
-        private void FailOnTypeLoadErrors(Assembly assembly, string outputAssemblyPath)
+        private void FailOnTypeLoadErrors(Assembly assembly, string outputAssemblyPath, IEnumerable<string> referencedAssembliesPaths)
         {
             try
             {
                 assembly.GetTypes();
             }
-            catch (ReflectionTypeLoadException ex)
+            catch (Exception ex)
             {
-                throw new FrameworkException(CsUtility.ReportTypeLoadException(ex, $"Error while compiling {Path.GetFileName(outputAssemblyPath)}."), ex);
+                string contextInfo = $"Error while compiling {Path.GetFileName(outputAssemblyPath)}.";
+                string typeLoadReport = CsUtility.ReportTypeLoadException(ex, contextInfo, referencedAssembliesPaths);
+                if (typeLoadReport != null)
+                    throw new FrameworkException(typeLoadReport, ex);
+                else
+                    ExceptionsUtility.Rethrow(ex);
             }
         }
 

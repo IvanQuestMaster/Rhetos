@@ -18,6 +18,7 @@
 */
 
 using Rhetos.Logging;
+using Rhetos.TestCommon;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
@@ -30,20 +31,27 @@ namespace Rhetos.Dsl.Test
     {
         public TestDslParser(string dsl, IConceptInfo[] conceptInfoPlugins = null)
             : base (
-                new Tokenizer(new MockDslScriptsProvider(dsl)),
-                conceptInfoPlugins != null ? conceptInfoPlugins : new IConceptInfo[] { },
+                new TestTokenizer(dsl),
+                conceptInfoPlugins ?? new IConceptInfo[] { },
                 new ConsoleLogProvider())
         {
         }
 
-        new public IEnumerable<IConceptInfo> ExtractConcepts(MultiDictionary<string, IConceptParser> conceptParsers)
+        private T Invoke<T>(string methodName, params object[] parameters)
         {
-            return base.ExtractConcepts(conceptParsers);
+            return (T)typeof(DslParser)
+                .GetMethod(methodName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .InvokeEx(this, parameters);
         }
 
-        new public IConceptInfo ParseNextConcept(TokenReader tokenReader, Stack<IConceptInfo> context, MultiDictionary<string, IConceptParser> conceptParsers)
+        public IEnumerable<IConceptInfo> ExtractConcepts(MultiDictionary<string, IConceptParser> conceptParsers)
         {
-            return base.ParseNextConcept(tokenReader, context, conceptParsers);
+            return Invoke<IEnumerable<IConceptInfo>>("ExtractConcepts", conceptParsers);
+        }
+
+        public IConceptInfo ParseNextConcept(TokenReader tokenReader, Stack<IConceptInfo> context, MultiDictionary<string, IConceptParser> conceptParsers)
+        {
+            return Invoke<IConceptInfo>("ParseNextConcept", tokenReader, context, conceptParsers);
         }
     }
 }

@@ -29,13 +29,15 @@ namespace Rhetos.Utilities
 {
     public class GeneratedFilesCache
     {
+        private readonly RhetosAppEnvironment _rhetosAppEnvironment;
         private readonly FilesUtility _filesUtility;
         private readonly FileSyncer _syncer;
         private readonly ILogger _logger;
         private readonly SHA1 _sha1;
 
-        public GeneratedFilesCache(ILogProvider logProvider)
+        public GeneratedFilesCache(RhetosAppEnvironment rhetosAppEnvironment, ILogProvider logProvider)
         {
+            _rhetosAppEnvironment = rhetosAppEnvironment;
             _filesUtility = new FilesUtility(logProvider);
             _syncer = new FileSyncer(logProvider);
             _logger = logProvider.GetLogger("FilesCache");
@@ -50,7 +52,7 @@ namespace Rhetos.Utilities
         {
             // Group files by name without extension:
 
-            var generatedFiles = _filesUtility.SafeGetFiles(Paths.GeneratedFolder, "*", SearchOption.AllDirectories)
+            var generatedFiles = _filesUtility.SafeGetFiles(_rhetosAppEnvironment.GeneratedFolder, "*", SearchOption.AllDirectories)
                 .GroupBy(file => Path.GetFileNameWithoutExtension(file))
                 .ToDictionary(g => g.Key, g => g.ToList());
 
@@ -64,7 +66,7 @@ namespace Rhetos.Utilities
 
             foreach (string moveGroup in succesfullyGeneratedGroups)
                 foreach (string moveFile in generatedFiles[moveGroup])
-                    _syncer.AddFile(moveFile, Path.Combine(Paths.GeneratedFilesCacheFolder, moveGroup));
+                    _syncer.AddFile(moveFile, Path.Combine(_rhetosAppEnvironment.GeneratedFilesCacheFolder, moveGroup));
             _syncer.UpdateDestination(deleteSource: true);
 
             foreach (string deleteGroup in generatedFiles.Keys.Except(succesfullyGeneratedGroups))
@@ -100,7 +102,7 @@ namespace Rhetos.Utilities
         public byte[] LoadHash(string sampleSourceFile)
         {
             string hashFile = Path.GetFullPath(Path.ChangeExtension(sampleSourceFile, ".hash"));
-            return CsUtility.HexToByteArray(File.ReadAllText(hashFile, Encoding.Default));
+            return CsUtility.HexToByteArray(File.ReadAllText(hashFile, Encoding.ASCII));
         }
 
         /// <summary>
@@ -135,7 +137,7 @@ namespace Rhetos.Utilities
 
         private Dictionary<string, List<string>> ListCachedFiles()
         {
-            return _filesUtility.SafeGetFiles(Paths.GeneratedFilesCacheFolder, "*", SearchOption.AllDirectories)
+            return _filesUtility.SafeGetFiles(_rhetosAppEnvironment.GeneratedFilesCacheFolder, "*", SearchOption.AllDirectories)
                 .GroupBy(file => Path.GetFileName(Path.GetDirectoryName(file)))
                 .ToDictionary(g => g.Key, g => g.ToList());
         }
@@ -162,7 +164,7 @@ namespace Rhetos.Utilities
             if (cachedHashFile == null)
                 return ValueOrError.CreateError("Missing hash file.");
 
-            byte[] cachedHash = CsUtility.HexToByteArray(File.ReadAllText(cachedHashFile, Encoding.Default));
+            byte[] cachedHash = CsUtility.HexToByteArray(File.ReadAllText(cachedHashFile, Encoding.ASCII));
             if (cachedHash == null || cachedHash.Length == 0)
                 return ValueOrError.CreateError("Missing hash value.");
 

@@ -21,13 +21,11 @@ using Rhetos;
 using Rhetos.Deployment;
 using Rhetos.Logging;
 using Rhetos.Utilities;
-using Rhetos.Utilities.ApplicationConfiguration;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DeployPackages
 {
@@ -37,14 +35,16 @@ namespace DeployPackages
         private readonly FilesUtility _filesUtility;
         private readonly DeployOptions _deployOptions;
         private readonly InitializationContext _initializationContext;
+        private readonly RhetosAppEnvironment _rhetosAppEnvironment;
 
-        public PackageManager(InitializationContext initializationContext)
+        public PackageManager(IConfigurationProvider configurationProvider, ILogProvider logProvider)
         {
-            _logger = initializationContext.LogProvider.GetLogger("DeployPackages");
-            _filesUtility = new FilesUtility(initializationContext.LogProvider);
-            _deployOptions = initializationContext.ConfigurationProvider.GetOptions<DeployOptions>();
-            _initializationContext = initializationContext;
-            LegacyUtilities.Initialize(_initializationContext.ConfigurationProvider);
+            _logger = logProvider.GetLogger("DeployPackages");
+            _filesUtility = new FilesUtility(logProvider);
+            _deployOptions = configurationProvider.GetOptions<DeployOptions>();
+            _initializationContext = new InitializationContext(configurationProvider, logProvider);
+            _rhetosAppEnvironment = _initializationContext.RhetosAppEnvironment;
+            LegacyUtilities.Initialize(configurationProvider);
         }
 
         public void InitialCleanup()
@@ -56,12 +56,12 @@ namespace DeployPackages
             if (!_deployOptions.DatabaseOnly)
             {
                 _logger.Trace("Moving old generated files to cache.");
-                new GeneratedFilesCache(_initializationContext.LogProvider).MoveGeneratedFilesToCache();
-                _filesUtility.SafeCreateDirectory(Paths.GeneratedFolder);
+                new GeneratedFilesCache(_rhetosAppEnvironment, _initializationContext.LogProvider).MoveGeneratedFilesToCache();
+                _filesUtility.SafeCreateDirectory(_rhetosAppEnvironment.GeneratedFolder);
             }
             else
             {
-                var missingFile = Paths.DomAssemblyFiles.FirstOrDefault(f => !File.Exists(f));
+                var missingFile = _rhetosAppEnvironment.DomAssemblyFiles.FirstOrDefault(f => !File.Exists(f));
                 if (missingFile != null)
                     throw new UserException($"'/DatabaseOnly' switch cannot be used if the server have not been deployed successfully before. Run a regular deployment instead. Missing '{missingFile}'.");
 
@@ -78,20 +78,20 @@ namespace DeployPackages
             }
 
             _logger.Trace("Getting packages.");
-            var config = new DeploymentConfiguration(_initializationContext.LogProvider);
+            var config = new DeploymentConfiguration(_rhetosAppEnvironment, _initializationContext.LogProvider);
             var packageDownloaderOptions = new PackageDownloaderOptions { IgnorePackageDependencies = _deployOptions.IgnoreDependencies };
-            var packageDownloader = new PackageDownloader(config, _initializationContext.LogProvider, packageDownloaderOptions);
+            var packageDownloader = new PackageDownloader(config, _rhetosAppEnvironment, _initializationContext.LogProvider, packageDownloaderOptions);
             var packages = packageDownloader.GetPackages();
 
-            InstalledPackages.Save(packages);
+            InstalledPackages.Save(packages, _rhetosAppEnvironment);
         }
 
         private void ThrowOnObsoleteFolders()
         {
             var obsoleteFolders = new string[]
             {
-                Path.Combine(Paths.RhetosServerRootPath, "DslScripts"),
-                Path.Combine(Paths.RhetosServerRootPath, "DataMigration")
+                Path.Combine(_rhetosAppEnvironment.RootPath, "DslScripts"),
+                Path.Combine(_rhetosAppEnvironment.RootPath, "DataMigration")
             };
             var obsoleteFolder = obsoleteFolders.FirstOrDefault(folder => Directory.Exists(folder));
             if (obsoleteFolder != null)
@@ -102,9 +102,9 @@ namespace DeployPackages
         {
             var deleteObsoleteFiles = new string[]
             {
-                Path.Combine(Paths.BinFolder, "ServerDom.cs"),
-                Path.Combine(Paths.BinFolder, "ServerDom.dll"),
-                Path.Combine(Paths.BinFolder, "ServerDom.pdb")
+                Path.Combine(_rhetosAppEnvironment.BinFolder, "ServerDom.cs"),
+                Path.Combine(_rhetosAppEnvironment.BinFolder, "ServerDom.dll"),
+                Path.Combine(_rhetosAppEnvironment.BinFolder, "ServerDom.pdb")
             };
 
             foreach (var path in deleteObsoleteFiles)

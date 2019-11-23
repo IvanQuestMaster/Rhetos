@@ -23,11 +23,9 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rhetos.Utilities;
-using Rhetos.Deployment;
 using System.Data;
 using System.Text.RegularExpressions;
 using Rhetos.TestCommon;
-using Rhetos.Utilities.ApplicationConfiguration;
 
 namespace Rhetos.Deployment.Test
 {

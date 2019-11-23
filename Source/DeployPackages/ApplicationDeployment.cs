@@ -19,32 +19,31 @@
 
 using Autofac;
 using Rhetos;
-using Rhetos.Configuration.Autofac;
 using Rhetos.Deployment;
 using Rhetos.Dom;
 using Rhetos.Extensibility;
 using Rhetos.Logging;
 using Rhetos.Utilities;
-using Rhetos.Utilities.ApplicationConfiguration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DeployPackages
 {
     public class ApplicationDeployment
     {
         private readonly ILogger _logger;
-        private readonly InitializationContext _initializationContext;
+        private readonly IConfigurationProvider _configurationProvider;
+        private readonly ILogProvider _logProvider;
 
-        public ApplicationDeployment(InitializationContext initializationContext)
+        public ApplicationDeployment(IConfigurationProvider configurationProvider, ILogProvider logProvider)
         {
-            _logger = initializationContext.LogProvider.GetLogger("DeployPackages");
-            _initializationContext = initializationContext;
+            _logger = logProvider.GetLogger("DeployPackages");
+            _configurationProvider = configurationProvider;
+            _logProvider = logProvider;
         }
         
         public void GenerateApplication()
@@ -52,15 +51,15 @@ namespace DeployPackages
             _logger.Trace("Loading plugins.");
             var stopwatch = Stopwatch.StartNew();
 
-            var builder = new ContextContainerBuilder(_initializationContext)
+            var builder = new RhetosContainerBuilder(_configurationProvider, _logProvider)
                 .AddRhetosDeployment()
-                .AddUserOverride();
+                .AddProcessUserOverride();
 
             using (var container = builder.Build())
             {
                 var performanceLogger = container.Resolve<ILogProvider>().GetLogger("Performance");
                 performanceLogger.Write(stopwatch, "DeployPackages.Program: Modules and plugins registered.");
-                Plugins.LogRegistrationStatistics("Generating application", container);
+                Plugins.LogRegistrationStatistics("Generating application", container, _logProvider);
 
                 container.Resolve<ApplicationGenerator>().ExecuteGenerators();
             }
@@ -68,16 +67,15 @@ namespace DeployPackages
 
         public void InitializeGeneratedApplication()
         {
-            // Creating a new container builder instead of using builder.Update, because of severe performance issues with the Update method.
-            Plugins.ClearCache();
+            // Creating a new container builder instead of using builder.Update(), because of severe performance issues with the Update method.
 
             _logger.Trace("Loading generated plugins.");
             var stopwatch = Stopwatch.StartNew();
 
-            var builder = new ContextContainerBuilder(_initializationContext)
+            var builder = new RhetosContainerBuilder(_configurationProvider, _logProvider)
                 .AddApplicationInitialization()
                 .AddRhetosRuntime()
-                .AddUserOverride();
+                .AddProcessUserOverride();
 
             using (var container = builder.Build())
             {
@@ -85,7 +83,7 @@ namespace DeployPackages
                 var initializers = ApplicationInitialization.GetSortedInitializers(container);
 
                 performanceLogger.Write(stopwatch, "DeployPackages.Program: New modules and plugins registered.");
-                Plugins.LogRegistrationStatistics("Initializing application", container);
+                Plugins.LogRegistrationStatistics("Initializing application", container, _logProvider);
 
                 if (!initializers.Any())
                 {
@@ -103,11 +101,12 @@ namespace DeployPackages
 
         private void RestartWebServer()
         {
-            var configFile = Path.Combine(_initializationContext.RhetosAppEnvironment.RootPath, "Web.config");
+            var rhetosAppEnvironment = new RhetosAppEnvironment(_configurationProvider.GetOptions<RhetosAppOptions>().RootPath);
+            var configFile = Path.Combine(rhetosAppEnvironment.RootPath, "Web.config");
             if (FilesUtility.SafeTouch(configFile))
                 _logger.Trace($"Updated {Path.GetFileName(configFile)} modification date to restart server.");
             else
-                _logger.Trace($"Missing {Path.GetFileName(configFile)}.");
+                _logger.Trace($"Missing {configFile}.");
         }
     }
 }

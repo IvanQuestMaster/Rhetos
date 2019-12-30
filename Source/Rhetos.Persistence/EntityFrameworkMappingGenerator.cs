@@ -47,24 +47,27 @@ namespace Rhetos.Persistence
         private readonly IPluginsContainer<IConceptMapping> _plugins;
         private readonly ILogger _performanceLogger;
         private readonly AssetsOptions _assetsOptions;
+        private readonly BuildOptions _buildOptions;
 
         public EntityFrameworkMappingGenerator(
             ICodeGenerator codeGenerator,
             IPluginsContainer<IConceptMapping> plugins,
             AssetsOptions assetsOptions,
-            ILogProvider logProvider)
+            ILogProvider logProvider,
+            BuildOptions buildOptions)
         {
             _plugins = plugins;
             _codeGenerator = codeGenerator;
             _performanceLogger = logProvider.GetLogger("Performance");
             _assetsOptions = assetsOptions;
+            _buildOptions = buildOptions;
         }
 
         public void Generate()
         {
             var sw = Stopwatch.StartNew();
 
-            string xml = _codeGenerator.ExecutePlugins(_plugins, "<!--", "-->", new InitialSnippet()).GeneratedCode;
+            string xml = _codeGenerator.ExecutePlugins(_plugins, "<!--", "-->", new InitialSnippet(_buildOptions)).GeneratedCode;
             string[] segments = xml.Split(new[] { "\r\n" + _segmentSplitter + "\r\n" }, StringSplitOptions.None);
 
             if (segments.Length != EntityFrameworkMapping.ModelFiles.Length)
@@ -82,6 +85,15 @@ namespace Rhetos.Persistence
 
         private class InitialSnippet : IConceptCodeGenerator
         {
+            public const string DefaultProviderManifestToken = "2012";
+
+            private readonly string _providerManifestToken;
+
+            public InitialSnippet(BuildOptions buildOptions)
+            {
+                _providerManifestToken = buildOptions.EntityFramework__ProviderManifestToken != null ? buildOptions.EntityFramework__ProviderManifestToken : DefaultProviderManifestToken;
+            }
+
             public void GenerateCode(IConceptInfo conceptInfo, ICodeBuilder codeBuilder)
             {
                 codeBuilder.InsertCode(
@@ -99,7 +111,7 @@ $@"<Schema Namespace=""{EntityFrameworkMapping.ConceptualModelNamespace}"" Alias
   </EntityContainerMapping>
 </Mapping>
 {_segmentSplitter}
-<Schema Namespace=""{EntityFrameworkMapping.StorageModelNamespace}"" Provider=""System.Data.SqlClient"" ProviderManifestToken=""{MsSqlUtility.GetProviderManifestToken()}"" Alias=""Self"" xmlns:customannotation=""http://schemas.microsoft.com/ado/2013/11/edm/customannotation"" xmlns=""http://schemas.microsoft.com/ado/2009/11/edm/ssdl"">
+<Schema Namespace=""{EntityFrameworkMapping.StorageModelNamespace}"" Provider=""System.Data.SqlClient"" ProviderManifestToken=""{_providerManifestToken}"" Alias=""Self"" xmlns:customannotation=""http://schemas.microsoft.com/ado/2013/11/edm/customannotation"" xmlns=""http://schemas.microsoft.com/ado/2009/11/edm/ssdl"">
   {EntityFrameworkMapping.StorageModelTag}
   <EntityContainer Name=""CodeFirstDatabase"">
     {EntityFrameworkMapping.StorageModelEntityContainerTag}

@@ -26,6 +26,7 @@ namespace Rhetos.Utilities
         public string GeneratedFilesCacheFolder { get; set; }
         public bool Debug { get; set; }
         public bool ShortTransactions { get; set; }
+        public string EntityFramework__ProviderManifestToken { get; set; }
         public bool DataMigration__SkipScriptsWithWrongOrder { get; set; } = true;
         public bool CommonConcepts__Legacy__AutoGeneratePolymorphicProperty { get; set; } = true;
         public bool CommonConcepts__Legacy__CascadeDeleteInDatabase { get; set; } = true;

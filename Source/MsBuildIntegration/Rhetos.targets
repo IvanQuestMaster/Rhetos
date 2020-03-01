@@ -1,6 +1,10 @@
 <Project>
     <UsingTask AssemblyFile="RhetosBuildTask.dll" TaskName="RhetosBuildTask.RhetosBuild" />
-    <Target Name="RhetosBuild" DependsOnTargets="ResolveProjectReferences" BeforeTargets="CoreCompile" Condition="'$(RhetosBuild)'=='True'" Inputs="@(RhetosInput)" Outputs="@(RhetosOutput)">
+    <!--TODO Vjeratno ovaj target ovisi o još nečemu (o targetu koji generira project assets json) pa treba provijeriti -->
+    <Target Name="RhetosResolveBuildArguments" DependsOnTargets="ResolveProjectReferences" BeforeTargets="CoreCompile">
+        <RhetosBuild ResolveArgumentsOnly="True" RhetosBuildExePath="$(RhetosCliExecutablePath)" ProjectDirectory="$(ProjectDir)." Assemblies="@(_ResolvedProjectReferencePaths)" AssemblyName="$(AssemblyName)" />      
+    </Target>    
+    <Target Name="RhetosBuild" DependsOnTargets="ResolveProjectReferences" BeforeTargets="Compile" Condition="'$(RhetosBuild)'=='True'" Inputs="@(RhetosInput)" Outputs="@(RhetosOutput)">
         <FindUnderPath Files="@(Compile)" Path="RhetosSource">
             <Output TaskParameter="InPath" ItemName="OldSourceFiles" />
         </FindUnderPath>

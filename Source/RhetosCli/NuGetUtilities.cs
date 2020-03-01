@@ -26,11 +26,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Rhetos
 {
     internal class NuGetUtilities
     {
+        const string ProjectAssetsJsonFileName = "project.assets.json";
+
         private readonly LockFile _lockFile;
         private readonly NuGetFramework _targetFramework;
 
@@ -41,9 +44,9 @@ namespace Rhetos
             var objFolderPath = Path.Combine(projectRootFolder, "obj");
             if (!Directory.Exists(objFolderPath))
                 throw new FrameworkException($"Project object files folder '{objFolderPath}' does not exist. Please make sure that a valid project folder is specified, and run NuGet restore before build.");
-            var path = Path.Combine(objFolderPath, "project.assets.json");
+            var path = Path.Combine(objFolderPath, ProjectAssetsJsonFileName);
             if (!File.Exists(path))
-                throw new FrameworkException("The project.assets.json file does not exist. Switch to NuGet's PackageReference format type for your project.");
+                throw new FrameworkException($"The {ProjectAssetsJsonFileName} file does not exist. Switch to NuGet's PackageReference format type for your project.");
             _lockFile = LockFileUtilities.GetLockFile(path, new NuGetLogger(logProvider));
             _targetFramework = ResolveTargetFramework(target);
         }
@@ -69,33 +72,90 @@ namespace Rhetos
             }
         }
 
-        internal List<string> GetBuildAssemblies()
+        internal List<string> GetBuildAssembliesForNugetPackages()
         {
-            return GetTargetFrameworkLibraries()
+            return GetTargetFrameworkLibraries().Where(x => x.Type == "package")
                 .Select(targetLibrary => new { PackageFolder = GetPackageFolderForLibrary(targetLibrary), targetLibrary.CompileTimeAssemblies })
                 .SelectMany(targetLibrary => targetLibrary.CompileTimeAssemblies.Select(libFile => Path.Combine(targetLibrary.PackageFolder, GetNormalizedNugetPaths(libFile.Path))))
                 .Where(libFile => Path.GetExtension(libFile) == ".dll")
                 .ToList();
         }
 
+        internal List<string> GetBuildAssembliesForReferencedProjects(IEnumerable<string> additionalAssemblies)
+        {
+            var projectOutputAssemblies = GetTargetFrameworkLibraries().Where(x => x.Type == "project")
+                .Select(targetLibrary => new { ProjectName = targetLibrary.Name, PackageFolder = GetPackageFolderForLibrary(targetLibrary), targetLibrary.CompileTimeAssemblies })
+                .SelectMany(targetLibrary => targetLibrary.CompileTimeAssemblies.Select(assemblyPartialPath =>  new { targetLibrary.ProjectName, targetLibrary.PackageFolder, AssemblyPartialPath = GetNormalizedNugetPaths(assemblyPartialPath.Path) }))
+                .ToList();
+
+            var projectAssemblies = new List<string>();
+            foreach (var projectOutputAssembly in projectOutputAssemblies)
+            {
+                var assemblyFullPath = Path.Combine(projectOutputAssembly.PackageFolder, projectOutputAssembly.AssemblyPartialPath);
+                if (!File.Exists(assemblyFullPath))
+                {
+                    var splits = projectOutputAssembly.AssemblyPartialPath.Split(new string []{ @"\placeholder\"}, StringSplitOptions.None);
+                    if (splits.Length != 2)
+                        throw new FrameworkException($"Unexpected output assembly path for project {projectOutputAssembly.ProjectName} found in {ProjectAssetsJsonFileName} file."); //This should never happen but if does happens what the user should do?
+                    var beginPath = Path.Combine(projectOutputAssembly.PackageFolder, splits[0]);
+                    var endPath = splits[1];
+                    Func<string, bool> patternSearch = (file) => file.StartsWith(splits[0]) && file.EndsWith(splits[0]);
+                    var validAssemblies = additionalAssemblies.Where(patternSearch).Distinct();
+                    if (validAssemblies.Count() == 1)
+                        projectAssemblies.Add(validAssemblies.First());
+                    else if (validAssemblies.Count() > 1)
+                        throw new FrameworkException($"Found multiple output assemblies for project {projectOutputAssembly.ProjectName}. Pass only one assembly to the option --assemblies argument that matches the following pattern {Path.Combine(projectOutputAssembly.PackageFolder, projectOutputAssembly.AssemblyPartialPath)}");
+
+                    var outputAssemblyFileName = Path.GetFileName(projectOutputAssembly.AssemblyPartialPath);
+                    validAssemblies = Directory.GetFiles(projectOutputAssembly.PackageFolder, "*/" + outputAssemblyFileName)
+                        .Where(patternSearch).OrderByDescending(f => File.GetLastWriteTime(f));
+                    if (validAssemblies.Count() == 1)
+                        projectAssemblies.Add(validAssemblies.First());
+                    else if (validAssemblies.Count() > 1)
+                        throw new FrameworkException($"Found multiple output assemblies for project {projectOutputAssembly.ProjectName}. Please specify which assembly to use with the --assemblies switch.");
+                    else
+                        throw new FrameworkException($"No assembly found for project {projectOutputAssembly.ProjectName}. Please specify which assembly to use with the --assemblies switch.");
+                }
+                else
+                {
+                    projectAssemblies.Add(assemblyFullPath);
+                }
+            }
+
+            return projectAssemblies;
+        }
+
         internal List<InstalledPackage> GetInstalledPackages()
         {
             var installedPackages = new List<InstalledPackage>();
-            var targetLibraries = GetTargetFrameworkLibraries();
+            var targetLibraries = GetTargetFrameworkLibraries().Where(x => x.Type == "package").ToList();
             foreach (var targetLibrary in targetLibraries)
             {
                 var packageFolder = GetPackageFolderForLibrary(targetLibrary);
+                var dependencies = targetLibrary.Dependencies.Select(x => new PackageRequest { Id = x.Id, VersionsRange = x.VersionRange.OriginalString });
                 var library = _lockFile.GetLibrary(targetLibrary.Name, targetLibrary.Version);
                 var contentFiles = library.Files.Select(x => new ContentFile { PhysicalPath = Path.Combine(packageFolder, GetNormalizedNugetPaths(x)), InPackagePath = GetNormalizedNugetPaths(x) }).ToList();
-                installedPackages.Add(new InstalledPackage(library.Name, library.Version.Version.ToString(), null, null, null, null, contentFiles));
+                installedPackages.Add(new InstalledPackage(library.Name, library.Version.Version.ToString(), dependencies, packageFolder, null, null, contentFiles));
             }
 
             return SortInstalledPackagesByDependencies(targetLibraries, installedPackages);
         }
 
+        internal InstalledPackage GetProjectAsInstalledPackage(string projectRootPath)
+        {
+            //TODO: We should add the possibility to specify content files as an option
+            //MSBuild knows which files are part of the project that it is building so we should use only those files
+            var contentFiles = Directory.GetFiles(projectRootPath, "*", SearchOption.AllDirectories)
+                .Select(f => new ContentFile { PhysicalPath = f, InPackagePath = FilesUtility.AbsoluteToRelativePath(projectRootPath, f) })
+                .Where(c => (!c.InPackagePath.StartsWith("bin") && !c.InPackagePath.StartsWith("obj")))
+                .ToList();
+            var dependencies = _lockFile.PackageSpec.TargetFrameworks.Single(x => x.FrameworkName == _targetFramework).Dependencies.Select(x => new PackageRequest { Id = x.Name, VersionsRange = x.LibraryRange.VersionRange.OriginalString });
+            return new InstalledPackage(ProjectName, "", dependencies, projectRootPath, null, null, contentFiles);
+        }
+
         private IList<LockFileTargetLibrary> GetTargetFrameworkLibraries()
         {
-            return _lockFile.Targets.Single(x => x.TargetFramework == _targetFramework && x.RuntimeIdentifier == null).Libraries.Where(x => x.Type == "package").ToList();
+            return _lockFile.Targets.Single(x => x.TargetFramework == _targetFramework && x.RuntimeIdentifier == null).Libraries.ToList();
         }
 
         private List<InstalledPackage> SortInstalledPackagesByDependencies(IList<LockFileTargetLibrary> targetLibraries, List<InstalledPackage> installedPackages)

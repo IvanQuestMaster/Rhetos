@@ -38,6 +38,8 @@ namespace RhetosBuildTask
 
         public ITaskItem[] Assemblies { get; set; }
 
+        public bool ResolveArgumentsOnly { get; set; }
+
         public override bool Execute()
         {
             var commandLineArgument = GetCommandLineArguments();
@@ -48,7 +50,11 @@ namespace RhetosBuildTask
 
         private string GetCommandLineArguments()
         {
-            var commandLineArgument = $"build \"{ProjectDirectory}\"";
+            var command = "build";
+            if (ResolveArgumentsOnly)
+                command = "initialize";
+
+            var commandLineArgument = $"{command} \"{ProjectDirectory}\"";
 
             if (!string.IsNullOrEmpty(AssemblyName))
                 commandLineArgument = commandLineArgument + " --assembly-name " + AssemblyName;

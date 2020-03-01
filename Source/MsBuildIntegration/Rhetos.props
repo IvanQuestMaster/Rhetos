@@ -12,6 +12,7 @@
         <RhetosOutput Include="Resources\**\*" />
     </ItemGroup>    
     <PropertyGroup>
+        <CoreCompileDependsOn>$(CoreCompileDependsOn);RhetosBuild</CoreCompileDependsOn>
         <RhetosCliExecutablePath>$(MSBuildThisFileDirectory)..\tools\rhetos.exe</RhetosCliExecutablePath>    
         <RhetosBuild>True</RhetosBuild>
         <RhetosDeploy>True</RhetosDeploy>

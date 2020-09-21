@@ -88,6 +88,40 @@ namespace Rhetos.Dom.DefaultConcepts
                     string test = containsIdsQuery.Groups["test"].Value;
 
                     var indexOfConcatenatedIdsParameter = cmd.Parameters.IndexOf(concatenatedIds.Replace("@", ""));
+                    var concatenatedIdsParameterValue = (byte[])cmd.Parameters[indexOfConcatenatedIdsParameter].Value;
+
+                    string containsIdsSql;
+                    if (concatenatedIdsParameterValue.Length == 0)
+                        containsIdsSql = (test == testTrue) ? "1 = 0" : "1 = 1";
+                    else
+                    {
+                        string operation = (test == testTrue) ? "IN" : "NOT IN";
+                        containsIdsSql = $"{id} {operation} (SELECT id FROM [Common].[GetUniqueidentifiers]({concatenatedIds}))"; ;
+                    }
+
+                    cmd.CommandText =
+                        cmd.CommandText.Substring(0, containsIdsQuery.Index)
+                        + containsIdsSql
+                        + cmd.CommandText.Substring(containsIdsQuery.Index + containsIdsQuery.Length);
+                }
+            }
+
+            /*if (cmd.CommandText.Contains(EFExpression.ContainsIdsFunction))
+            {
+                const string testTrue = "= 1";
+                const string testFalse = "<> 1";
+                var parseContainsIdsQuery = new Regex($@"\(\[{EntityFrameworkMapping.StorageModelNamespace}\]\.\[{EFExpression.ContainsIdsFunction}\]\((?<id>.+?), (?<concatenatedIds>.*?)\)\) (?<test>{testTrue}|{testFalse})", RegexOptions.Singleline);
+
+                var containsIdsQueries = parseContainsIdsQuery.Matches(cmd.CommandText).Cast<Match>();
+                var replacedVariablesIndices = new HashSet<int>();
+
+                foreach (var containsIdsQuery in containsIdsQueries.OrderByDescending(m => m.Index))
+                {
+                    string id = containsIdsQuery.Groups["id"].Value;
+                    string concatenatedIds = containsIdsQuery.Groups["concatenatedIds"].Value;
+                    string test = containsIdsQuery.Groups["test"].Value;
+
+                    var indexOfConcatenatedIdsParameter = cmd.Parameters.IndexOf(concatenatedIds.Replace("@", ""));
                     var concatenatedIdsParameterValue = (string)cmd.Parameters[indexOfConcatenatedIdsParameter].Value;
 
                     string containsIdsSql;
@@ -110,7 +144,7 @@ namespace Rhetos.Dom.DefaultConcepts
 
                 foreach (var replacedVariableIndex in replacedVariablesIndices)
                     cmd.Parameters[replacedVariableIndex].Value = "This parameter was replaced in SQL query with list of GUIDs (Rhetos EF optizmization)";
-            }
+            }*/
 
             if (cmd.CommandText.Contains(EFExpression.ContainsIdsFunction))
                 throw new FrameworkException("Error while parsing ContainsIds query. Not all conditions were handled.");

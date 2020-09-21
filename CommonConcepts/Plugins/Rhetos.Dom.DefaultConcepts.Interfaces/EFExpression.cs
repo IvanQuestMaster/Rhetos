@@ -70,14 +70,14 @@ namespace Rhetos.Dom.DefaultConcepts
                 nameof(ContainsIds),
                 BindingFlags.NonPublic | BindingFlags.Static,
                 null,
-                new Type[] { typeof(Guid), typeof(string) },
+                new Type[] { typeof(Guid), typeof(byte[]) },
                 null);
 
             static readonly MethodInfo ContainsIdNullableMethod = typeof(EFExpression).GetMethod(
                 nameof(ContainsIds),
                 BindingFlags.NonPublic | BindingFlags.Static,
                 null,
-                new Type[] { typeof(Guid?), typeof(string) },
+                new Type[] { typeof(Guid?), typeof(byte[]) },
                 null);
 
             protected override Expression VisitMethodCall(MethodCallExpression node)
@@ -129,16 +129,16 @@ namespace Rhetos.Dom.DefaultConcepts
 
             Expression CreateOptimizeExpressionForListOfGuid(IList<Guid> guids, Expression value)
             {
-                var concatenatedIds = string.Join(",", guids.Distinct().Select(x => x.ToString()));
-                Expression<Func<string>> idsLambda = () => concatenatedIds;
+                var concatenatedIds = GuidsToByteArray(guids);
+                Expression<Func<byte[]>> idsLambda = () => concatenatedIds;
 
                 return Expression.Call(ContainsIdsMethod, value, idsLambda.Body);
             }
 
             Expression CreateOptimizeExpressionForListOfNullableGuid(IList<Guid?> guids, Expression value)
             {
-                var concatenatedIds = string.Join(",", guids.Where(x => x != null).Distinct().Select(x => x.ToString()));
-                Expression<Func<string>> idsLambda = () => concatenatedIds;
+                var concatenatedIds = GuidsToByteArray(guids.Where(x => x.HasValue).Select(x => x.Value).ToList());
+                Expression<Func<byte[]>> idsLambda = () => concatenatedIds;
 
                 Expression optimizedContainsExpression = Expression.Call(ContainsIdNullableMethod, value, idsLambda.Body);
 
@@ -154,23 +154,46 @@ namespace Rhetos.Dom.DefaultConcepts
 
                 return optimizedContainsExpression;
             }
+
+            byte[] GuidsToByteArray(IList<Guid> guids)
+            {
+                var binary = new byte[16 * guids.Count];
+                for (var i = 0; i < guids.Count; i++)
+                {
+                    var id = guids[i];
+                    Array.Copy(id.ToByteArray(), 0, binary, i * 16, 16);
+                }
+                return binary;
+            }
+        }
+
+        private static List<Guid> ListOfGuidsFromBytes(byte[] bytes)
+        {
+            var guids = new List<Guid>();
+            for (var i = 0; i < bytes.Length; i = i + 16)
+            {
+                var guidBytes = new byte[16];
+                Array.Copy(bytes, i, guidBytes, 0, 16);
+                guids.Add(new Guid(guidBytes));
+            }
+            return guids;
         }
 
         public const string ContainsIdsFunction = "InterceptContainsIds";
 
         [DbFunction(EntityFrameworkMapping.StorageModelNamespace, ContainsIdsFunction)]
-        private static bool ContainsIds(Guid id, string guids)
+        private static bool ContainsIds(Guid id, byte[] guids)
         {
-            return !string.IsNullOrEmpty(guids)
-                && guids.Split(',').Select(guid => new Guid(guid)).Contains(id);
+            return guids.Length != 0 && 
+                ListOfGuidsFromBytes(guids).Contains(id);
         }
 
         [DbFunction(EntityFrameworkMapping.StorageModelNamespace, ContainsIdsFunction)]
-        private static bool ContainsIds(Guid? id, string guids)
+        private static bool ContainsIds(Guid? id, byte[] guids)
         {
             return id != null
-                && !string.IsNullOrEmpty(guids)
-                && guids.Split(',').Select(guid => new Guid(guid)).Contains(id.Value);
+                && guids.Length != 0 &&
+                ListOfGuidsFromBytes(guids).Contains(id.Value);
         }
     }
 }

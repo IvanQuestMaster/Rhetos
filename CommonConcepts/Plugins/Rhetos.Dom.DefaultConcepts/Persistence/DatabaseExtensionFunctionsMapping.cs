@@ -144,7 +144,7 @@ $@"  <Function Name=""{DatabaseExtensionFunctions.InterceptFullTextSearchFunctio
   </Function>
   <Function Name=""{EFExpression.ContainsIdsFunction}"" ReturnType=""bit"" >
     <Parameter Name = ""id"" Mode = ""In"" Type = ""uniqueidentifier"" />
-    <Parameter Name = ""concatenatedids"" Mode = ""In"" Type = ""nvarchar"" />
+    <Parameter Name = ""concatenatedids"" Mode = ""In"" Type = ""varbinary"" />
   </Function>
 ", EntityFrameworkMapping.StorageModelTag);
         }

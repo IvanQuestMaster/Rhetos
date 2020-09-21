@@ -1,0 +1,23 @@
+Module Common
+{
+    SqlObject GetUniqueidintifiersFunction
+    "
+        CREATE FUNCTION [Common].[GetUniqueidentifiers](@binaryIds varbinary(MAX))
+            RETURNS @ids TABLE (
+                id uniqueidentifier
+            )
+        AS
+        BEGIN
+            DECLARE @cnt INT = 1;
+            WHILE @cnt < DATALENGTH(@binaryIds) 
+            BEGIN
+            insert into @ids (id) values(SUBSTRING(@binaryIds, @cnt, 16))
+            SET @cnt = @cnt + 16;
+            END;
+            RETURN;
+        END;
+    "
+    "
+        DROP FUNCTION [Common].[GetUniqueidentifiers]
+    ";
+}

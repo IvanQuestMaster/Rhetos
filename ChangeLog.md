@@ -50,6 +50,9 @@ Changes in behavior:
 13. IDomainObjectModel.GetType no longer returns types for "Common.RowPermissionsReadItems" and "Common.RowPermissionsWriteItems". For example `GetType(RowPermissionsReadInfo.FilterName)` and `GetType(RowPermissionsWriteInfo.FilterName)` will return null.
     * Use `typeof(Common.RowPermissionsReadItems)` and `typeof(Common.RowPermissionsWriteItems)` instead.
 14. Upgraded Autofac from version 4.9.4 to 6.2.0
+15. Changed how navigation properties are generated in Queryable classes:
+    * Navigation properties can be set only during the initialization phase. That means that after the Queryable object is constructed the navigation properties are read only.
+    * Navigation properties behaviour can no longer be extended with custom tags *DataStructureQueryable Getter* and *DataStructureQueryable Setter*
 
 Changes in Rhetos libraries API:
 
@@ -75,6 +78,9 @@ Changes in Rhetos libraries API:
 8. The property DatabaseLanguage is moved from classes BuildOptions and RhetosAppOptions to class DatabaseSettings.
 9. Removed support for ContainerBuilderPluginRegistration.CheckOverride method. This was usually used to check if the expected implementation of IUserInfo interface was used because of different load orders of Autofac modules.
    In the new design it is up to the developer how it will setup the IServiceCollection IoC container from which the IUserInfo will be resolved.
+10. The following methods are no longer available: EntityFrameworkContext.ClearCache(), IPersistenceCache.ClearCache() and ToNavigation(). They where Rhetos-specific helpers for saving entity with Entity Framework.
+    * If custom application code overrides repository's standard Save method, use DomHelper.WriteToDatabase to save an entity, instead of Entity Framework methods. For reference, see the new generated source code for repository Save methods.
+11. Method `DataStructureQueryableCodeGenerator.AddNavigationPropertyWithBackingField` is renamed to `DataStructureQueryableCodeGenerator.AddNavigationProperty` and the use of parameter `additionalSetterCode` is removed,
 
 ## 4.3.0 (2021-03-05)
 

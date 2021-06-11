@@ -40,7 +40,7 @@ namespace Rhetos
                     + $" Method is required in entry point assembly for constructing a configured instance of {nameof(RhetosHost)}.");
 
             if (method.ReturnType != typeof(IHostBuilder))
-                throw new FrameworkException($"Static method '{entryPointType.FullName}.{HostBuilderFactoryMethodName}' has incorrect return type. Expected return type is {nameof(IRhetosHostBuilder)}.");
+                throw new FrameworkException($"Static method '{entryPointType.FullName}.{HostBuilderFactoryMethodName}' has incorrect return type. Expected return type is {nameof(IHostBuilder)}.");
 
             return (IHostBuilder)method.InvokeEx(null, new object[] { Array.Empty<string>() });
         }

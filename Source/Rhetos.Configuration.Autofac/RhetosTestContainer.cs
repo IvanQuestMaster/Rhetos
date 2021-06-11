@@ -101,9 +101,13 @@ namespace Rhetos.Configuration.Autofac
                     lock (_rhetosHostInitializationLock)
                         if (_rhetosHost == null)
                         {
-                            _rhetosHost = RhetosHost.Find(_rhetosAppAssemblyPath, rhetosHostBuilder => {
-                                rhetosHostBuilder.UseBuilderLogProvider(new ConsoleLogProvider())
-                                    .ConfigureConfiguration(configurationBuilder => configurationBuilder.AddConfigurationManagerConfiguration());
+                            _rhetosHost = RhetosHost.Find(_rhetosAppAssemblyPath, hostBuilder => {
+                                hostBuilder.ConfigureContainer<ContainerBuilder>((hostBuilderContext, containerBuilder) =>
+                                {
+                                    containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(configurationBuilder => {
+                                        configurationBuilder.AddConfigurationManagerConfiguration();
+                                    }));
+                                });
                             });
                         }
                 }

@@ -18,6 +18,7 @@
 */
 
 using Autofac;
+using Microsoft.Extensions.Hosting;
 using Rhetos.Logging;
 using Rhetos.Security;
 using Rhetos.Utilities;
@@ -81,9 +82,9 @@ namespace Rhetos
             return _singleRhetosHost.CreateScope(registerCustomComponents);
         }
 
-        private static void ConfigureRhetosHostBuilder(IRhetosHostBuilder rhetosHostBuilder)
+        private static void ConfigureRhetosHostBuilder(IHostBuilder rhetosHostBuilder)
         {
-            rhetosHostBuilder.ConfigureContainer(builder =>
+            rhetosHostBuilder.ConfigureContainer<ContainerBuilder>((hostBuilderContext, builder) =>
             {
                 // Override runtime IUserInfo plugins. This container is intended to be used
                 // in a process that is executed directly by user, usually by developer or administrator.

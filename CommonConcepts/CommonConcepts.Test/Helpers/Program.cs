@@ -47,8 +47,8 @@ namespace CommonConcepts.Test
         {
             containerBuilder.AddRhetosAppDefaults();
             containerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
-            containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(confiurationBuilder => {
-                confiurationBuilder.AddJsonFile("rhetos-app.local.settings.json");
+            containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(configurationBuilder => {
+                configurationBuilder.AddJsonFile("rhetos-app.local.settings.json");
             }));
         }
     }

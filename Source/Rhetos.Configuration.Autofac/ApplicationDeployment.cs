@@ -18,6 +18,7 @@
 */
 
 using Autofac;
+using Microsoft.Extensions.Hosting;
 using Rhetos.Configuration.Autofac.Modules;
 using Rhetos.Deployment;
 using Rhetos.Logging;
@@ -34,17 +35,17 @@ namespace Rhetos
 {
     public class ApplicationDeployment
     {
-        private readonly Func<Action<IRhetosHostBuilder>, RhetosHost> _rhetosHostFactory;
+        private readonly Func<Action<IHostBuilder>, RhetosHost> _rhetosHostFactory;
         private readonly ILogger _logger;
         private readonly ILogProvider _logProvider;
 
         /// <param name="rhetosHostFactory">
-        /// Full <see cref="IRhetosHostBuilder"/> is needed for <see cref="InitializeGeneratedApplication"/>,
+        /// Full <see cref="IHostBuilder"/> is needed for <see cref="InitializeGeneratedApplication"/>,
         /// while <see cref="UpdateDatabase"/> should work without runtime components registration
         /// (only runtime configuration settings are required, for database connection and similar).
         /// Since both sub-commands are now executed together, this is simplified to a single argument.
         /// </param>
-        public ApplicationDeployment(Func<Action<IRhetosHostBuilder>, RhetosHost> rhetosHostFactory, ILogProvider logProvider)
+        public ApplicationDeployment(Func<Action<IHostBuilder>, RhetosHost> rhetosHostFactory, ILogProvider logProvider)
         {
             _rhetosHostFactory = rhetosHostFactory;
             _logProvider = logProvider;
@@ -58,10 +59,9 @@ namespace Rhetos
             _logger.Info("Loading plugins.");
             var stopwatch = Stopwatch.StartNew();
 
-            Action<IRhetosHostBuilder> configureRhetosHost = builder =>
+            Action<IHostBuilder> configureRhetosHost = builder =>
             {
-                builder.UseBuilderLogProvider(_logProvider)
-                    .OverrideContainerConfiguration(SetDbUpdateComponents);
+                builder.ConfigureContainer<ContainerBuilder>(SetDbUpdateComponents);
             };
 
             using (var rhetosHost = _rhetosHostFactory(configureRhetosHost))
@@ -75,7 +75,7 @@ namespace Rhetos
             }
         }
 
-        private void SetDbUpdateComponents(IConfiguration configuration, ContainerBuilder builder, List<Action<ContainerBuilder>> configureActions)
+        private void SetDbUpdateComponents(HostBuilderContext hostBuilderContext, ContainerBuilder builder)
         {
             // DbUpdate overrides default runtime components with OverrideContainerConfiguration,
             // because it does not require full runtime context.
@@ -103,10 +103,9 @@ namespace Rhetos
             _logger.Info("Loading generated plugins.");
             var stopwatch = Stopwatch.StartNew();
 
-            Action<IRhetosHostBuilder> configureRhetosHost = builder =>
+            Action<IHostBuilder> configureRhetosHost = builder =>
             {
-                builder.UseBuilderLogProvider(_logProvider)
-                    .ConfigureContainer(AddAppInitializationComponents);
+                builder.ConfigureContainer<ContainerBuilder>(AddAppInitializationComponents);
             };
 
             using (var rhetosHost = _rhetosHostFactory(configureRhetosHost))
@@ -141,7 +140,7 @@ namespace Rhetos
             }
         }
 
-        private void AddAppInitializationComponents(ContainerBuilder builder)
+        private void AddAppInitializationComponents(HostBuilderContext hostBuilderContext, ContainerBuilder builder)
         {
             builder.RegisterModule(new AppInitializeModule());
             builder.RegisterType<ProcessUserInfo>().As<IUserInfo>(); // Override runtime IUserInfo plugins. This container is intended to be used in a simple process.

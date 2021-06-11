@@ -20,9 +20,7 @@
 using Autofac;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Rhetos.Utilities;
 using System;
-using System.IO;
 
 namespace Rhetos
 {
@@ -38,11 +36,11 @@ namespace Rhetos
     /// </summary>
     public class RhetosHost : IDisposable
     {
-        private readonly IContainer _container;
+        private readonly ILifetimeScope _container;
 
         private bool disposed;
 
-        public RhetosHost(IContainer container)
+        public RhetosHost(ILifetimeScope container)
         {
             _container = container;
         }
@@ -76,7 +74,7 @@ namespace Rhetos
         /// Instead create a scope (unit of work) with <see cref="CreateScope"/>,
         /// and resolve components from it.
         /// </remarks>
-        public IContainer GetRootContainer() => _container;
+        public ILifetimeScope GetRootContainer() => _container;
 
         /// <summary>
         /// Finds and loads the Rhetos runtime context of the main application.
@@ -96,23 +94,17 @@ namespace Rhetos
         /// Path to assembly where the CreateHostBuilder method is located.
         /// </param>
         /// <returns>It returns a <see cref="IHostBuilder"/> that is created and configuration by the referenced main application (<paramref name="rhetosHostAssemblyPath"/>).</returns>
-        public static RhetosHost Find(string rhetosHostAssemblyPath, Action<IRhetosHostBuilder> configureRhetosHost = null)
+        public static RhetosHost Find(string rhetosHostAssemblyPath, Action<IHostBuilder> configureHost = null)
         {
             var hostBuilder = HostResolver.FindBuilder(rhetosHostAssemblyPath);
-            hostBuilder.ConfigureServices((hostContext, services) => {
-                services.AddRhetosHost((serviceProvider, rhetosHostBuilder) => {
-                    // Overriding Rhetos host application's location settings, because the default values might be incorrect when the host assembly is executed
-                    // from another process with FindBuilder. For example, it could have different AppDomain.BaseDirectory, or the assembly copied in shadow directory.
-                    rhetosHostBuilder.UseRootFolder(Path.GetDirectoryName(rhetosHostAssemblyPath)); // Use host assembly directory as root for all RhetosHostBuilder operations.
-                    rhetosHostBuilder.ConfigureConfiguration(configurationBuilder => configurationBuilder.AddKeyValue(
-                        ConfigurationProvider.GetKey((RhetosAppOptions o) => o.RhetosHostFolder),
-                        Path.GetDirectoryName(rhetosHostAssemblyPath))); // Override the RhetosHostFolder to make sure it is set to the original host folder location, not a shadow copy (for applications such as LINQPad).                
-                    
-                    configureRhetosHost?.Invoke(rhetosHostBuilder);
-                });
+            hostBuilder.ConfigureContainer<ContainerBuilder>((hostContext, containerBuilder) => {
+                containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(confiurationBuilder => {
+                    confiurationBuilder.AddJsonFile("rhetos-app.local.settings.json");
+                }));
             });
+            configureHost?.Invoke(hostBuilder);
 
-            return hostBuilder.Build().Services.GetService<RhetosHost>();
+            return new RhetosHost(hostBuilder.Build().Services.GetService<ILifetimeScope>());
         }
 
         public void Dispose()

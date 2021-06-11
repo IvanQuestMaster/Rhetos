@@ -80,26 +80,6 @@ namespace Rhetos
         /// <item>Various plugin packages may add additional configuration settings and components registration.</item>
         /// </list>
         /// </remarks>
-        public static IRhetosHostBuilder ConfigureRhetosAppDefaults(this IRhetosHostBuilder hostBuilder)
-        {{
-            hostBuilder
-                .ConfigureConfiguration(containerBuilder => containerBuilder
-                    .AddKeyValue(
-                        ConfigurationProvider.GetKey((RhetosAppOptions o) => o.RhetosAppAssemblyName),
-                        typeof(RhetosHostBuilderAppConfiguration).Assembly.GetName().Name)
-                    .AddKeyValue(
-                        ConfigurationProvider.GetKey((RhetosAppOptions o) => o.RhetosHostFolder),
-                        AppContext.BaseDirectory)
-                    .AddOptions(new Rhetos.Utilities.DatabaseSettings
-                        {{
-                            DatabaseLanguage = {CsUtility.QuotedString(_databaseSettings.DatabaseLanguage)},
-                        }})
-                    )
-                .AddPluginAssemblies(GetPluginAssemblies())
-                .AddPluginTypes(GetPluginTypes());
-            return hostBuilder;
-        }}
-
         public static ContainerBuilder AddRhetosAppDefaults(this ContainerBuilder containerBuilder)
         {{
             RhetosContainerSetup(containerBuilder, new ConsoleLogProvider());

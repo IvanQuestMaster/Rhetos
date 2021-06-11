@@ -6,7 +6,7 @@
     <IsPackable>false</IsPackable>
     <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);..\..\Install</RestoreAdditionalProjectSources>
     <RhetosBuild>True</RhetosBuild>
-    <RhetosDeploy>False</RhetosDeploy>
+    <RhetosDeploy>True</RhetosDeploy>
   </PropertyGroup>
   
   <ItemGroup>

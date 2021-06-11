@@ -85,14 +85,15 @@ namespace Rhetos.Dom.DefaultConcepts
         private string GetInitialConfigurationSnippet()
         {
             return
-            $@"containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(confiurationBuilder => {{
-                confiurationBuilder
+            $@"hostBuilder.ConfigureHostConfiguration(configurationBuilder =>
+            {{
+                configurationBuilder
                     .AddOptions(new Rhetos.Dom.DefaultConcepts.CommonConceptsDatabaseSettings
                     {{
                         UseLegacyMsSqlDateTime = {_databaseSettings.UseLegacyMsSqlDateTime.ToString().ToLowerInvariant()},
                         DateTimePrecision = {_databaseSettings.DateTimePrecision},
                     }});
-            }}));
+            }});
             ";
         }
 

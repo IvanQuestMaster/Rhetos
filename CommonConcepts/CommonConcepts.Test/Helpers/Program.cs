@@ -18,8 +18,7 @@
 */
 
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Rhetos;
 using Rhetos.Security;
@@ -37,19 +36,12 @@ namespace CommonConcepts.Test
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-                .ConfigureContainer<ContainerBuilder>(ConfigureRhetos);
-
-        /// <summary>
-        /// Provides basic runtime infrastructure for Rhetos framework: configuration settings and system components registration.
-        /// </summary>
-        private static void ConfigureRhetos(ContainerBuilder containerBuilder)
-        {
-            containerBuilder.AddRhetosAppDefaults();
-            containerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
-            containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(configurationBuilder => {
-                configurationBuilder.AddJsonFile("rhetos-app.local.settings.json");
-            }));
-        }
+                .ConfigreRhetosAppDefaults()
+                .ConfigureHostConfiguration(configurationBuilder => {
+                    configurationBuilder.AddJsonFile("rhetos-app.local.settings.json");
+                })
+                .ConfigureContainer<ContainerBuilder>(containerBuilder => {
+                    containerBuilder.RegisterType<ProcessUserInfo>().As<IUserInfo>();
+                });
     }
 }

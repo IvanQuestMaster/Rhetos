@@ -98,8 +98,8 @@ namespace Rhetos
         {
             var hostBuilder = HostResolver.FindBuilder(rhetosHostAssemblyPath);
             hostBuilder.ConfigureContainer<ContainerBuilder>((hostContext, containerBuilder) => {
-                containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(confiurationBuilder => {
-                    confiurationBuilder.AddJsonFile("rhetos-app.local.settings.json");
+                containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(configurationBuilder => {
+                    configurationBuilder.AddJsonFile("rhetos-app.local.settings.json");
                 }));
             });
             configureHost?.Invoke(hostBuilder);

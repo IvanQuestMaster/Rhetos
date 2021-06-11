@@ -24,6 +24,8 @@
       <dependency id="System.Data.SqlClient" version="4.8.1" />
       <dependency id="System.Text.Encoding.CodePages" version="5.0.0" />
       <dependency id="Oracle.ManagedDataAccess.Core" version="2.19.91" />
+      <dependency id="Microsoft.Extensions.Configuration" version="5.0.0" />
+      <dependency id="Microsoft.Extensions.Configuration.Json" version="5.0.0" />
     </dependencies>
   </metadata>
   <files>

@@ -56,6 +56,8 @@ namespace Rhetos.Dom
 
             var rhetosHostBuilderCode =
 $@"using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Rhetos.Extensibility;
 using Rhetos.Logging;
 using Rhetos.Utilities;
@@ -80,19 +82,14 @@ namespace Rhetos
         /// <item>Various plugin packages may add additional configuration settings and components registration.</item>
         /// </list>
         /// </remarks>
-        public static ContainerBuilder AddRhetosAppDefaults(this ContainerBuilder containerBuilder)
+        
+        public static IHostBuilder ConfigreRhetosAppDefaults(this IHostBuilder hostBuilder)
         {{
-            RhetosContainerSetup(containerBuilder, new ConsoleLogProvider());
-            containerBuilder.AddRhetosRuntime();
-            containerBuilder.AddRhetosPluginModules();
-            containerBuilder.RegisterType<ConsoleLogProvider>().As<ILogProvider>().SingleInstance();
-            containerBuilder.Register(context => {{
-                var logProvider = context.Resolve<ILogProvider>();
-                var configureConfigurations = context.Resolve<IEnumerable<ConfigureConfiguration>>();
-                return new ConfigurationBuilder(logProvider, configureConfigurations).Build();
-            }}).As<IConfiguration>().SingleInstance();
-            containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(confiurationBuilder => {{
-                confiurationBuilder
+            hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+
+            hostBuilder.ConfigureHostConfiguration(configurationBuilder =>
+            {{
+                configurationBuilder
                     .AddKeyValue(
                         ConfigurationProvider.GetKey((RhetosAppOptions o) => o.RhetosAppAssemblyName),
                         typeof(RhetosHostBuilderAppConfiguration).Assembly.GetName().Name)
@@ -103,10 +100,28 @@ namespace Rhetos
                     {{
                         DatabaseLanguage = @""MsSql"",
                     }});
-            }}));
+            }});
+
+            hostBuilder.ConfigureContainer<ContainerBuilder>(containerBuilder =>
+            {{
+                RhetosContainerSetup(containerBuilder, new ConsoleLogProvider());
+                containerBuilder.AddRhetosRuntime();
+                containerBuilder.AddRhetosPluginModules();
+                containerBuilder.RegisterType<ConsoleLogProvider>().As<ILogProvider>().SingleInstance();
+                containerBuilder.Register(context => {{
+                    var logProvider = context.Resolve<ILogProvider>();
+                    var netCoreConfiguration = context.Resolve<Microsoft.Extensions.Configuration.IConfiguration>();
+                    var configurationBuilder = new ConfigurationBuilder(logProvider);
+                    return configurationBuilder.MapNetCoreConfiguration(netCoreConfiguration).Build();
+                }}).As<IConfiguration>().SingleInstance();
+            }});
+
             {RhetosHostBuilderInitialConfigurationTag}
-            return containerBuilder;
+
+            /*RhetosHostBuilder.InitialConfiguration*/
+            return hostBuilder;
         }}
+        
 
         private static ContainerBuilder RhetosContainerSetup(ContainerBuilder containerBuilder, ILogProvider logProvider)
         {{

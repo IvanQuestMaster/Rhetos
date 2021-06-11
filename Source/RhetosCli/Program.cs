@@ -19,6 +19,7 @@
 
 using Autofac;
 using Autofac.Core;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Rhetos.Dsl;
 using Rhetos.Extensibility;
@@ -154,20 +155,18 @@ namespace Rhetos
             {
                 return RhetosHost.Find(startupAssembly, builder =>
                 {
-                    builder.ConfigureContainer<ContainerBuilder>((hostBuilderContext, containerBuilder) =>
+                    builder.ConfigureHostConfiguration(configurationBuilder =>
                     {
-                        containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(configurationBuilder => {
-                            configurationBuilder.AddKeyValue(ConfigurationProvider.GetKey((DatabaseOptions o) => o.SqlCommandTimeout), 0);
-                            configurationBuilder.AddKeyValue(ConfigurationProvider.GetKey((ConfigurationProviderOptions o) => o.LegacyKeysWarning), true);
-                            configurationBuilder.AddKeyValue(ConfigurationProvider.GetKey((LoggingOptions o) => o.DelayedLogTimout), 60.0);
-                            // Standard configuration files can override the default settings:
-                            configurationBuilder.AddJsonFile(DbUpdateOptions.ConfigurationFileName, optional: true);
-                            // CLI switches can override the settings from configuration files:
-                            if (shortTransactions)
-                                configurationBuilder.AddKeyValue(ConfigurationProvider.GetKey((DbUpdateOptions o) => o.ShortTransactions), shortTransactions);
-                            if (skipRecompute)
-                                configurationBuilder.AddKeyValue(ConfigurationProvider.GetKey((DbUpdateOptions o) => o.SkipRecompute), skipRecompute);
-                        }));
+                        configurationBuilder.AddKeyValue(ConfigurationProvider.GetKey((DatabaseOptions o) => o.SqlCommandTimeout), 0);
+                        configurationBuilder.AddKeyValue(ConfigurationProvider.GetKey((ConfigurationProviderOptions o) => o.LegacyKeysWarning), true);
+                        configurationBuilder.AddKeyValue(ConfigurationProvider.GetKey((LoggingOptions o) => o.DelayedLogTimout), 60.0);
+                        // Standard configuration files can override the default settings:
+                        configurationBuilder.AddJsonFile(DbUpdateOptions.ConfigurationFileName, optional: true);
+                        // CLI switches can override the settings from configuration files:
+                        if (shortTransactions)
+                            configurationBuilder.AddKeyValue(ConfigurationProvider.GetKey((DbUpdateOptions o) => o.ShortTransactions), shortTransactions);
+                        if (skipRecompute)
+                            configurationBuilder.AddKeyValue(ConfigurationProvider.GetKey((DbUpdateOptions o) => o.SkipRecompute), skipRecompute);
                     });
 
                     configureRhetosHost.Invoke(builder);

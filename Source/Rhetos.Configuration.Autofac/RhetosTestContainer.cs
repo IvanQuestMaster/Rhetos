@@ -102,11 +102,9 @@ namespace Rhetos.Configuration.Autofac
                         if (_rhetosHost == null)
                         {
                             _rhetosHost = RhetosHost.Find(_rhetosAppAssemblyPath, hostBuilder => {
-                                hostBuilder.ConfigureContainer<ContainerBuilder>((hostBuilderContext, containerBuilder) =>
-                                {
-                                    containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(configurationBuilder => {
-                                        configurationBuilder.AddConfigurationManagerConfiguration();
-                                    }));
+                                hostBuilder.ConfigureHostConfiguration(configurationBuilder => {
+                                    //TODO: Implement this method on .NET Configuration builder
+                                    //configurationBuilder.AddConfigurationManagerConfiguration();
                                 });
                             });
                         }

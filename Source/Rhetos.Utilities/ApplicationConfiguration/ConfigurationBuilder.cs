@@ -29,18 +29,10 @@ namespace Rhetos
     {
         private readonly List<IConfigurationSource> configurationSources = new List<IConfigurationSource>();
         private ILogProvider _builderLogProvider;
-        private readonly IEnumerable<ConfigureConfiguration> _configureConfigurations;
-
+        
         public ConfigurationBuilder(ILogProvider builderLogProvider)
         {
             _builderLogProvider = builderLogProvider;
-            _configureConfigurations = new List<ConfigureConfiguration>();
-        }
-
-        public ConfigurationBuilder(ILogProvider builderLogProvider, IEnumerable<ConfigureConfiguration> configureConfigurations)
-        {
-            _builderLogProvider = builderLogProvider;
-            _configureConfigurations = configureConfigurations;
         }
 
         public IConfigurationBuilder UseBuilderLogProvider(ILogProvider builderLogProvider)
@@ -57,11 +49,6 @@ namespace Rhetos
 
         public IConfiguration Build()
         {
-            foreach (var configureConfiguration in _configureConfigurations)
-            {
-                configureConfiguration.Action.Invoke(this);
-            }
-
             var configurationValues = new Dictionary<string, ConfigurationValue>(new ConfigurationKeyComparer());
 
             foreach (var configurationSource in configurationSources)

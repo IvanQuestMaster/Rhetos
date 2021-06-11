@@ -97,11 +97,7 @@ namespace Rhetos
         public static RhetosHost Find(string rhetosHostAssemblyPath, Action<IHostBuilder> configureHost = null)
         {
             var hostBuilder = HostResolver.FindBuilder(rhetosHostAssemblyPath);
-            hostBuilder.ConfigureContainer<ContainerBuilder>((hostContext, containerBuilder) => {
-                containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(configurationBuilder => {
-                    configurationBuilder.AddJsonFile("rhetos-app.local.settings.json");
-                }));
-            });
+            //TODO: Check if we want the rhetos-app.local.settings.json config file by default
             configureHost?.Invoke(hostBuilder);
 
             return new RhetosHost(hostBuilder.Build().Services.GetService<ILifetimeScope>());

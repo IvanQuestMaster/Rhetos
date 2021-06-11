@@ -5,9 +5,12 @@
     <GenerateProgramFile>false</GenerateProgramFile>
     <IsPackable>false</IsPackable>
     <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);..\..\Install</RestoreAdditionalProjectSources>
+    <RhetosBuild>True</RhetosBuild>
+    <RhetosDeploy>False</RhetosDeploy>
   </PropertyGroup>
   
   <ItemGroup>
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />

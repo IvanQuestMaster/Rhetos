@@ -35,7 +35,9 @@ namespace Rhetos.Configuration.Autofac.Modules
             builder.RegisterType<XmlUtility>().SingleInstance();
             builder.RegisterType<FilesUtility>().SingleInstance();
             builder.Register(context => context.Resolve<IConfiguration>().GetOptions<DatabaseSettings>()).SingleInstance();
-            builder.RegisterType(DatabaseTypes.GetSqlUtilityType(SqlUtility.DatabaseLanguage)).As<ISqlUtility>().InstancePerLifetimeScope();
+            builder.RegisterType<MsSqlUtility>().As<ISqlUtility>().InstancePerLifetimeScope();
+            //TODO: Fix this after a workaround is found
+            //builder.Register(context => DatabaseTypes.GetSqlUtilityType(context.Resolve<DatabaseSettings>().DatabaseLanguage)).As<ISqlUtility>().InstancePerLifetimeScope();
 
             base.Load(builder);
         }

@@ -30,8 +30,12 @@ namespace Rhetos.Configuration.Autofac.Modules
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterInstance(new ConnectionString(SqlUtility.ConnectionString));
-            builder.RegisterType(DatabaseTypes.GetSqlExecuterType(SqlUtility.DatabaseLanguage)).As<ISqlExecuter>().InstancePerLifetimeScope();
+            //TODO: Fix this after a workaround is found
+            //builder.RegisterInstance(new ConnectionString(SqlUtility.ConnectionString));
+            builder.Register(context => new ConnectionString(SqlUtility.ConnectionString)).SingleInstance();
+            //TODO: Fix this after a workaround is found
+            //builder.RegisterType(DatabaseTypes.GetSqlExecuterType(SqlUtility.DatabaseLanguage)).As<ISqlExecuter>().InstancePerLifetimeScope();
+            builder.RegisterType<MsSqlExecuter>().As<ISqlExecuter>().InstancePerLifetimeScope();
             builder.Register(context => context.Resolve<IConfiguration>().GetOptions<SqlTransactionBatchesOptions>()).InstancePerLifetimeScope();
             builder.RegisterType<SqlTransactionBatches>().InstancePerLifetimeScope();
 

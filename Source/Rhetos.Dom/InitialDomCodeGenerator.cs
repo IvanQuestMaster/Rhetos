@@ -56,10 +56,13 @@ namespace Rhetos.Dom
 
             var rhetosHostBuilderCode =
 $@"using Autofac;
+using Rhetos.Extensibility;
+using Rhetos.Logging;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+
 
 namespace Rhetos
 {{
@@ -94,8 +97,53 @@ namespace Rhetos
                     )
                 .AddPluginAssemblies(GetPluginAssemblies())
                 .AddPluginTypes(GetPluginTypes());
-            {RhetosHostBuilderInitialConfigurationTag}
             return hostBuilder;
+        }}
+
+        public static ContainerBuilder AddRhetosAppDefaults(this ContainerBuilder containerBuilder)
+        {{
+            RhetosContainerSetup(containerBuilder, new ConsoleLogProvider());
+            containerBuilder.AddRhetosRuntime();
+            containerBuilder.AddRhetosPluginModules();
+            containerBuilder.RegisterType<ConsoleLogProvider>().As<ILogProvider>().SingleInstance();
+            containerBuilder.Register(context => {{
+                var logProvider = context.Resolve<ILogProvider>();
+                var configureConfigurations = context.Resolve<IEnumerable<ConfigureConfiguration>>();
+                return new ConfigurationBuilder(logProvider, configureConfigurations).Build();
+            }}).As<IConfiguration>().SingleInstance();
+            containerBuilder.RegisterInstance(new Rhetos.Utilities.ConfigureConfiguration(confiurationBuilder => {{
+                confiurationBuilder
+                    .AddKeyValue(
+                        ConfigurationProvider.GetKey((RhetosAppOptions o) => o.RhetosAppAssemblyName),
+                        typeof(RhetosHostBuilderAppConfiguration).Assembly.GetName().Name)
+                    .AddKeyValue(
+                        ConfigurationProvider.GetKey((RhetosAppOptions o) => o.RhetosHostFolder),
+                        AppContext.BaseDirectory)
+                    .AddOptions(new Rhetos.Utilities.DatabaseSettings
+                    {{
+                        DatabaseLanguage = @""MsSql"",
+                    }});
+            }}));
+            {RhetosHostBuilderInitialConfigurationTag}
+            return containerBuilder;
+        }}
+
+        private static ContainerBuilder RhetosContainerSetup(ContainerBuilder containerBuilder, ILogProvider logProvider)
+        {{
+            if (!containerBuilder.Properties.ContainsKey(nameof(IPluginScanner)))
+            {{
+                var pluginScanner = new RuntimePluginScanner(GetPluginAssemblies(), GetPluginTypes(), logProvider);
+
+                // make properties accessible to modules which are provided with new/unique instance of ContainerBuilder
+                containerBuilder.Properties.Add(nameof(IPluginScanner), pluginScanner);
+                containerBuilder.Properties.Add(nameof(ILogProvider), logProvider);
+
+                containerBuilder.RegisterBuildCallback(lifetimeScope => {{
+                    LegacyUtilities.Initialize(lifetimeScope.Resolve<IConfiguration>());
+                }});
+            }}
+
+            return containerBuilder;
         }}
 
         private static IEnumerable<Assembly> GetPluginAssemblies()
